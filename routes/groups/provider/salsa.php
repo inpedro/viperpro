@@ -7,6 +7,6 @@ Route::prefix('cron')
     ->group(function ()
     {
 
-        Route::post('salsa/webhook', [GameController::class, 'webhookSalsaMethod']);
+        Route::post('salsa/webhook', [GameController::class, 'webhookSalsaMethod'])->middleware('provider.callback:salsa');
     });
 

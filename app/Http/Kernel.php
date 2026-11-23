@@ -40,6 +40,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
+            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
@@ -65,5 +66,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'auth.jwt' => \App\Http\Middleware\JwtMiddleWare::class,
         'admin.filament' => \App\Http\Middleware\RedirectIfNotFilamentAdmin::class,
+        'provider.callback' => \App\Http\Middleware\AuthenticateProviderCallback::class,
     ];
 }
