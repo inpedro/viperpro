@@ -281,8 +281,11 @@ class AuthController extends Controller
                 ->update(['redeemed_at' => now(), 'redeemed_by' => $user->id]);
 
             $value = json_decode((string) $run->prize)->value ?? null;
-            if ($claimed === 1 && is_numeric($value) && $value > 0) {
-                Wallet::where('user_id', $user->id)->increment('balance_bonus', $value);
+            $wallet = Wallet::where('user_id', $user->id)->first();
+            $minor  = is_numeric($value) ? (int) round(((float) $value) * 100) : 0;
+            if ($claimed === 1 && $wallet && $minor > 0) {
+                \App\Core\Wallet\WalletService::credit($wallet, 'balance_bonus', \App\Core\Money\Amount::fromMinor($minor),
+                    'bonus.spin', 'bonus', "bonus:spin:{$run->id}", ['reference_type' => 'spin_run', 'reference_id' => $run->id]);
             }
         });
     }

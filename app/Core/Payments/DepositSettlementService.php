@@ -2,6 +2,8 @@
 
 namespace App\Core\Payments;
 
+use App\Core\Money\Amount;
+use App\Core\Wallet\WalletService;
 use App\Helpers\Core as Helper;
 use App\Models\AffiliateHistory;
 use App\Models\Deposit;
@@ -76,7 +78,12 @@ class DepositSettlementService
 
             if ($isFirstDeposit && $transaction->accept_bonus) {
                 $bonus = Helper::porcentagem_xn($setting->initial_bonus, $price);
-                $wallet->increment('balance_bonus', $bonus);
+                $bonusMinor = (int) round(((float) $bonus) * 100);
+                if ($bonusMinor > 0) {
+                    WalletService::credit($wallet, 'balance_bonus', Amount::fromMinor($bonusMinor), 'bonus.first_deposit', 'bonus',
+                        "bonus:first_deposit:{$paymentId}", ['reference_type' => 'transaction', 'reference_id' => $transaction->id]);
+                    $wallet->refresh();
+                }
 
                 if (! $setting->disable_rollover) {
                     $wallet->update(['balance_bonus_rollover' => $bonus * $setting->rollover]);
@@ -90,7 +97,18 @@ class DepositSettlementService
             Helper::payBonusVip($wallet, $price);
 
             // With rollover disabled the deposit is immediately withdrawable; otherwise it is play-only balance.
-            $wallet->increment($setting->disable_rollover ? 'balance_withdrawal' : 'balance', $price);
+            $credited = WalletService::credit(
+                $wallet,
+                $setting->disable_rollover ? 'balance_withdrawal' : 'balance',
+                (string) Amount::normalize((string) $price),
+                'deposit',
+                'deposits',
+                "deposit:{$paymentId}",
+                ['reference_type' => 'transaction', 'reference_id' => $transaction->id, 'meta' => ['payment_method' => $transaction->payment_method]],
+            );
+            if (! $credited->ok) {
+                throw new \RuntimeException("Deposit {$paymentId} could not be credited: {$credited->reason}");
+            }
 
             $transaction->update(['status' => 1]);
 
@@ -139,8 +157,9 @@ class DepositSettlementService
 
         if ($history->deposited_amount >= $sponsor->affiliate_baseline || $deposit->amount >= $sponsor->affiliate_baseline) {
             $sponsorWallet = Wallet::where('user_id', $history->inviter)->lockForUpdate()->first();
-            if ($sponsorWallet) {
-                $sponsorWallet->increment('refer_rewards', $sponsor->affiliate_cpa);
+            if ($sponsorWallet && (float) $sponsor->affiliate_cpa > 0) {
+                WalletService::credit($sponsorWallet, 'refer_rewards', (string) Amount::normalize((string) $sponsor->affiliate_cpa), 'affiliate.cpa', 'affiliate',
+                    "affiliate:cpa:{$history->id}", ['reference_type' => 'affiliate_history', 'reference_id' => $history->id]);
                 $history->update(['status' => 1, 'commission_paid' => $sponsor->affiliate_cpa]);
             }
         }

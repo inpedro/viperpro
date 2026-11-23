@@ -30,6 +30,9 @@ class AppServiceProvider extends ServiceProvider
 
         Schema::defaultStringLength(191);
 
+        // Ledger safety net: journals any wallet balance change not made through WalletService.
+        \App\Models\Wallet::observe(\App\Core\Wallet\WalletLedgerObserver::class);
+
         Builder::macro('whereLike', function ($attributes, string $searchTerm) {
             $this->where(function (Builder $query) use ($attributes, $searchTerm) {
                 foreach (Arr::wrap($attributes) as $attribute) {

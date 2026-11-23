@@ -8,6 +8,8 @@ use App\Models\Withdrawal;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Core\Money\Amount;
+use App\Core\Wallet\WalletService;
 
 /**
  * Withdrawal state machine.
@@ -78,7 +80,13 @@ class WithdrawalService
             }
 
             $column = $type === self::TYPE_AFFILIATE ? 'refer_rewards' : 'balance_withdrawal';
-            $wallet->increment($column, $withdrawal->amount);
+            $refund = WalletService::credit($wallet, $column, (string) Amount::normalize((string) $withdrawal->amount),
+                'withdrawal.cancel', 'withdrawals', "withdrawal:cancel:{$type}:{$id}",
+                ['reference_type' => $type.'_withdrawal', 'reference_id' => $id]);
+
+            if (! $refund->ok) {
+                throw new \RuntimeException("Refund for {$type} withdrawal {$id} failed: {$refund->reason}");
+            }
 
             return true;
         });
@@ -98,23 +106,33 @@ class WithdrawalService
         $model  = self::modelClass($type);
         $column = $type === self::TYPE_AFFILIATE ? 'refer_rewards' : 'balance_withdrawal';
 
-        return DB::transaction(function () use ($model, $column, $userId, $amount, $attributes) {
-            // Conditional decrement: the balance check and the debit are one atomic UPDATE.
-            $debited = Wallet::where('user_id', $userId)
-                ->where($column, '>=', $amount)
-                ->limit(1)
-                ->decrement($column, $amount);
+        $walletId = Wallet::where('user_id', $userId)->orderByDesc('active')->orderBy('id')->value('id');
+        if (! $walletId) {
+            return null;
+        }
 
-            if ($debited !== 1) {
-                return null;
-            }
+        try {
+            return DB::transaction(function () use ($model, $column, $userId, $walletId, $amount, $attributes, $type) {
+                $withdrawal = $model::create(array_merge($attributes, [
+                    'user_id' => $userId,
+                    'amount'  => $amount,
+                    'status'  => self::PENDING,
+                ]));
 
-            return $model::create(array_merge($attributes, [
-                'user_id' => $userId,
-                'amount'  => $amount,
-                'status'  => self::PENDING,
-            ]));
-        });
+                // Locked, funds-checked debit journaled as withdrawal.request (counter: platform:withdrawals).
+                $debit = WalletService::debit($walletId, $column, $amount, 'withdrawal.request', 'withdrawals',
+                    "withdrawal:request:{$type}:{$withdrawal->id}",
+                    ['reference_type' => $type.'_withdrawal', 'reference_id' => $withdrawal->id]);
+
+                if (! $debit->ok) {
+                    throw new InsufficientFunds();
+                }
+
+                return $withdrawal;
+            });
+        } catch (InsufficientFunds) {
+            return null; // transaction rolled back: no withdrawal record, no debit
+        }
     }
 
     private static function transition(string $model, int|string $id, int $from, int $to): bool
@@ -133,4 +151,9 @@ class WithdrawalService
             default              => throw new \InvalidArgumentException('Unknown withdrawal type'),
         };
     }
+}
+
+/** @internal rollback signal for WithdrawalService::request() */
+final class InsufficientFunds extends \RuntimeException
+{
 }

@@ -37,43 +37,23 @@ class Core
      */
     public static function DiscountBalance(Wallet $wallet, $bet)
     {
-        $changeBonus = 'no_balance';
+        // Delegates to WalletService::debitBet (locked, journaled as game.bet). Same bucket
+        // priority and return values as before: balance | balance_withdrawal | balance_bonus | no_balance.
+        // Provider amounts can carry >2 decimals; the decimal(20,2) column always rounded them to cents.
+        $minor = is_numeric($bet) ? (int) round(((float) $bet) * 100) : null;
 
-        if ($wallet->balance >= $bet) {
-            $wallet->decrement('balance', $bet);
-            return 'balance';
-        } elseif ($wallet->balance_withdrawal >= $bet) {
-            $wallet->decrement('balance_withdrawal', $bet);
-            return 'balance_withdrawal';
-        } elseif ($wallet->total_balance_without_bonus >= $bet) {
-            $balanceBet = 0;
-            $remainingBet = 0;
-
-            if($wallet->balance > 0) {
-                $balanceBet = $wallet->balance;
-                $wallet->decrement('balance', $wallet->balance);
-            }
-
-            if($wallet->balance_withdrawal > 0) {
-                $remainingBet = ($bet - $balanceBet);
-                if($wallet->balance_withdrawal >= $remainingBet) {
-                    $wallet->decrement('balance_withdrawal', $remainingBet);
-                }
-            }
-
-            return 'balance_withdrawal';
+        if ($minor === null || $minor < 0) {
+            return "no_balance"; // a negative "bet" used to be a credit
+        }
+        if ($minor === 0) {
+            return "balance"; // free rounds: nothing to debit (legacy behaviour)
         }
 
-        if(($wallet->balance > 0 || $wallet->balance_withdrawal > 0) && $wallet->total_balance_without_bonus < $bet) {
-            return 'no_balance';
-        }else{
-            if ($wallet->balance_bonus >= $bet) {
-                $wallet->decrement('balance_bonus', $bet); // retira do bônus
-                return 'balance_bonus';
-            }
-        }
+        $ctx = \App\Core\Wallet\LedgerContext::current()["context"];
+        $result = \App\Core\Wallet\WalletService::debitBet($wallet, \App\Core\Money\Amount::fromMinor($minor), null, $ctx);
+        $wallet->refresh();
 
-        return $changeBonus;
+        return $result->ok ? $result->bucket : "no_balance";
     }
 
     /**
@@ -607,12 +587,16 @@ class Core
         /// pagar afiliado
         if($type == 'bet' && !empty($user->inviter)) {
             $affiliate = User::find($user->inviter);
-            self::PayLoss($user, $affiliate, $bet, $changeBonus);
+            \App\Core\Wallet\LedgerContext::run('affiliate.revshare', 'affiliate',
+                fn () => self::PayLoss($user, $affiliate, $bet, $changeBonus),
+                ['reference_type' => 'game_tx', 'reference_id' => $tx]);
         }
 
         if($type == 'win' && !empty($user->inviter)) {
             $affiliate  = User::find($user->inviter);
-            self::PayWin($user, $affiliate, $type, $win, $changeBonus);
+            \App\Core\Wallet\LedgerContext::run('affiliate.revshare_clawback', 'affiliate',
+                fn () => self::PayWin($user, $affiliate, $type, $win, $changeBonus),
+                ['reference_type' => 'game_tx', 'reference_id' => $tx]);
         }
 
         if($type == 'win') {
@@ -636,7 +620,10 @@ class Core
         /// pagando o premio
         if ($user->is_demo_agent == false) {
             /// atualiza os ganhos da vitoria
-            self::payWithRollover($userId, $changeBonus, $win, $bet, $type); /// verifica o rollover
+            // Win credits and rollover conversions; journaled as game.settlement (counter: platform:game).
+            \App\Core\Wallet\LedgerContext::run('game.settlement', 'game',
+                fn () => self::payWithRollover($userId, $changeBonus, $win, $bet, $type),
+                ['reference_type' => 'game_tx', 'reference_id' => $tx]);
             return true;
         }
 
