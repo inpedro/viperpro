@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('oauth_id')->nullable();
             $table->string('oauth_type')->nullable();
-            $table->string('avatar')->nullable();
+            // avatar is already created by 2014_10_12_000000_create_users_table (duplicate removed: broke fresh installs)
             $table->string('last_name')->nullable();
             $table->string('cpf', 20)->nullable();
             $table->string('phone', 30)->nullable();
