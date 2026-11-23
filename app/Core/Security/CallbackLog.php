@@ -20,6 +20,7 @@ class CallbackLog
             $raw = (string) $request->getContent();
 
             DB::table('callback_logs')->insert([
+                'tenant_id'      => \App\Core\Tenancy\Tenancy::id(),
                 'channel'        => $channel,
                 'source'         => substr($source, 0, 50),
                 'ip'             => $request->ip(),

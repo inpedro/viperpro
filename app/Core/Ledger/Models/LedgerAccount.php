@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class LedgerAccount extends Model
 {
+    use \App\Core\Tenancy\BelongsToTenant;
+
     public const UPDATED_AT = null;
 
     protected $table = 'ledger_accounts';

@@ -21,6 +21,8 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements FilamentUser, JWTSubject
 {
+    use \App\Core\Tenancy\BelongsToTenant;
+
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     /**
@@ -244,7 +246,8 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
      */
     public function getJWTCustomClaims()
     {
-        return [];
+        // Bind tokens to the tenant that issued them (checked by JWTMiddleWare).
+        return ["tid" => $this->tenant_id];
     }
 
 }

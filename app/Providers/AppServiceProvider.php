@@ -30,6 +30,18 @@ class AppServiceProvider extends ServiceProvider
 
         Schema::defaultStringLength(191);
 
+        // Console (artisan, scheduler, queue workers) starts in the default tenant; commands that
+        // must cover every tenant iterate with Tenancy::runAs(). HTTP requests use ResolveTenant.
+        if ($this->app->runningInConsole() && ! \App\Core\Tenancy\Tenancy::isResolved()) {
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasTable('tenants')) {
+                    \App\Core\Tenancy\Tenancy::set(\App\Core\Tenancy\Models\Tenant::find(config('tenancy.default_tenant_id')));
+                }
+            } catch (\Throwable) {
+                // no database yet
+            }
+        }
+
         // Ledger safety net: journals any wallet balance change not made through WalletService.
         \App\Models\Wallet::observe(\App\Core\Wallet\WalletLedgerObserver::class);
 

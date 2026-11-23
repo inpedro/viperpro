@@ -16,7 +16,7 @@ return new class extends Migration
             $table->integer('user_id')->unsigned()->index();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->integer('vip_id')->unsigned()->index();
-            $table->foreign('vip_id')->references('id')->on('´vips')->onDelete('cascade');
+            $table->foreign('vip_id')->references('id')->on('vips')->onDelete('cascade');
             $table->bigInteger('level');
             $table->bigInteger('points');
             $table->tinyInteger('status')->default(0);

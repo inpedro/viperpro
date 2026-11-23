@@ -21,6 +21,9 @@ abstract class SecurityTestCase extends TestCase
 
         Cache::flush();
 
+        // The in-memory database is migrated after the app booted: set the default tenant now.
+        \App\Core\Tenancy\Tenancy::set(\App\Core\Tenancy\Models\Tenant::findOrFail(1));
+
         Setting::query()->insert([
             'software_name'   => 'Test Casino',
             'currency_code'   => 'EUR',

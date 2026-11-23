@@ -274,7 +274,7 @@ class LayoutCssCustom extends Page implements HasForms
             if(!empty($custom)) {
                 if($custom->update($this->data)) {
 
-                    Cache::put('custom', $custom);
+                    Cache::put(\App\Core\Tenancy\Tenancy::key('custom'), $custom);
 
                     Notification::make()
                         ->title('Dados alterados')

@@ -11,6 +11,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Core\Tenancy\Tenancy;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Str;
@@ -189,8 +190,9 @@ class AuthController extends Controller
 
         // 64-char CSPRNG token; only its hash is stored. One active token per email.
         $token = Str::random(64);
-        DB::table("password_reset_tokens")->where("email", $user->email)->delete();
-        DB::table("password_reset_tokens")->insert([
+        DB::table("tenant_password_resets")->where("tenant_id", Tenancy::requireId())->where("email", $user->email)->delete();
+        DB::table("tenant_password_resets")->insert([
+            "tenant_id"  => Tenancy::requireId(),
             "email"      => $user->email,
             "token"      => Hash::make($token),
             "created_at" => Carbon::now(),
@@ -228,14 +230,14 @@ class AuthController extends Controller
 
         // The token is looked up BY EMAIL and verified against its stored hash: a token issued
         // for one account can no longer reset another account (previous account-takeover bug).
-        $record = DB::table("password_reset_tokens")->where("email", $request->email)->first();
+        $record = DB::table("tenant_password_resets")->where("tenant_id", Tenancy::requireId())->where("email", $request->email)->first();
         if (! $record || ! Hash::check($request->token, $record->token)) {
             return $invalid;
         }
 
         $ttlMinutes = (int) config("auth.passwords.users.expire", 60);
         if (Carbon::parse($record->created_at)->addMinutes($ttlMinutes)->isPast()) {
-            DB::table("password_reset_tokens")->where("email", $request->email)->delete();
+            DB::table("tenant_password_resets")->where("tenant_id", Tenancy::requireId())->where("email", $request->email)->delete();
             return $invalid;
         }
 
@@ -247,7 +249,7 @@ class AuthController extends Controller
         DB::transaction(function () use ($user, $request) {
             $user->forceFill(["password" => $request->password, "remember_token" => Str::random(60)])->save();
             // Single use.
-            DB::table("password_reset_tokens")->where("email", $request->email)->delete();
+            DB::table("tenant_password_resets")->where("tenant_id", Tenancy::requireId())->where("email", $request->email)->delete();
         });
 
         return response()->json(["status" => true, "message" => trans("Your password has been changed!")], 200);

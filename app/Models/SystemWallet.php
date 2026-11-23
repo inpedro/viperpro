@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class SystemWallet extends Model
 {
+    use \App\Core\Tenancy\BelongsToTenant;
+
     use HasFactory;
 
     protected $table = 'system_wallets';

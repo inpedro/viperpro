@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class SpinConfigs extends Model
 {
+    use \App\Core\Tenancy\BelongsToTenant;
+
     use HasFactory;
 
     protected $appends = ['prizesArray'];

@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class SettingMail extends Model
 {
+    use \App\Core\Tenancy\BelongsToTenant;
+
     use HasFactory;
 
     /**

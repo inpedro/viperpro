@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class VipUser extends Model
 {
+    use \App\Core\Tenancy\BelongsToTenant;
+
     use HasFactory;
 
     /**

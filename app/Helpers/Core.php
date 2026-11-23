@@ -890,11 +890,11 @@ class Core
     public static function getCustom()
     {
         $custom = null;
-        if(Cache::has('custom')) {
-            $custom = Cache::get('custom');
+        if(Cache::has(\App\Core\Tenancy\Tenancy::key('custom'))) {
+            $custom = Cache::get(\App\Core\Tenancy\Tenancy::key('custom'));
         }else{
             $custom = CustomLayout::first();
-            Cache::put('custom', $custom);
+            Cache::put(\App\Core\Tenancy\Tenancy::key('custom'), $custom);
         }
 
         return $custom;
@@ -908,8 +908,8 @@ class Core
     public static function getSetting()
     {
         $setting = null;
-        if(Cache::has('setting')) {
-            $setting = Cache::get('setting');
+        if(Cache::has(\App\Core\Tenancy\Tenancy::key('setting'))) {
+            $setting = Cache::get(\App\Core\Tenancy\Tenancy::key('setting'));
         }else{
             $setting = Setting::select(
                 'software_name',
@@ -933,7 +933,7 @@ class Core
                 'disable_rollover',
             )->first();
 
-            Cache::put('setting', $setting);
+            Cache::put(\App\Core\Tenancy\Tenancy::key('setting'), $setting);
         }
 
         return $setting;
@@ -1114,8 +1114,8 @@ class Core
     {
         $extension  = $file->extension();
         $size       = $file->getSize();
-        $path       = Storage::disk('public')->putFile('uploads', $file, 'public');
-        $name       = explode('uploads/', $path);
+        $path       = Storage::disk('public')->putFile(\App\Core\Tenancy\Tenancy::storagePrefix().'/uploads', $file, 'public');
+        $name       = explode('uploads/', $path); // tenants/{id}/uploads/<file>
 
         if($path && isset($name[1])) {
             return [
@@ -1527,7 +1527,7 @@ class Core
      * @return mixed
      */
     public static function WheelPrizes() {
-        $key = 'spin:config:prizes';
+        $key = \App\Core\Tenancy\Tenancy::key('spin:config:prizes');
         $cached = Cache::get($key);
         $config = NULL;
 

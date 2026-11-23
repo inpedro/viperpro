@@ -11,6 +11,7 @@ final class Audit
     {
         try {
             DB::table('audit_logs')->insert([
+                'tenant_id'    => \App\Core\Tenancy\Tenancy::id(),
                 'actor_id'     => auth()->check() ? auth()->id() : null,
                 'action'       => $action,
                 'subject_type' => $subjectType,

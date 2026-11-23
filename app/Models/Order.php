@@ -11,6 +11,8 @@ use App\Helpers\Core as Helper;
 
 class Order extends Model
 {
+    use \App\Core\Tenancy\BelongsToTenant;
+
     use HasFactory;
 
     /**

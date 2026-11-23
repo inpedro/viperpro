@@ -29,7 +29,7 @@ class PasswordResetTest extends SecurityTestCase
         $token = $this->issueToken($user->email);
 
         $this->assertSame(64, strlen($token));
-        $stored = DB::table('password_reset_tokens')->where('email', $user->email)->value('token');
+        $stored = DB::table('tenant_password_resets')->where('email', $user->email)->value('token');
         $this->assertNotSame($token, $stored);
         $this->assertTrue(Hash::check($token, $stored));
     }
@@ -60,7 +60,7 @@ class PasswordResetTest extends SecurityTestCase
         $this->postJson('/api/auth/reset-password/'.$token, $body)->assertStatus(400);
 
         $token2 = $this->issueToken($user->email);
-        DB::table('password_reset_tokens')->where('email', $user->email)->update(['created_at' => now()->subHours(2)]);
+        DB::table('tenant_password_resets')->where('email', $user->email)->update(['created_at' => now()->subHours(2)]);
         $this->postJson('/api/auth/reset-password/'.$token2, array_merge($body, ['token' => $token2]))->assertStatus(400);
     }
 

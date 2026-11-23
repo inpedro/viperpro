@@ -16,8 +16,22 @@ class JWTMiddleWare
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(auth('api')->check()) {
-            return $next($request);
+        if (auth('api')->check()) {
+            // The user lookup is tenant-scoped already; additionally require that the user AND the
+            // token's tenant claim match the tenant resolved from the domain (defence in depth).
+            $user = auth('api')->user();
+            $sameTenant = $user->tenant_id !== null && (int) $user->tenant_id === (int) \App\Core\Tenancy\Tenancy::id();
+
+            try {
+                $tid = auth('api')->payload()->get('tid');
+                $sameTenant = $sameTenant && $tid !== null && (int) $tid === (int) $user->tenant_id;
+            } catch (\Tymon\JWTAuth\Exceptions\JWTException) {
+                // No token in the request (e.g. an authenticated test client): user check only.
+            }
+
+            if ($sameTenant) {
+                return $next($request);
+            }
         }
 
         return response()->json(['error' => 'unauthenticated'], 401);

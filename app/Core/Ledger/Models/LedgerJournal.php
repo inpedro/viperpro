@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class LedgerJournal extends Model
 {
+    use \App\Core\Tenancy\BelongsToTenant;
+
     use ImmutableLedgerRecord;
 
     public const UPDATED_AT = null;

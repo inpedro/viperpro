@@ -78,7 +78,7 @@ class FeeSetting extends Page implements HasForms
             $setting = Setting::find($this->record->id);
 
             if($setting->update($this->data)) {
-                Cache::put('setting', $setting);
+                Cache::put(\App\Core\Tenancy\Tenancy::key('setting'), $setting);
 
                 Notification::make()
                     ->title('Dados alterados')

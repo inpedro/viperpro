@@ -9,6 +9,8 @@ use App\Core\Wallet\WalletService;
 use App\Models\Wallet;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use App\Core\Tenancy\Models\Tenant;
+use App\Core\Tenancy\Tenancy;
 
 /**
  * Compares every wallet bucket (the projection) with the sum of its ledger entries, and
@@ -28,6 +30,17 @@ class ReconcileWallets extends Command
         $mismatches = 0;
         $checked = 0;
 
+        foreach (Tenant::orderBy('id')->get() as $tenant) {
+            Tenancy::runAs($tenant, function () use (&$mismatches, &$checked) {
+                $this->reconcileCurrentTenant($mismatches, $checked);
+            });
+        }
+
+        return $this->summary($mismatches, $checked);
+    }
+
+    private function reconcileCurrentTenant(int &$mismatches, int &$checked): void
+    {
         Wallet::query()->orderBy('id')->chunkById(500, function ($wallets) use (&$mismatches, &$checked) {
             foreach ($wallets as $wallet) {
                 foreach (LedgerService::WALLET_BUCKETS as $bucket) {
@@ -47,7 +60,7 @@ class ReconcileWallets extends Command
                     if ($ledger !== $projection) {
                         $mismatches++;
                         $this->error(sprintf(
-                            'wallet %d %-18s projection %s  ledger %s  diff %s',
+                            '[tenant '.\App\Core\Tenancy\Tenancy::id().'] wallet %d %-18s projection %s  ledger %s  diff %s',
                             $wallet->id, $bucket, Amount::fromMinor($projection), Amount::fromMinor($ledger), Amount::fromMinor($projection - $ledger)
                         ));
                     }
@@ -55,6 +68,10 @@ class ReconcileWallets extends Command
             }
         });
 
+    }
+
+    private function summary(int $mismatches, int $checked): int
+    {
         $unbalanced = DB::table('ledger_entries')
             ->select('journal_id', 'currency', DB::raw('SUM(amount_minor) AS total'))
             ->groupBy('journal_id', 'currency')

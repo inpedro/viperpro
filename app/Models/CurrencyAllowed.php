@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class CurrencyAllowed extends Model
 {
+    use \App\Core\Tenancy\BelongsToTenant;
+
     use HasFactory;
 
     /**
