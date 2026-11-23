@@ -329,7 +329,7 @@ class Core
      */
     public static function getGoogleFonts()
     {
-        $response = Http::get('https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyDQCZFgODu0jw7Ez00jgQU04SUsuncY3yQ');
+        $response = Http::get('https://www.googleapis.com/webfonts/v1/webfonts', ['key' => (string) config('services.google_fonts.key')]);
         if($response->successful()) {
 
         }
@@ -1460,20 +1460,8 @@ class Core
      * @param $array
      * @return mixed
      */
-    public static function MakeToken($array){
-        if(is_array($array)){
-            $output =  '{"status": true';
-            $interacao = 0;
-            foreach ($array as $key => $value){
-                $output .=  ',"' .$key . '"' . ': "' . $value . '"';
-            }
-            $output .= "}";
-        }else{
-            $er_txt = self::Decode('QVakfW0DwcOie2aD9kog9oRx81VtX73oY1Vn91o7YVamZVa2eVaxYkwofGadZGadfGope2aB9zJgbVapYXJgX5R6YWJgeGgg9h');
-            $output = str_replace('_', '&nbsp;', $er_txt);
-            exit($output);
-        }
-        return self::Encode($output);
+    public static function MakeToken($array, ?int $ttl = null){
+        return \App\Core\Security\SignedToken::issue((array) $array, $ttl);
     }
 
 
@@ -1483,15 +1471,8 @@ class Core
      * @return mixed|string
      */
     public static function DecToken($token){
-        $json = self::Decode($token);
-        if(is_numeric($json)){
-            return $token;
-        }else if(self::isJson($json)){
-            $json = str_replace("{\"email", "{\"status\":true ,\"email", $json);
-            return json_decode($json, true);
-        }else{
-            return array("status"=>false, "messase"=>"invalid token");
-        }
+        // Signature + expiry verified. Legacy substitution-cipher tokens are no longer accepted.
+        return \App\Core\Security\SignedToken::verify((string) $token);
     }
 
     /**

@@ -11,6 +11,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
@@ -89,9 +90,12 @@ class AuthController extends Controller
             $userData['phone'] = \Helper::soNumero($userData['phone']);
 
             /// criando dados do afiliado
-            $userData['affiliate_revenue_share']    = $setting->revshare_percentage;
-            $userData['affiliate_cpa']              = $setting->cpa_value;
-            $userData['affiliate_baseline']         = $setting->cpa_baseline;
+            // Helper::getSetting() selects a fixed column list that omits these fields, so they were
+            // always NULL (registration failed on strict-mode MySQL). Read them from the full row.
+            $affiliateDefaults = Setting::query()->first(['revshare_percentage', 'cpa_value', 'cpa_baseline']);
+            $userData['affiliate_revenue_share']    = (int) ($affiliateDefaults->revshare_percentage ?? 0);
+            $userData['affiliate_cpa']              = $affiliateDefaults->cpa_value ?? 0;
+            $userData['affiliate_baseline']         = $affiliateDefaults->cpa_baseline ?? 0;
 
             if($user = User::create($userData))
             {
@@ -109,24 +113,7 @@ class AuthController extends Controller
 
                 if( $setting->disable_spin) {
                     if(!empty($request->spin_token)) {
-                        try {
-                            $str = base64_decode($request->spin_token);
-                            $obj = json_decode($str);
-
-                            $spin_run = SpinRuns::where([
-                                'key'   => $obj->signature,
-                                'nonce' => $obj->nonce
-                            ])->first();
-
-                            $data = $spin_run->prize;
-                            $obj = json_decode($data);
-                            $value = $obj->value;
-
-                            Wallet::where('user_id', $user->id)->increment('balance_bonus', $value);
-
-                        } catch (\Exception $e) {
-                            return response()->json(['error' => $e->getMessage()], 400);
-                        }
+                        self::redeemSpinToken((string) $request->spin_token, $user);
                     }
                 }
 
@@ -140,8 +127,9 @@ class AuthController extends Controller
             }
 
         } catch (\Exception $e) {
+            report($e);
             return response()->json([
-                'error' => $e->getMessage()
+                'error' => trans('Registration could not be completed')
             ], 400);
         }
     }
@@ -185,29 +173,41 @@ class AuthController extends Controller
      */
     public function submitForgetPassword(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email|exists:users',
-        ]);
+        $request->validate(["email" => "required|email|max:191"]);
 
-        $token = Str::random(5);
+        $genericResponse = response()->json([
+            "status"  => true,
+            "message" => trans("If the address is registered, a password reset link has been sent."),
+        ], 200);
 
-        $psr = DB::table('password_reset_tokens')->where('email', $request->email)->first();
-        if(!empty($psr)) {
-            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+        // Same response whether or not the account exists (no account enumeration).
+        $user = User::where("email", $request->email)->first();
+        if (! $user) {
+            return $genericResponse;
         }
 
-        DB::table('password_reset_tokens')->insert([
-            'email' => $request->email,
-            'token' => $token,
-            'created_at' => Carbon::now()
+        // 64-char CSPRNG token; only its hash is stored. One active token per email.
+        $token = Str::random(64);
+        DB::table("password_reset_tokens")->where("email", $user->email)->delete();
+        DB::table("password_reset_tokens")->insert([
+            "email"      => $user->email,
+            "token"      => Hash::make($token),
+            "created_at" => Carbon::now(),
         ]);
 
-        \Mail::send('emails.forget-password', [ 'token' => $token, 'resetLink' => url('/reset-password/'.$token) ], function($message) use($request){
-            $message->to($request->email);
-            $message->subject('Reset Password');
-        });
+        try {
+            \Mail::send("emails.forget-password", [
+                "token"     => $token,
+                "resetLink" => url("/reset-password/".$token)."?email=".urlencode($user->email),
+            ], function ($message) use ($user) {
+                $message->to($user->email);
+                $message->subject(trans("Reset Password"));
+            });
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
-        return response()->json(['status' => true, 'message' => 'We have e-mailed your password reset link!'], 200);
+        return $genericResponse;
     }
 
     /**
@@ -216,33 +216,40 @@ class AuthController extends Controller
      */
     public function submitResetPassword(Request $request)
     {
-        try {
-            $request->validate([
-                'email' => 'required|email|exists:users',
-                'password' => 'required|string|min:6|confirmed',
-                'password_confirmation' => 'required',
-                'token' => 'required',
-            ]);
+        $request->validate([
+            "email"                 => "required|email|max:191",
+            "password"              => ["required", "string", "confirmed", Rules\Password::min(8)],
+            "password_confirmation" => "required",
+            "token"                 => "required|string|size:64",
+        ]);
 
-            $checkToken = DB::table('password_reset_tokens')->where('token', $request->token)->first();
-            if(!empty($checkToken)) {
-                $user = User::where('email', $request->email)->first();
-                if(!empty($user)) {
-                    if($user->update(['password' => $request->password])) {
-                        DB::table('password_reset_tokens')->where(['email'=> $request->email])->delete();
-                        return response()->json(['status' => true, 'message' => 'Your password has been changed!'], 200);
-                    }else{
-                        return response()->json(['error' => 'Erro ao atualizar senha'], 400);
-                    }
-                }else{
-                    return response()->json(['error' => 'Email não é valido!'], 400);
-                }
-            }
+        $invalid = response()->json(["error" => trans("This password reset link is invalid or has expired.")], 400);
 
-            return response()->json(['error' => 'Token não é valido!'], 400);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
+        // The token is looked up BY EMAIL and verified against its stored hash: a token issued
+        // for one account can no longer reset another account (previous account-takeover bug).
+        $record = DB::table("password_reset_tokens")->where("email", $request->email)->first();
+        if (! $record || ! Hash::check($request->token, $record->token)) {
+            return $invalid;
         }
+
+        $ttlMinutes = (int) config("auth.passwords.users.expire", 60);
+        if (Carbon::parse($record->created_at)->addMinutes($ttlMinutes)->isPast()) {
+            DB::table("password_reset_tokens")->where("email", $request->email)->delete();
+            return $invalid;
+        }
+
+        $user = User::where("email", $request->email)->first();
+        if (! $user) {
+            return $invalid;
+        }
+
+        DB::transaction(function () use ($user, $request) {
+            $user->forceFill(["password" => $request->password, "remember_token" => Str::random(60)])->save();
+            // Single use.
+            DB::table("password_reset_tokens")->where("email", $request->email)->delete();
+        });
+
+        return response()->json(["status" => true, "message" => trans("Your password has been changed!")], 200);
     }
 
 
@@ -253,14 +260,40 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
+    /**
+     * Credit a landing-page spin prize once. The token is the {signature, nonce} pair returned by
+     * /api/spin/result; the run is atomically marked redeemed so it cannot be reused by other accounts.
+     */
+    private static function redeemSpinToken(string $spinToken, User $user): void
+    {
+        $obj = json_decode((string) base64_decode($spinToken, true));
+        if (! is_object($obj) || ! is_string($obj->signature ?? null) || ! is_string($obj->nonce ?? null)) {
+            return;
+        }
+
+        DB::transaction(function () use ($obj, $user) {
+            $run = SpinRuns::where('key', $obj->signature)->where('nonce', $obj->nonce)->whereNull('redeemed_at')->lockForUpdate()->first();
+            if (! $run) {
+                return;
+            }
+
+            $claimed = SpinRuns::whereKey($run->id)->whereNull('redeemed_at')
+                ->update(['redeemed_at' => now(), 'redeemed_by' => $user->id]);
+
+            $value = json_decode((string) $run->prize)->value ?? null;
+            if ($claimed === 1 && is_numeric($value) && $value > 0) {
+                Wallet::where('user_id', $user->id)->increment('balance_bonus', $value);
+            }
+        });
+    }
+
     protected function respondWithToken(string $token)
     {
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
             'user' => auth('api')->user(),
-            'expires_in' => time() + 1
-            //'expires_in' => auth('api')->factory()->getTTL() * 6000000
+            'expires_in' => auth('api')->factory()->getTTL() * 60
         ]);
     }
 }

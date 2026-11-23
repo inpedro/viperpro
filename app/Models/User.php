@@ -187,13 +187,8 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
         return $this->hasOne(Wallet::class)->where('active', 1);
     }
 
-    /**
-     * @return BelongsToMany
-     */
-    public function roles(): BelongsToMany
-    {
-        return $this->belongsToMany(Role::class, 'model_has_roles', 'model_id', 'role_id');
-    }
+    // Removed custom roles() override: it shadowed Spatie's polymorphic HasRoles::roles(), so
+    // assignRole()/syncRoles() could not write model_has_roles.model_type and failed.
 
     /**
      * @param Panel $panel
@@ -201,7 +196,13 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->hasRole(['admin', 'afiliado']);
+        // Each panel admits only its own role. Affiliates must never reach the admin panel
+        // (previously both roles could log into every panel, including /admin).
+        return match ($panel->getId()) {
+            "admin"     => $this->hasRole("admin"),
+            "affiliate" => $this->hasRole(["afiliado", "admin"]),
+            default     => false,
+        };
     }
 
     /**
