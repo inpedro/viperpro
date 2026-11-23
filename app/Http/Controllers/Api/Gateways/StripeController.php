@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\Gateways;
 
+use App\Core\Payments\DepositSettlementService;
+use App\Core\Security\CallbackLog;
 use App\Models\Currency;
 use App\Models\Deposit;
 use App\Models\Gateway;
@@ -26,7 +28,8 @@ class StripeController extends Controller
         try {
             return self::stripeSession($request->amount, $request->currency);
         }catch (\Exception $e) {
-            return response()->json(['status' => false, 'errors' => $e->getMessage()], 400);
+            report($e);
+            return response()->json(['status' => false, 'errors' => trans('Payment could not be started')], 400);
         }
     }
 
@@ -41,7 +44,8 @@ class StripeController extends Controller
         try {
             return $this->stripePayment($request);
         }catch (\Exception $e) {
-            return response()->json(['status' => false, 'errors' => $e->getMessage()], 400);
+            report($e);
+            return response()->json(['status' => false, 'errors' => trans('Payment could not be started')], 400);
         }
     }
 
@@ -62,10 +66,12 @@ class StripeController extends Controller
      */
     public function getPublicKey()
     {
+        // The secret key must never leave the server (it was previously returned here).
         $stripe = Gateway::first();
-        if(!empty($stripe)) {
-            return response()->json(['stripe_public_key' => $stripe->stripe_public_key, 'stripe_secret_key' => $stripe->stripe_secret_key, 'successURL' => url('stripe/success')]);
-        }
+        return response()->json([
+            "stripe_public_key" => $stripe?->stripe_public_key,
+            "successURL"        => url("stripe/success"),
+        ]);
     }
 
     /**
@@ -74,75 +80,58 @@ class StripeController extends Controller
      */
     public function webhooks(Request $request)
     {
-        $payload = @file_get_contents('php://input');
-        $event = null;
+        $secret = (string) config("services.stripe.webhook_secret");
+        if ($secret === "") {
+            CallbackLog::record("payment", "stripe", $request, "rejected", "STRIPE_WEBHOOK_SECRET not configured");
+            return response()->json(["error" => "webhook not configured"], 503);
+        }
 
         try {
-            $event = \Stripe\Event::constructFrom(
-                json_decode($payload, true)
+            // Verifies the Stripe-Signature header (HMAC-SHA256) and the timestamp tolerance (replay protection).
+            $event = \Stripe\Webhook::constructEvent(
+                $request->getContent(),
+                (string) $request->header("Stripe-Signature"),
+                $secret
             );
-        } catch(\UnexpectedValueException $e) {
-            http_response_code(400);
-            exit();
+        } catch (\UnexpectedValueException|\Stripe\Exception\SignatureVerificationException) {
+            CallbackLog::record("payment", "stripe", $request, "rejected", "invalid signature or payload");
+            return response()->json(["error" => "invalid signature"], 400);
         }
 
-        switch ($event->type) {
-            case 'checkout.session.completed':
-                $paymentIntent = $event->data->object; // contains a \Stripe\PaymentIntent
-                if(!empty($paymentIntent['client_reference_id'])) {
-                    $user = User::find($paymentIntent['client_reference_id']);
-                    if(!empty($user)) {
-                        $array = [
-                            'payment_intent' => $paymentIntent['payment_intent'],
-                            'status' => $paymentIntent['payment_status'],
-                            'currency' => $paymentIntent['currency'],
-                            'amount' => $paymentIntent['amount_total'] / 100,
-                        ];
-
-                        //\DB::table('debug')->insert(['text' => json_encode($array)]);
-                        if($paymentIntent['payment_status'] == 'paid') {
-                            $amount = $paymentIntent['amount_total'] / 100;
-                            self::generateTransaction($paymentIntent['payment_intent'], $user->id, $amount); /// gerando historico
-                            self::generateDeposit($paymentIntent['payment_intent'], $user->id, $amount); /// gerando deposito
-
-                            $wallet = Wallet::where('user_id', $user->id)->first();
-
-                            /// verificar se a wallet ativa é da mesma moeda
-                            if(strtolower($user->wallet->currency) == strtolower($paymentIntent['currency'])) {
-                                $wallet->increment('balance', intval($amount));
-                                $wallet->update(['active' => 1]);
-                            }else{
-                                $wallet->update(['active' => 0]); /// desativa a carteira
-                                ///
-                                $currency = Currency::where('code', strtoupper($paymentIntent['currency']))->first();
-
-                                /// cria uma nova ativa
-                                Wallet::create([
-                                    'user_id'   => $user->id,
-                                    'balance'   => $amount,
-                                    'currency'  => $currency->code,
-                                    'symbol'    => $currency->symbol,
-                                    'active'    => 1
-                                ]);
-                            }
-                        }
-                    }
-                }
-
-                break;
-            case 'payment_intent.succeeded':
-                $paymentIntent = $event->data->object; // contains a \Stripe\PaymentIntent
-
-
-                break;
-            case 'payment_method.attached':
-                $paymentMethod = $event->data->object; // contains a \Stripe\PaymentMethod
-                //\DB::table('debug')->insert(['text' => json_encode($paymentMethod)]);
-
-                break;
-            default:
-                echo 'Received unknown event type ' . $event->type;
+        if ($event->type !== "checkout.session.completed") {
+            CallbackLog::record("payment", "stripe", $request, "ignored", "event ".$event->type, $event->id);
+            return response()->json(["received" => true]);
         }
+
+        $session = $event->data->object;
+        $user    = User::find($session->client_reference_id ?? null);
+
+        if (! $user || ($session->payment_status ?? null) !== "paid" || empty($session->payment_intent)) {
+            CallbackLog::record("payment", "stripe", $request, "ignored", "not a paid session for a known user", $event->id);
+            return response()->json(["received" => true]);
+        }
+
+        $paymentId = (string) $session->payment_intent;
+        $amount    = \App\Core\Money\Amount::fromMinor((int) $session->amount_total); // 2-decimal currencies only (see docs)
+        $currency  = strtoupper((string) $session->currency);
+
+        // Idempotent: Stripe retries webhooks; the unique payment_id + pending-state check prevent double credit.
+        if (! Transaction::where("payment_id", $paymentId)->exists()) {
+            self::generateTransaction($paymentId, $user->id, $amount);
+            self::generateDeposit($paymentId, $user->id, $amount);
+        }
+
+        $wallet = Wallet::where("user_id", $user->id)->first();
+        if (! $wallet || strcasecmp((string) $wallet->currency, $currency) !== 0) {
+            // Previously this silently created a new wallet in another currency. Multi-currency wallets are Phase 2.
+            CallbackLog::record("payment", "stripe", $request, "rejected", "currency mismatch with player wallet", $paymentId);
+            return response()->json(["received" => true]);
+        }
+
+        $settled = DepositSettlementService::settle($paymentId, $amount);
+        CallbackLog::record("payment", "stripe", $request, $settled ? "accepted" : "ignored", $settled ? null : "already settled", $paymentId);
+
+        return response()->json(["received" => true]);
     }
 
 
@@ -181,7 +170,7 @@ class StripeController extends Controller
             'payment_method' => 'stripe',
             'price' => $amount,
             'currency' => $setting->currency_code,
-            'status' => 1
+            'status' => 0 // pending; DepositSettlementService moves it to 1 and credits the wallet exactly once
         ]);
     }
 }

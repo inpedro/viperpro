@@ -10,8 +10,8 @@ Route::prefix('bspay')
         Route::any('callback', [BsPayController::class, 'callbackMethod']);
         Route::post('consult-status-transaction', [BsPayController::class, 'consultStatusTransactionPix']);
 
-        Route::get('withdrawal/{id}', [BsPayController::class, 'withdrawalFromModal'])->name('bspay.withdrawal');
-        Route::get('cancelwithdrawal/{id}', [BsPayController::class, 'cancelWithdrawalFromModal'])->name('bspay.cancelwithdrawal');
+        // removed: unauthenticated GET withdrawal route
+        // removed: unauthenticated GET cancel route
     });
 
 

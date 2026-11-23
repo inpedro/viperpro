@@ -33,17 +33,30 @@ trait DigitoPayTrait
     private static function digitoPayGenerateCredentials()
     {
         $setting = Gateway::first();
-        if(!empty($setting)) {
-            self::$uri = $setting->getAttributes()['digitopay_uri'];
-            $clientId = $setting->getAttributes()['digitopay_cliente_id'];
-            $clienteSecret = $setting->getAttributes()['digitopay_cliente_secret'];
-
-            self::$bearerToken = Http::post(self::$uri.'api/token/api',
-                [
-                    "clientId" => $clientId,
-                    "secret" => $clienteSecret
-                ])->object()->accessToken;
+        if (empty($setting)) {
+            return false;
         }
+
+        self::$uri     = (string) ($setting->getAttributes()["digitopay_uri"] ?? "");
+        $clientId      = $setting->getAttributes()["digitopay_cliente_id"] ?? "";
+        $clienteSecret = $setting->getAttributes()["digitopay_cliente_secret"] ?? "";
+
+        // Credentials are only ever sent to an allowlisted HTTPS host (see config/payments.php).
+        if ($clientId === "" || $clienteSecret === "" || ! \App\Core\Security\TrustedEndpoint::isAllowed("digitopay", self::$uri)) {
+            return false;
+        }
+
+        $token = Http::timeout(15)->post(self::$uri."api/token/api", [
+            "clientId" => $clientId,
+            "secret"   => $clienteSecret,
+        ])->json("accessToken");
+
+        if (! is_string($token) || $token === "") {
+            return false;
+        }
+
+        self::$bearerToken = $token;
+        return true;
     }
 
     /**
@@ -64,7 +77,9 @@ trait DigitoPayTrait
             return response()->json($validator->errors(), 400);
         }
 
-        self::digitoPayGenerateCredentials();
+        if (! self::digitoPayGenerateCredentials()) {
+            return ['status' => false];
+        }
 
         $response = Http::withToken(self::$bearerToken)->post(self::$uri.'api/deposit', [
             "dueDate" => Carbon::now()->addDay(),
@@ -103,26 +118,32 @@ trait DigitoPayTrait
      */
     public static function digitoPayConsultStatusTransaction($request)
     {
-        self::digitoPayGenerateCredentials();
+        $status = self::digitoPayFetchStatus((string) $request->idTransaction);
 
-        $response = Http::withToken(self::$bearerToken)->get(self::$uri.'api/status/'.$request->idTransaction);
-        if($response->successful()) {
-            $responseData = $response->object();
-
-            if($responseData == "REALIZADO")
-            {
-                if(self::digitoPayFinalizePayment($request->idTransaction)) {
-                    return response()->json(['status' => 'PAID']);
-                }
-
-                return response()->json(['status' => $responseData], 400);
-            }
-
-            return response()->json(['status' => $responseData], 400);
-
+        if ($status === "REALIZADO") {
+            self::digitoPayFinalizePayment($request->idTransaction);
+            return response()->json(["status" => "PAID"]);
         }
 
-        return response()->json(['status' => 'ERROR'], 400);
+        return response()->json(["status" => $status ?? "UNKNOWN"], 400);
+    }
+
+    /**
+     * Server-to-server status lookup (the endpoint this integration already used for polling).
+     */
+    public static function digitoPayFetchStatus(string $idTransaction): ?string
+    {
+        if ($idTransaction === "" || ! self::digitoPayGenerateCredentials()) {
+            return null;
+        }
+
+        $response = Http::timeout(15)->withToken(self::$bearerToken)->get(self::$uri."api/status/".rawurlencode($idTransaction));
+        if (! $response->successful()) {
+            return null;
+        }
+
+        $status = $response->json();
+        return is_string($status) ? $status : null;
     }
 
     /**
@@ -132,99 +153,8 @@ trait DigitoPayTrait
      */
     public static function digitoPayFinalizePayment($idTransaction) : bool
     {
-        $transaction = Transaction::where('payment_id', $idTransaction)->where('status', 0)->first();
-        $setting = \Helper::getSetting();
-
-        if(!empty($transaction)) {
-            $user = User::find($transaction->user_id);
-
-            $wallet = Wallet::where('user_id', $transaction->user_id)->first();
-            if(!empty($wallet)) {
-
-                /// verifica se é o primeiro deposito, verifica as transações, somente se for transações concluidas
-                $checkTransactions = Transaction::where('user_id', $transaction->user_id)
-                    ->where('status', 1)
-                    ->count();
-
-                if($checkTransactions == 0 || empty($checkTransactions)) {
-                    if($transaction->accept_bonus) {
-                        /// pagar o bonus
-                        $bonus = Helper::porcentagem_xn($setting->initial_bonus, $transaction->price);
-                        $wallet->increment('balance_bonus', $bonus);
-
-                        if(!$setting->disable_rollover) {
-                            $wallet->update(['balance_bonus_rollover' => $bonus * $setting->rollover]);
-                        }
-                    }
-                }
-
-                /// rollover deposito
-                if($setting->disable_rollover == false) {
-                    $wallet->increment('balance_deposit_rollover', ($transaction->price * intval($setting->rollover_deposit)));
-                }
-
-                /// acumular bonus
-                Helper::payBonusVip($wallet, $transaction->price);
-
-                /// quando tiver desativado o rollover, ele manda o dinheiro depositado direto pra carteira de saque
-                if($setting->disable_rollover) {
-                    $wallet->increment('balance_withdrawal', $transaction->price); /// carteira de saque
-                }else{
-                    $wallet->increment('balance', $transaction->price); /// carteira de jogos, não permite sacar
-                }
-
-                if($transaction->update(['status' => 1])) {
-                    $deposit = Deposit::where('payment_id', $idTransaction)->where('status', 0)->first();
-                    if(!empty($deposit)) {
-
-                        /// fazer o deposito em cpa
-                        $affHistoryCPA = AffiliateHistory::where('user_id', $user->id)
-                            ->where('commission_type', 'cpa')
-                            //->where('deposited', 1)
-                            //->where('status', 0)
-                            ->first();
-
-                        if(!empty($affHistoryCPA)) {
-                            /// faz uma soma de depositos feitos pelo indicado
-                            $affHistoryCPA->increment('deposited_amount', $transaction->price);
-
-                            /// verifcia se já pode receber o cpa
-                            $sponsorCpa = User::find($user->inviter);
-
-                            /// verifica se foi pago ou nnão
-                            if(!empty($sponsorCpa) && $affHistoryCPA->status == 'pendente') {
-
-                                if($affHistoryCPA->deposited_amount >= $sponsorCpa->affiliate_baseline || $deposit->amount >= $sponsorCpa->affiliate_baseline) {
-                                    $walletCpa = Wallet::where('user_id', $affHistoryCPA->inviter)->first();
-
-                                    if(!empty($walletCpa)) {
-
-                                        /// paga o valor de CPA
-                                        $walletCpa->increment('refer_rewards', $sponsorCpa->affiliate_cpa); /// coloca a comissão
-                                        $affHistoryCPA->update(['status' => 1, 'commission_paid' => $sponsorCpa->affiliate_cpa]); /// desativa cpa
-                                    }
-                                }
-                            }
-                        }
-
-                        if($deposit->update(['status' => 1])) {
-                            $admins = User::where('role_id', 0)->get();
-                            foreach ($admins as $admin) {
-                                $admin->notify(new NewDepositNotification($user->name, $transaction->price));
-                            }
-
-                            return true;
-                        }
-                        return false;
-                    }
-                    return false;
-                }
-
-                return false;
-            }
-            return false;
-        }
-        return false;
+        // Settlement is centralised, locked and idempotent. Callers must have verified the payment with the gateway first.
+        return \App\Core\Payments\DepositSettlementService::settle((string) $idTransaction);
     }
 
     /**
@@ -278,7 +208,9 @@ trait DigitoPayTrait
      */
     public static function digitoPayPixCashOut(array $array): bool
     {
-        self::digitoPayGenerateCredentials();
+        if (! self::digitoPayGenerateCredentials()) {
+            return false;
+        }
 
         $response = Http::withToken(self::$bearerToken)->post(self::$uri.'api/withdraw', [
             "paymentOptions" => ["PIX"],

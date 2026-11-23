@@ -34,34 +34,11 @@ class BsPayController extends Controller
      */
     public function callbackMethod(Request $request)
     {
-        ///\DB::table('debug')->insert(['text' => json_encode($request->all())]);
-
-        if(isset($request->transactionId) && $request->transactionType == 'RECEIVEPIX') {
-            $transaction = Transaction::where('payment_id', $request->transactionId)->where('status', 0)->first();
-            if(!empty($transaction)) {
-                $wallet = Wallet::where('user_id', $transaction->user_id)->first();
-                if(!empty($wallet)) {
-                    if($transaction->update(['status' => 1])) {
-                        $setting = Setting::first();
-
-                        $checkTransactions = Transaction::where('user_id', $transaction->user_id)->count();
-                        if($checkTransactions <= 1) {
-                            /// pagar o bonus
-                            $bonus = \Helper::porcentagem_xn($setting->initial_bonus, $transaction->price);
-                            $wallet->increment('balance_bonus', $bonus);
-                            $wallet->update(['balance_bonus_rollover' => $bonus * $setting->rollover]);
-                        }else{
-                            $wallet->increment('balance', $transaction->price); /// add saldo
-                        }
-
-                        $user = User::find($transaction->user_id);
-
-                        self::saveAffiliateHistory($user); /// paga o afiliado
-                        self::FinishTransaction($transaction->price, $user->id); /// finaliza a transação
-                    }
-                }
-            }
-        }
+        // DISABLED: the previous implementation credited wallets on an unauthenticated callback
+        // without verifying with BsPay. Its routes are not mounted (routes/web.php). Re-enable only
+        // after a server-to-server verification adapter has been built against BsPay's official docs.
+        \App\Core\Security\CallbackLog::record("payment", "bspay", $request, "rejected", "integration disabled");
+        return response()->json(["status" => false, "message" => "integration disabled"], 410);
     }
 
     /**
@@ -79,36 +56,6 @@ class BsPayController extends Controller
      */
     public function withdrawalFromModal($id)
     {
-        $withdrawal = Withdrawal::find($id);
-        if(!empty($withdrawal)) {
-            $parm = [
-                'pix_key'           => $withdrawal->chave_pix,
-                'pix_type'          => $withdrawal->tipo_chave,
-                'amount'            => $withdrawal->amount,
-                'document'          => $withdrawal->document,
-                'payment_id'        => $withdrawal->id
-            ];
-
-            $resp = self::MakePayment($parm);
-
-            if($resp) {
-                $withdrawal->update(['status' => 1]);
-                Notification::make()
-                    ->title('Saque solicitado')
-                    ->body('Saque solicitado com sucesso')
-                    ->success()
-                    ->send();
-
-                return back();
-            }else{
-                Notification::make()
-                    ->title('Erro no saque')
-                    ->body('Erro ao solicitar o saque')
-                    ->danger()
-                    ->send();
-
-                return back();
-            }
-        }
+        abort(410, "BsPay integration disabled pending verification.");
     }
 }

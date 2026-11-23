@@ -10,12 +10,6 @@ Route::prefix('suitpay')
     {
         Route::post('callback', [SuitPayController::class, 'callbackMethod']);
         Route::post('payment', [SuitPayController::class, 'callbackMethodPayment']);
-
-        Route::middleware(['admin.filament'])
-            ->group(function ()
-            {
-                Route::get('withdrawal/{id}/{action}', [SuitPayController::class, 'withdrawalFromModal'])->name('suitpay.withdrawal');
-                Route::get('cancelwithdrawal/{id}/{action}', [SuitPayController::class, 'cancelWithdrawalFromModal'])->name('suitpay.cancelwithdrawal');
-            });
+        // Withdrawal approve/cancel moved to authenticated Filament actions (POST + CSRF). See WithdrawalService.
     });
 

@@ -37,11 +37,16 @@ trait SuitpayTrait
     private static function generateCredentials()
     {
         $setting = Gateway::first();
-        if(!empty($setting)) {
-            self::$uri = $setting->getAttributes()['suitpay_uri'] ?? '';
-            self::$clienteId = $setting->getAttributes()['suitpay_cliente_id'] ?? '';
-            self::$clienteSecret = $setting->getAttributes()['suitpay_cliente_secret'] ?? '';
+        if (empty($setting)) {
+            return false;
         }
+
+        self::$uri           = $setting->getAttributes()["suitpay_uri"] ?? "";
+        self::$clienteId     = $setting->getAttributes()["suitpay_cliente_id"] ?? "";
+        self::$clienteSecret = $setting->getAttributes()["suitpay_cliente_secret"] ?? "";
+
+        return self::$clienteId !== "" && self::$clienteSecret !== ""
+            && \App\Core\Security\TrustedEndpoint::isAllowed("suitpay", self::$uri);
     }
 
     /**
@@ -63,7 +68,9 @@ trait SuitpayTrait
             return response()->json($validator->errors(), 400);
         }
 
-        self::generateCredentials();
+        if (! self::generateCredentials()) {
+            return ['status' => false];
+        }
 
         $response = Http::withHeaders([
             'ci' => self::$clienteId,
@@ -115,28 +122,40 @@ trait SuitpayTrait
      */
     public static function consultStatusTransaction($request)
     {
-        self::generateCredentials();
+        $status = self::suitpayFetchStatus((string) $request->idTransaction);
 
-        $response = Http::withHeaders([
-            'ci' => self::$clienteId,
-            'cs' => self::$clienteSecret
-        ])->post(self::$uri.'gateway/consult-status-transaction', [
-            "typeTransaction" => "PIX",
-            "idTransaction" => $request->idTransaction,
-        ]);
-        if($response->successful()) {
-            $responseData = $response->json();
-
-            if($responseData == "PAID_OUT" || $responseData == "PAYMENT_ACCEPT") {
-                if(self::finalizePayment($request->idTransaction)) {
-                    return response()->json(['status' => 'PAID']);
-                }
-
-                return response()->json(['status' => $responseData], 400);
-            }
-
-            return response()->json(['status' => $responseData], 400);
+        if (in_array($status, ["PAID_OUT", "PAYMENT_ACCEPT"], true)) {
+            self::finalizePayment($request->idTransaction);
+            return response()->json(["status" => "PAID"]);
         }
+
+        return response()->json(["status" => $status ?? "UNKNOWN"], 400);
+    }
+
+    /**
+     * Ask SuitPay (server-to-server, authenticated with our ci/cs credentials) for the
+     * real status of a transaction. Never trust the status sent in an inbound callback.
+     */
+    public static function suitpayFetchStatus(string $idTransaction): ?string
+    {
+        if ($idTransaction === "" || ! self::generateCredentials()) {
+            return null;
+        }
+
+        $response = Http::timeout(15)->withHeaders([
+            "ci" => self::$clienteId,
+            "cs" => self::$clienteSecret,
+        ])->post(self::$uri."gateway/consult-status-transaction", [
+            "typeTransaction" => "PIX",
+            "idTransaction"   => $idTransaction,
+        ]);
+
+        if (! $response->successful()) {
+            return null;
+        }
+
+        $status = $response->json();
+        return is_string($status) ? $status : null;
     }
 
     /**
@@ -146,105 +165,8 @@ trait SuitpayTrait
      */
     public static function finalizePayment($idTransaction) : bool
     {
-        $transaction = Transaction::where('payment_id', $idTransaction)->where('status', 0)->first();
-        $setting = \Helper::getSetting();
-
-        if(!empty($transaction)) {
-            $user = User::find($transaction->user_id);
-
-            $wallet = Wallet::where('user_id', $transaction->user_id)->first();
-            if(!empty($wallet)) {
-
-                /// verifica se é o primeiro deposito, verifica as transações, somente se for transações concluidas
-                $checkTransactions = Transaction::where('user_id', $transaction->user_id)
-                    ->where('status', 1)
-                    ->count();
-
-                if($checkTransactions == 0 || empty($checkTransactions)) {
-                    if($transaction->accept_bonus) {
-                        /// pagar o bonus
-                        $bonus = Helper::porcentagem_xn($setting->initial_bonus, $transaction->price);
-                        $wallet->increment('balance_bonus', $bonus);
-
-                        if(!$setting->disable_rollover) {
-                            $wallet->update(['balance_bonus_rollover' => $bonus * $setting->rollover]);
-                        }
-                    }
-                }
-
-                /// rollover deposito
-                if($setting->disable_rollover == false) {
-                    $wallet->increment('balance_deposit_rollover', ($transaction->price * intval($setting->rollover_deposit)));
-                }
-
-                /// acumular bonus
-                Helper::payBonusVip($wallet, $transaction->price);
-
-                /// quando tiver desativado o rollover, ele manda o dinheiro depositado direto pra carteira de saque
-                if($setting->disable_rollover) {
-                    $wallet->increment('balance_withdrawal', $transaction->price); /// carteira de saque
-                }else{
-                    $wallet->increment('balance', $transaction->price); /// carteira de jogos, não permite sacar
-                }
-
-                if($transaction->update(['status' => 1])) {
-                    $deposit = Deposit::where('payment_id', $idTransaction)->where('status', 0)->first();
-                    if(!empty($deposit)) {
-
-                        /// fazer o deposito em cpa
-                        $affHistoryCPA = AffiliateHistory::where('user_id', $user->id)
-                            ->where('commission_type', 'cpa')
-                            //->where('deposited', 1)
-                            //->where('status', 0)
-                            ->first();
-
-                        \Log::info(json_encode($affHistoryCPA));
-                        if(!empty($affHistoryCPA)) {
-                            /// faz uma soma de depositos feitos pelo indicado
-                            $affHistoryCPA->increment('deposited_amount', $transaction->price);
-
-                            /// verifcia se já pode receber o cpa
-                            $sponsorCpa = User::find($user->inviter);
-
-                            \Log::info(json_encode($sponsorCpa));
-                            /// verifica se foi pago ou nnão
-                            if(!empty($sponsorCpa) && $affHistoryCPA->status == 'pendente') {
-                                \Log::info('Deposited Amount: '.$affHistoryCPA->deposited_amount);
-                                \Log::info('Affiliate Baseline: '.$sponsorCpa->affiliate_baseline);
-                                \Log::info('Amount: '.$deposit->amount);
-
-                                if($affHistoryCPA->deposited_amount >= $sponsorCpa->affiliate_baseline || $deposit->amount >= $sponsorCpa->affiliate_baseline) {
-                                    $walletCpa = Wallet::where('user_id', $affHistoryCPA->inviter)->first();
-                                    \Log::info(json_encode($walletCpa));
-                                    if(!empty($walletCpa)) {
-                                        \Log::info('Affiliate CPA: '.$sponsorCpa->affiliate_cpa);
-
-                                        /// paga o valor de CPA
-                                        $walletCpa->increment('refer_rewards', $sponsorCpa->affiliate_cpa); /// coloca a comissão
-                                        $affHistoryCPA->update(['status' => 1, 'commission_paid' => $sponsorCpa->affiliate_cpa]); /// desativa cpa
-                                    }
-                                }
-                            }
-                        }
-
-                        if($deposit->update(['status' => 1])) {
-                            $admins = User::where('role_id', 0)->get();
-                            foreach ($admins as $admin) {
-                                $admin->notify(new NewDepositNotification($user->name, $transaction->price));
-                            }
-
-                            return true;
-                        }
-                        return false;
-                    }
-                    return false;
-                }
-
-                return false;
-            }
-            return false;
-        }
-        return false;
+        // Settlement is centralised, locked and idempotent. Callers must have verified the payment with the gateway first.
+        return \App\Core\Payments\DepositSettlementService::settle((string) $idTransaction);
     }
 
     /**
@@ -297,7 +219,9 @@ trait SuitpayTrait
      */
     public static function pixCashOut(array $array): bool
     {
-        self::generateCredentials();
+        if (! self::generateCredentials()) {
+            return false;
+        }
 
         $response = Http::withHeaders([
             'ci' => self::$clienteId,

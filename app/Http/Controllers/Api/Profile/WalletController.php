@@ -37,16 +37,18 @@ class WalletController extends Controller
      */
     public function setWalletActive($id)
     {
-        $checkWallet = Wallet::whereUserId(auth('api')->id())->where('active', 1)->first();
-        if(!empty($checkWallet)) {
-            $checkWallet->update(['active' => 0]);
+        // Ownership enforced: a player can only activate one of their own wallets.
+        $wallet = Wallet::where("user_id", auth("api")->id())->whereKey($id)->first();
+        if (! $wallet) {
+            return response()->json(["error" => trans("Wallet not found")], 404);
         }
 
-        $wallet = Wallet::find($id);
-        if(!empty($wallet)) {
-            $wallet->update(['active' => 1]);
-            return response()->json(['wallet' => $wallet], 200);
-        }
+        \Illuminate\Support\Facades\DB::transaction(function () use ($wallet) {
+            Wallet::where("user_id", $wallet->user_id)->where("active", 1)->update(["active" => 0]);
+            $wallet->update(["active" => 1]);
+        });
+
+        return response()->json(["wallet" => $wallet->fresh()], 200);
     }
 
     /**
@@ -59,6 +61,10 @@ class WalletController extends Controller
 
         /// Verificar se é afiliado
         If(auth('api')->check()) {
+
+            if (! in_array($request->type, ['pix', 'bank'], true)) {
+                return response()->json(['error' => trans('Invalid withdrawal type')], 400);
+            }
 
             if($request->type === 'pix') {
                 $rules = [
@@ -116,7 +122,7 @@ class WalletController extends Controller
                         }
                         break;
                     case 'monthly':
-                        $registrosDiarios = Withdrawal::where('user_id', auth('api')->user()->id)->whereYear('created_at', now()->year)->whereMonth('data', now()->month)->count();
+                        $registrosDiarios = Withdrawal::where('user_id', auth('api')->user()->id)->whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count();
                         if($registrosDiarios >= $setting->withdrawal_limit) {
                             return response()->json(['error' => trans('You have already reached the monthly withdrawal limit')], 400);
                         }
@@ -135,52 +141,33 @@ class WalletController extends Controller
             }
 
             if($request->accept_terms == true) {
-                if(floatval($request->amount) > floatval(auth('api')->user()->wallet->balance_withdrawal)) {
-                    return response()->json(['error' => 'Você não tem saldo suficiente'], 400);
+                $attributes = ['type' => $request->type, 'currency' => $request->currency, 'symbol' => $request->symbol];
+                if ($request->type === 'pix') {
+                    $attributes += ['pix_key' => $request->pix_key, 'pix_type' => $request->pix_type];
+                } else {
+                    $attributes += ['bank_info' => $request->bank_info];
                 }
 
-                $data = [];
-                if($request->type === 'pix') {
-                    $data = [
-                        'user_id'   => auth('api')->user()->id,
-                        'amount'    => \Helper::amountPrepare($request->amount),
-                        'type'      => $request->type,
-                        'pix_key'   => $request->pix_key,
-                        'pix_type'  => $request->pix_type,
-                        'currency'  => $request->currency,
-                        'symbol'    => $request->symbol,
-                        'status'    => 0,
-                    ];
+                // Balance check + debit + record creation happen atomically (no double-spend under concurrency).
+                $withdrawal = \App\Core\Payments\WithdrawalService::request(
+                    \App\Core\Payments\WithdrawalService::TYPE_USER,
+                    (int) auth('api')->id(),
+                    (string) \Helper::amountPrepare($request->amount),
+                    $attributes
+                );
+
+                if (! $withdrawal) {
+                    return response()->json(['error' => trans('Insufficient balance')], 400);
                 }
 
-                if($request->type === 'bank') {
-                    $data = [
-                        'user_id'   => auth('api')->user()->id,
-                        'amount'    => \Helper::amountPrepare($request->amount),
-                        'type'      => $request->type,
-                        'bank_info' => $request->bank_info,
-                        'currency'  => $request->currency,
-                        'symbol'    => $request->symbol,
-                        'status'    => 0,
-                    ];
+                foreach (User::where('role_id', 0)->get() as $admin) {
+                    $admin->notify(new NewWithdrawalNotification(auth('api')->user()->name, $withdrawal->amount));
                 }
 
-                $withdrawal = Withdrawal::create($data);
-
-                if($withdrawal) {
-                    $wallet = Wallet::where('user_id', auth('api')->id())->first();
-                    $wallet->decrement('balance_withdrawal', floatval($request->amount));
-
-                    $admins = User::where('role_id', 0)->get();
-                    foreach ($admins as $admin) {
-                        $admin->notify(new NewWithdrawalNotification(auth()->user()->name, $request->amount));
-                    }
-
-                    return response()->json([
-                        'status' => true,
-                        'message' => 'Saque realizado com sucesso',
-                    ], 200);
-                }
+                return response()->json([
+                    'status' => true,
+                    'message' => trans('Withdrawal requested successfully'),
+                ], 200);
             }
 
             return response()->json(['error' => 'Você precisa aceitar os termos'], 400);

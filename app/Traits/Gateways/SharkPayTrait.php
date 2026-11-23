@@ -127,28 +127,33 @@ trait SharkPayTrait
      */
     public static function consultStatusTransactionSharkpay($request)
     {
-        if($token = self::generateCredentialsSharkPay()) {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer '. $token,
-                'Accept' => 'application/json',
-            ])->get(self::$uriSharkPay.'pix/txid/'.$request->idTransaction);
+        return self::sharkpayVerifyAndSettle((string) $request->idTransaction)
+            ? response()->json(["status" => "PAID"])
+            : response()->json(["status" => "PENDING"]);
+    }
 
-            if($response->successful()) {
-                $json = $response->json();
-                if($json) {
-                    $invoice = $json['invoice'];
-
-                    if($invoice['status'] == 1) {
-                        if(self::finalizePaymentSharpay($request->idTransaction)) {
-                            return response()->json(['status' => 'PAID']);
-                        }
-                    }
-                    return response()->json(['status' => 'PENDING']);
-                }
-                return response()->json(['status' => 'PENDING']);
-            }
-            return response()->json(['status' => 'PENDING']);
+    /**
+     * Server-to-server lookup of the PIX invoice (endpoint already used by this integration).
+     */
+    public static function sharkpayVerifyAndSettle(string $idTransaction): bool
+    {
+        if ($idTransaction === "" || ! \App\Core\Security\TrustedEndpoint::isAllowed("sharkpay", self::$uriSharkPay)) {
+            return false;
         }
+
+        $token = self::generateCredentialsSharkPay();
+        if (! $token) {
+            return false;
+        }
+
+        $response = Http::timeout(15)->withToken($token)->acceptJson()
+            ->get(self::$uriSharkPay."pix/txid/".rawurlencode($idTransaction));
+
+        if (! $response->successful() || (int) $response->json("invoice.status") !== 1) {
+            return false;
+        }
+
+        return self::finalizePaymentSharpay($idTransaction);
     }
 
     /**
@@ -158,97 +163,8 @@ trait SharkPayTrait
      */
     public static function finalizePaymentSharpay($idTransaction) : bool
     {
-        $transaction = Transaction::where('payment_id', $idTransaction)->where('status', 0)->first();
-        $setting = \Helper::getSetting();
-
-        if(!empty($transaction)) {
-            $user = User::find($transaction->user_id);
-
-            $wallet = Wallet::where('user_id', $transaction->user_id)->first();
-            if(!empty($wallet)) {
-                $setting = Setting::first();
-
-                /// verifica se é o primeiro deposito, verifica as transações, somente se for transações concluidas
-                $checkTransactions = Transaction::where('user_id', $transaction->user_id)
-                    ->where('status', 1)
-                    ->count();
-
-                if($checkTransactions == 0 || empty($checkTransactions)) {
-                    if($transaction->accept_bonus) {
-                        /// pagar o bonus
-                        $bonus = Helper::porcentagem_xn($setting->initial_bonus, $transaction->price);
-                        $wallet->increment('balance_bonus', $bonus);
-
-                        if(!$setting->disable_rollover) {
-                            $wallet->update(['balance_bonus_rollover' => $bonus * $setting->rollover]);
-                        }
-                    }
-                }
-
-                /// rollover deposito
-                if(!$setting->disable_rollover) {
-                    $wallet->update(['balance_deposit_rollover' => $transaction->price * intval($setting->rollover_deposit)]);
-                }
-
-                /// acumular bonus
-                Helper::payBonusVip($wallet, $transaction->price);
-
-                if($setting->disable_rollover) {
-                    $wallet->increment('balance_withdrawal', $transaction->price);
-                }else{
-                    $wallet->increment('balance', $transaction->price);
-                }
-
-                if($transaction->update(['status' => 1])) {
-                    $deposit = Deposit::where('payment_id', $idTransaction)->where('status', 0)->first();
-                    if(!empty($deposit)) {
-
-                        /// fazer o deposito em cpa
-                        $affHistoryCPA = AffiliateHistory::where('user_id', $user->id)
-                            ->where('commission_type', 'cpa')
-                            //->where('deposited', 1)
-                            //->where('status', 0)
-                            ->first();
-
-                        if(!empty($affHistoryCPA)) {
-                            /// faz uma soma de depositos feitos pelo indicado
-                            $affHistoryCPA->increment('deposited_amount', $transaction->price);
-
-                            /// verifcia se já pode receber o cpa
-                            $sponsorCpa = User::find($user->inviter);
-                            if(!empty($sponsorCpa) && $affHistoryCPA->status == 'pendente') {
-                                if($affHistoryCPA->deposited_amount >= $sponsorCpa->affiliate_baseline || $deposit->amount >= $sponsorCpa->affiliate_baseline) {
-                                    $walletCpa = Wallet::where('user_id', $affHistoryCPA->inviter)->first();
-                                    if(!empty($walletCpa)) {
-
-                                        /// paga o valor de CPA
-                                        $walletCpa->increment('refer_rewards', $sponsorCpa->affiliate_cpa); /// coloca a comissão
-                                        $affHistoryCPA->update(['status' => 1, 'commission_paid' => $sponsorCpa->affiliate_cpa]); /// desativa cpa
-                                    }
-                                }else{
-                                    $affHistoryCPA->update(['deposited_amount' => $transaction->price]);
-                                }
-                            }
-                        }
-
-                        if($deposit->update(['status' => 1])) {
-                            $admins = User::where('role_id', 0)->get();
-                            foreach ($admins as $admin) {
-                                $admin->notify(new NewDepositNotification($user->name, $transaction->price));
-                            }
-
-                            return true;
-                        }
-                        return false;
-                    }
-                    return false;
-                }
-
-                return false;
-            }
-            return false;
-        }
-        return false;
+        // Settlement is centralised, locked and idempotent. Callers must have verified the payment with the gateway first.
+        return \App\Core\Payments\DepositSettlementService::settle((string) $idTransaction);
     }
 
     /**

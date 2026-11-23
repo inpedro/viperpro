@@ -28,7 +28,7 @@ trait StripeTrait
                 return self::$stripe;
             }
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'erros' => $e->getMessage()], 400);
+            report($e); return response()->json(['status' => false, 'erros' => 'Payment provider error'], 400);
         }
     }
 

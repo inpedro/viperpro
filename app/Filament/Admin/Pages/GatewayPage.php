@@ -60,7 +60,7 @@ class GatewayPage extends Page
                         TextInput::make('digitopay_uri')
                             ->label('Client URI')
                             ->placeholder('Digite a url da api')
-                            ->default('https://si5n56mrnjzvt5gr2f536ildr40sqzke.lambda-url.sa-east-1.on.aws/')
+                            ->helperText('Official DigitoPay API base URL (HTTPS). Its host must also be listed in DIGITOPAY_ALLOWED_HOSTS.')
                             ->maxLength(191),
                         TextInput::make('digitopay_cliente_id')
                             ->label('Client ID')

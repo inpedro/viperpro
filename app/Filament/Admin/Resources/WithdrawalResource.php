@@ -150,58 +150,30 @@ class WithdrawalResource extends Resource
             ])
             ->actions([
                 Action::make('deny_payment')
-                    ->label('Cancelar')
+                    ->label('Cancel')
                     ->icon('heroicon-o-banknotes')
                     ->color('danger')
-                    ->visible(fn (Withdrawal $withdrawal): bool => !$withdrawal->status)
-                    ->action(function(Withdrawal $withdrawal) {
-                        \Filament\Notifications\Notification::make()
-                            ->title('Cancelar Saque')
-                            ->success()
-                            ->persistent()
-                            ->body('Você está cancelando saque de '. \Helper::amountFormatDecimal($withdrawal->amount))
-                            ->actions([
-                                \Filament\Notifications\Actions\Action::make('view')
-                                    ->label('Confirmar')
-                                    ->button()
-                                    ->url(route(\Helper::GetDefaultGateway().'.cancelwithdrawal', ['id' => $withdrawal->id, 'action' => 'user']))
-                                    ->close(),
-                                \Filament\Notifications\Actions\Action::make('undo')
-                                    ->color('gray')
-                                    ->label('Cancelar')
-                                    ->action(function(Withdrawal $withdrawal) {
-
-                                    })
-                                    ->close(),
-                            ])
-                            ->send();
+                    ->visible(fn (Withdrawal $withdrawal): bool => (int) $withdrawal->status === \App\Core\Payments\WithdrawalService::PENDING)
+                    ->requiresConfirmation()
+                    ->modalDescription(fn (Withdrawal $withdrawal) => 'Cancel this withdrawal of '.\Helper::amountFormatDecimal($withdrawal->amount).' and return the funds to the player?')
+                    ->action(function (Withdrawal $withdrawal) {
+                        $gateway = \App\Core\Payments\GatewayControllers::forDefaultGateway();
+                        $gateway
+                            ? $gateway->cancelWithdrawal($withdrawal->id, 'user')
+                            : \Filament\Notifications\Notification::make()->title('No payout gateway configured')->danger()->send();
                     }),
                 Action::make('approve_payment')
-                    ->label('Fazer pagamento')
+                    ->label('Pay out')
                     ->icon('heroicon-o-banknotes')
                     ->color('success')
-                    ->visible(fn (Withdrawal $withdrawal): bool => !$withdrawal->status)
-                    ->action(function(Withdrawal $withdrawal) {
-                        \Filament\Notifications\Notification::make()
-                            ->title('Saque')
-                            ->success()
-                            ->persistent()
-                            ->body('Você está solicitando um saque de '. \Helper::amountFormatDecimal($withdrawal->amount))
-                            ->actions([
-                                \Filament\Notifications\Actions\Action::make('view')
-                                    ->label('Confirmar')
-                                    ->button()
-                                    ->url(route(\Helper::GetDefaultGateway().'.withdrawal', ['id' => $withdrawal->id, 'action' => 'user']))
-                                    ->close(),
-                                \Filament\Notifications\Actions\Action::make('undo')
-                                    ->color('gray')
-                                    ->label('Cancelar')
-                                    ->action(function(Withdrawal $withdrawal) {
-
-                                    })
-                                    ->close(),
-                            ])
-                            ->send();
+                    ->visible(fn (Withdrawal $withdrawal): bool => (int) $withdrawal->status === \App\Core\Payments\WithdrawalService::PENDING)
+                    ->requiresConfirmation()
+                    ->modalDescription(fn (Withdrawal $withdrawal) => 'Send a payout of '.\Helper::amountFormatDecimal($withdrawal->amount).' through the default gateway?')
+                    ->action(function (Withdrawal $withdrawal) {
+                        $gateway = \App\Core\Payments\GatewayControllers::forDefaultGateway();
+                        $gateway
+                            ? $gateway->approveWithdrawal($withdrawal->id, 'user')
+                            : \Filament\Notifications\Notification::make()->title('No payout gateway configured')->danger()->send();
                     }),
                 Tables\Actions\EditAction::make(),
             ])
