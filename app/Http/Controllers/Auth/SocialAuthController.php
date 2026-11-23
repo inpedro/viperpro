@@ -46,25 +46,24 @@ class SocialAuthController extends Controller
                 Auth::login($existing_user);
                 return redirect()->to(url('/'));
             } else {
-                $new_user = User::create([
-                    'name'          => $user->getName(),
-                    'email'         => $user->getEmail(),
-                    'oauth_id'      => $user->getId(),
-                    'oauth_type'    => $driver,
-                    'password'      => $user->getEmail(),
-                ]);
+                // The password used to be the user's e-mail address, i.e. anyone knowing the address
+                // could log in with password auth. Social accounts get an unusable random password.
+                $new_user = new User();
+                $new_user->forceFill([
+                    'name'       => $user->getName(),
+                    'email'      => $user->getEmail(),
+                    'oauth_id'   => $user->getId(),
+                    'oauth_type' => $driver,
+                    'password'   => \Illuminate\Support\Str::random(64),
+                ])->save();
 
                 event(new Registered($new_user));
                 Auth::login($new_user);
 
-                Wallet::create([
-                    'user_id' => $new_user->id,
-                    'balance' => 0,
-                    'balance_bonus' => 0
-                ]);
+                // (A second Wallet::create here duplicated the wallet that User::created already makes.)
 
                 self::saveAffiliateHistory($new_user);
-                return redirect()->to(url('/'))->with('success', 'Sua conta foi ativada com sucesso, a senha de acesso foi enviada para seu E-mail');
+                return redirect()->to(url('/'))->with('success', trans('Your account has been created.'));
             }
 
         } catch (Exception $e) {

@@ -97,14 +97,15 @@ class AuthController extends Controller
             $userData['affiliate_cpa']              = $affiliateDefaults->cpa_value ?? 0;
             $userData['affiliate_baseline']         = $affiliateDefaults->cpa_baseline ?? 0;
 
-            if($user = User::create($userData))
+            $user = new User();
+            if($user->forceFill($userData)->save())
             {
                 if(isset($request->reference_code) && !empty($request->reference_code)) {
                     // P20TUKHVRV
                     $checkAffiliate = User::where('inviter_code', $request->reference_code)->first();
                     if(!empty($checkAffiliate)) {
                         if($checkAffiliate->affiliate_revenue_share > 0 || $checkAffiliate->affiliate_cpa > 0) {
-                            $user->update(['inviter' => $checkAffiliate->id]);
+                            $user->forceFill(['inviter' => $checkAffiliate->id])->save();
 
                             self::saveAffiliateHistory($user);
                         }

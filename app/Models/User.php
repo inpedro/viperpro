@@ -99,7 +99,9 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
      * @var array<int, string>
      */
     protected $fillable = [
-        'role_id',
+        // Only fields a player may set about themselves. Privileged fields (role_id, is_admin,
+        // banned, is_demo_agent, status, inviter, inviter_code, affiliate_*) are NOT mass
+        // assignable: server code sets them with forceFill(), admin forms via ADMIN_EDITABLE.
         'avatar',
         'name',
         'last_name',
@@ -107,18 +109,14 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
         'phone',
         'email',
         'password',
-        'logged_in',
-        'banned',
-        'inviter',
-        'inviter_code',
-        'affiliate_revenue_share',
-        'affiliate_revenue_share_fake',
-        'affiliate_cpa',
-        'affiliate_baseline',
-        'is_demo_agent',
-        'is_admin',
         'language',
-        'role_id',
+    ];
+
+    /** Fields the admin user form may write (UserResource pages). */
+    public const ADMIN_EDITABLE = [
+        'name', 'last_name', 'email', 'cpf', 'phone', 'password', 'email_verified_at', 'inviter',
+        'affiliate_revenue_share', 'affiliate_revenue_share_fake', 'affiliate_cpa', 'affiliate_baseline',
+        'banned', 'is_demo_agent', 'status',
     ];
 
     /**

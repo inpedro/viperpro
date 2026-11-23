@@ -37,14 +37,30 @@ Deliverables: `ARCHITECTURE_AUDIT.md`, `SECURITY_AUDIT.md`, `INTEGRATION_INVENTO
 
 **Rollback path:** every change is in normal commits on the transformation branch. The migration's `down()` drops `callback_logs`, the spin redemption columns and the unique index. The InnoDB conversion and Lambda removal are intentionally not reverted.
 
-## Phase 2: Core architecture and ledger (next)
-1. `app/Core/Ledger`: `ledger_accounts`, `ledger_entries` (append-only, double entry, integer minor units, currency per account, idempotency key unique per tenant). `LedgerService::post(Posting…)` inside `DB::transaction`.
-2. `WalletService` becomes the only writer of wallet balances. All ~40 `increment`/`decrement` call sites (gateway traits, provider traits, `Helper::DiscountBalance`, missions, VIP, affiliates) migrate to it. Balance columns become a projection, with `php artisan wallet:reconcile`.
-3. `Money` value object (amount + currency + precision) replaces `Amount`.
-4. Contracts: `PaymentGatewayInterface`, `GameProviderInterface`, `WebhookVerifier`. Existing traits are wrapped as adapters first (behaviour preserved, covered by tests), then the traits are deleted.
-5. Domain events: `DepositSettled`, `WithdrawalRequested/Paid/Cancelled`, `BetPlaced`, `WinCredited`, `BonusGranted`. Bonus, VIP and affiliate logic moves to listeners (out of the settlement path).
-6. Unify `role_id` with Spatie roles; remove privileged fields from `$fillable`.
-7. JWT hardening: short access TTL, refresh rotation, revocation on password change.
+## Phase 2: Core architecture and ledger (**done, see status below**)
+
+| Item | Status |
+|---|---|
+| Append-only double-entry ledger, integer minor units, idempotency, immutability | done (`app/Core/Ledger`, `docs/LEDGER.md`) |
+| `WalletService` as the explicit writer; deposits, bonuses, CPA, withdrawals, spin bonus and bet debits migrated | done |
+| Remaining legacy call sites journaled by `WalletLedgerObserver` (exact DB deltas, labelled by `LedgerContext`) | done; migration of each site is ongoing (list in `docs/LEDGER.md`) |
+| `wallet:reconcile [--open]` | done |
+| `Money` value object | done (2-decimal precision, see limits) |
+| `PaymentGatewayInterface` + adapters (SuitPay, DigitoPay, Mercado Pago, SharkPay), registry, thin controllers | done; Stripe/BsPay adapters pending |
+| `GameProviderInterface` + fail-closed descriptors; `integrations:status` | done; full provider adapters are Phase 7 |
+| Privileged `User` fields removed from `$fillable` | done |
+| Domain events (`DepositSettled`, …) with bonus/VIP/affiliate as listeners | **open** |
+| Unify `users.role_id` with Spatie roles | **open** |
+| JWT refresh rotation / revocation; `lcobucci` lock update for PHP 8.3 | **open** |
+| Characterisation tests + rewrite of the `payWithRollover` rules | **open** (needs product sign-off on intended rules) |
+
+**Breaking changes in Phase 2**
+* `POST /api/wallet/deposit/payment` returns 422 for gateways that aren't installed or configured (previously any name was accepted).
+* `User::$fillable` no longer includes privileged fields. Code that set them with `create()`/`update()` must use `forceFill()`; the in-repo callers are updated.
+* `SuitPayController`/`DigitoPayController`/`MercadoPagoController`/`SharkPayController` no longer expose the legacy `confirmWithdrawal*`/`cancelWithdrawal*` methods; payouts go through `WithdrawalActions` → `PaymentGateways`.
+* Removed trait methods: `consultStatusTransaction` (SuitPay), `digitoPayConsultStatusTransaction`, `consultStatusTransactionMP`, `mercadoPagoCallback`, `consultStatusTransactionSharkpay`.
+
+**Migration:** `2026_11_24_000001_create_ledger_tables` (rollback drops the three tables). After deploying, run `php artisan wallet:reconcile --open`.
 
 ## Phase 3: Addon framework
 `addon.json` manifest validated against a JSON Schema (id, version, category, `requires.platform` semver, permissions, config schema, migrations path, health check class). Addons are Composer packages exposing a service provider and installed from a signed, trusted registry, never from uploaded archives. An `AddonManager` (enable/disable, dependency resolution, per-tenant activation, migration runner, health) plus a Filament addon manager page. The first addons are the existing gateways and providers, re-packaged from their Phase 2 adapters.

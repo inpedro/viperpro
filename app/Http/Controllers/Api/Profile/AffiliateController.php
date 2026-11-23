@@ -48,7 +48,7 @@ class AffiliateController extends Controller
                 ],
             );
 
-            if(auth('api')->user()->update(['inviter_code' => $code, 'affiliate_revenue_share' => $setting->revshare_percentage])) {
+            if(auth('api')->user()->forceFill(['inviter_code' => $code, 'affiliate_revenue_share' => $setting->revshare_percentage])->save()) {
                 return response()->json(['status' => true, 'message' => trans('Successfully generated code')]);
             }
 

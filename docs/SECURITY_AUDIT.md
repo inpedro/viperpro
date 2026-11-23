@@ -39,6 +39,16 @@ Severity: **C** = exploitable anonymously for money or full account takeover; **
 | 19 | M | Raw callback bodies written to the `debug` table. | Replaced by the redacting `callback_logs` audit table. | — |
 | 20 | M | Registration always stored NULL affiliate defaults (fails on strict MySQL). | Read from the full settings row. | `SpinWheelTest` (registers users) |
 
+### Found and fixed in Phase 2
+
+| # | Sev | Finding | Resolution | Test |
+|---|---|---|---|---|
+| 21 | C | Social login created accounts whose **password was the e-mail address**, so anyone could log in to them with password auth. It also created a duplicate wallet and claimed a password had been e-mailed. | Random 64-char unusable password, no duplicate wallet, honest message. | — (Socialite flow; manual check) |
+| 22 | H | `POST /api/wallet/deposit/payment` let the client choose any gateway, including disabled or unconfigured ones. | Only installed gateways whose health check passes. | `IntegrationContractsTest` |
+| 23 | H | Privileged `User` fields (`role_id`, `is_admin`, `banned`, `is_demo_agent`, `affiliate_*`, `inviter`) were mass assignable. | Removed from `$fillable`; `forceFill` in server code; `ADMIN_EDITABLE` whitelist in the admin form. | `MassAssignmentTest` |
+| 24 | M | `MercadoPagoTrait::mercadoPagoCallback` (dead code) marked the transaction paid before settlement, so it could never credit. | Removed. | — |
+| 25 | H | No audit trail of balance changes. | Double-entry ledger plus observer for legacy paths; `wallet:reconcile`. | `LedgerTest` |
+
 ## 3. Deceptive or non-compliant features
 
 | Finding | Action |
@@ -49,11 +59,10 @@ Severity: **C** = exploitable anonymously for money or full account takeover; **
 
 ## 4. Remaining vulnerabilities and risks (open)
 
-* **No ledger.** Balances are still mutable counters. Required before real money (Phase 2).
+* **Ledger coverage:** all balance changes are journaled, but several legacy paths are only *observed* (no idempotency key, coarse types). See `docs/LEDGER.md`.
 * **Provider transaction idempotency and rollback** are inconsistent per provider. Mitigated only by caller authentication (Phase 7, needs provider documentation).
 * **No MFA or admin session management** (Phase 8).
 * **Stored HTML/JS injection by admins** (`custom_js`, `custom_header`, `custom_body`, `custom_css` rendered with `{!! !!}`) is intentional operator functionality, but an admin-account compromise therefore means script running for all players. Mitigate with MFA, audit logging and a CSP (Phase 8).
-* **Mass assignment:** `User::$fillable` includes `role_id`, `is_admin`, `is_demo_agent`, `banned` and the affiliate rates. Current public endpoints use explicit `only()` lists, but these must move to guarded or explicit fill (Phase 2).
 * **JWT:** no refresh-token rotation or revocation list beyond the package default (Phase 2).
 * **Social login and file uploads** are unaudited beyond the avatar `image|mimes` rule.
 * **Git history** still contains the leaked key, the log and the seeded admin hash.
@@ -66,9 +75,9 @@ Severity: **C** = exploitable anonymously for money or full account takeover; **
 
 ## 6. Release gates (must all pass before real money)
 
-1. Phase 1 complete and regression tests green (**done**: `php artisan test`, 30 tests).
+1. Phase 1 complete and regression tests green (**done**: `php artisan test`, 48 tests after Phase 2).
 2. Financial tables on InnoDB in the target DB (run the Phase 1 migration; verify with `SHOW TABLE STATUS`).
-3. Ledger plus reconciliation (Phase 2).
+3. Ledger plus reconciliation (**done**). Zero `source = observed` journals for game and provider paths (Phase 7).
 4. Per-provider callback authentication configured and tested in the provider's sandbox.
 5. Gateway hosts confirmed against official documentation; credentials rotated.
 6. Independent penetration test.
