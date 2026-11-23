@@ -8922,7 +8922,7 @@ CREATE TABLE `gateways`  (
 -- ----------------------------
 -- Records of gateways
 -- ----------------------------
-INSERT INTO `gateways` VALUES (1, 'https://ws.suitpay.app/api/v1/', NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, '2023-11-30 21:05:51', '2024-03-31 15:55:10', NULL, NULL, NULL, NULL, NULL, NULL, 'https://si5n56mrnjzvt5gr2f536ildr40sqzke.lambda-url.sa-east-1.on.aws/', NULL, NULL);
+INSERT INTO `gateways` VALUES (1, 'https://ws.suitpay.app/api/v1/', NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, '2023-11-30 21:05:51', '2024-03-31 15:55:10', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for ggds_spin_config
@@ -9228,7 +9228,7 @@ CREATE TABLE `model_has_roles`  (
 -- ----------------------------
 -- Records of model_has_roles
 -- ----------------------------
-INSERT INTO `model_has_roles` VALUES (1, 'App\\Models\\User', 1);
+-- Removed with the seeded admin user (role assignment for user id 1).
 
 -- ----------------------------
 -- Table structure for notifications
@@ -9784,7 +9784,7 @@ CREATE TABLE `users`  (
 -- ----------------------------
 -- Records of users
 -- ----------------------------
-INSERT INTO `users` VALUES (1, 'Admin', 'admin@demo.com', NULL, '$2y$10$sq4gZjSHoI4Jk4yEthM5Cua/yVoFac6nTpRsTy7v9ayXAvKLHHrsq', 'Tb5Z4Br9ksYmvy4r0do0m0szYI2m5I2bXZo0uddrZquyzvzNRimd0yveUxaH', '2023-11-07 22:15:13', '2024-03-31 15:51:21', NULL, NULL, 'uploads/8lx3OeL0c6GX18GMIhbgf2Kj4JVew0NRmnTUYYSb.png', NULL, NULL, NULL, 0, 0, NULL, 'IL9O93HOCY', 20, NULL, 10.00, 40.00, 0, 'active', 'pt_BR', 1);
+-- Removed: seeded admin account (published password hash + remember token). Create one with `php artisan viper:create-admin`.
 
 -- ----------------------------
 -- Table structure for vip_users

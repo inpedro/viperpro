@@ -136,10 +136,11 @@ class AdvancedPage extends Page implements HasForms
     {
         return $form
             ->schema([
-                Section::make('Atualização')
-                    ->description('Carregue aqui seu arquivo de atualização no formato zip')
+                Section::make('Updates')
+                    ->description('Archive uploads are disabled for security. Deploy updates through your release pipeline.')
                     ->schema([
-                        FileUpload::make('update')
+                        \Filament\Forms\Components\Placeholder::make('update_disabled')
+                            ->content('Uploading ZIP archives that are extracted over the application is no longer supported.'),
                     ])
 
             ])
@@ -151,47 +152,15 @@ class AdvancedPage extends Page implements HasForms
      */
     public function submit(): void
     {
-        try {
-            if(env('APP_DEMO')) {
-                Notification::make()
-                    ->title('Atenção')
-                    ->body('Você não pode realizar está alteração na versão demo')
-                    ->danger()
-                    ->send();
-                return;
-            }
-
-            foreach ($this->data['update'] as $file) {
-                $extension  = $file->extension();
-                if($extension === "zip") {
-                    $filePath = $file->storeAs('updates', $file->getClientOriginalName());
-
-                    $zip = new \ZipArchive;
-                    $zipPath = storage_path("app/{$filePath}"); // Caminho completo para o arquivo zip
-                    $extractPath = base_path(); // Altere para o diretório desejado
-
-                    if ($zip->open($zipPath) === true) {
-                        $zip->extractTo($extractPath);
-                        $zip->close();
-
-                        // Exclua o arquivo zip após a extração
-                        \Storage::delete($filePath);
-                    }
-                }
-
-                Notification::make()
-                    ->title('Sucesso')
-                    ->body('Atualização feita com sucesso')
-                    ->success()
-                    ->send();
-            }
-        } catch (Halt $exception) {
-            Notification::make()
-                ->title('Erro ao alterar dados!')
-                ->body('Erro ao alterar dados!')
-                ->danger()
-                ->send();
-        }
+        // DISABLED (security): this extracted any uploaded ZIP over base_path(), i.e. arbitrary code
+        // execution for anyone holding an admin session. Updates must be deployed through the normal
+        // release pipeline (git + composer + migrations). A signed, verified addon installer is planned
+        // in Phase 3 (see docs/REFACTORING_PLAN.md).
+        Notification::make()
+            ->title("Disabled")
+            ->body("Uploading update archives is disabled. Deploy updates through your release pipeline.")
+            ->danger()
+            ->send();
     }
 
     /**

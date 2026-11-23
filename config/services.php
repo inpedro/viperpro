@@ -89,6 +89,11 @@ return [
     | Payment Gateways
     |--------------------------------------------------------------------------
     */
+    // Previously hardcoded in app/Helpers/Core.php (leaked key: revoke it in Google Cloud Console).
+    'google_fonts' => [
+        'key' => env('GOOGLE_FONTS_API_KEY'),
+    ],
+
     'stripe' => [
         'enable' => env('STRIPE_ENABLED'),
         'subscription' => env('STRIPE_SUBSCRIPTION_ENABLED'),

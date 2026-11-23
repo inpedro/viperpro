@@ -14,30 +14,23 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |Sme
 */
-Route::get('clear', function() {
-    Artisan::command('clear', function () {
-        Artisan::call('optimize:clear');
-       return back();
-    });
-
-    return back();
-});
+// Removed: unauthenticated GET /clear utility route (ran optimize:clear for anyone). Use `php artisan optimize:clear`.
 
 // GAMES PROVIDER
-include_once(__DIR__ . '/groups/provider/games.php');
-include_once(__DIR__ . '/groups/provider/venix.php');
-include_once(__DIR__ . '/groups/provider/salsa.php');
+require(__DIR__ . '/groups/provider/games.php');
+require(__DIR__ . '/groups/provider/venix.php');
+require(__DIR__ . '/groups/provider/salsa.php');
 
 
 // GATEWAYS
-include_once(__DIR__ . '/groups/gateways/digitopay.php');
-include_once(__DIR__ . '/groups/gateways/sharkpay.php');
-include_once(__DIR__ . '/groups/gateways/mercadopago.php');
-include_once(__DIR__ . '/groups/gateways/suitpay.php');
+require(__DIR__ . '/groups/gateways/digitopay.php');
+require(__DIR__ . '/groups/gateways/sharkpay.php');
+require(__DIR__ . '/groups/gateways/mercadopago.php');
+require(__DIR__ . '/groups/gateways/suitpay.php');
 
 /// SOCIAL
-include_once(__DIR__ . '/groups/auth/social.php');
+require(__DIR__ . '/groups/auth/social.php');
 
 // APP
-include_once(__DIR__ . '/groups/layouts/app.php');
+require(__DIR__ . '/groups/layouts/app.php');
 
