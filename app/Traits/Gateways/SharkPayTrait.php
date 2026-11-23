@@ -117,44 +117,7 @@ trait SharkPayTrait
         }
     }
 
-    /**
-     * Consult Status Transaction
-     * Consultar o status da transação
-     * @dev victormsalatiel - Corra de golpista, me chame no instagram
-     *
-     * @param $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public static function consultStatusTransactionSharkpay($request)
-    {
-        return self::sharkpayVerifyAndSettle((string) $request->idTransaction)
-            ? response()->json(["status" => "PAID"])
-            : response()->json(["status" => "PENDING"]);
-    }
 
-    /**
-     * Server-to-server lookup of the PIX invoice (endpoint already used by this integration).
-     */
-    public static function sharkpayVerifyAndSettle(string $idTransaction): bool
-    {
-        if ($idTransaction === "" || ! \App\Core\Security\TrustedEndpoint::isAllowed("sharkpay", self::$uriSharkPay)) {
-            return false;
-        }
-
-        $token = self::generateCredentialsSharkPay();
-        if (! $token) {
-            return false;
-        }
-
-        $response = Http::timeout(15)->withToken($token)->acceptJson()
-            ->get(self::$uriSharkPay."pix/txid/".rawurlencode($idTransaction));
-
-        if (! $response->successful() || (int) $response->json("invoice.status") !== 1) {
-            return false;
-        }
-
-        return self::finalizePaymentSharpay($idTransaction);
-    }
 
     /**
      * @param $idTransaction

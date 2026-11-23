@@ -39,4 +39,16 @@ return [
         'vibra'       => $provider('VIBRA'),         // route: vibra/webhooks (not mounted)
         'salsa'       => $provider('SALSA'),         // route: cron/salsa/webhook
     ],
+
+    // Provider descriptors (App\Core\Games\Contracts\GameProviderInterface). [name, legacy trait, callbacks mounted?]
+    'providers' => [
+        'fivers'      => ['Fivers (gold_api)', 'FiversTrait', true],
+        'venix'       => ['VeniX', 'VeniXTrait', true],
+        'playigaming' => ['PlayIGaming', 'PlayIGamingTrait', true],
+        'evergame'    => ['Evergame', 'EvergameTrait', true],
+        'playgaming'  => ['PlayGaming', 'PlayGamingTrait', true],
+        'salsa'       => ['Salsa', 'SalsaGamesTrait', true],
+        'kagaming'    => ['KaGaming', 'KaGamingTrait', false],
+        'vibra'       => ['Vibra', 'VibraTrait', false],
+    ],
 ];

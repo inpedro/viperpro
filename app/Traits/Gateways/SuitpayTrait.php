@@ -112,25 +112,6 @@ trait SuitpayTrait
         ];
     }
 
-    /**
-     * Consult Status Transaction
-     * Consultar o status da transação
-     * @dev victormsalatiel - Corra de golpista, me chame no instagram
-     *
-     * @param $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public static function consultStatusTransaction($request)
-    {
-        $status = self::suitpayFetchStatus((string) $request->idTransaction);
-
-        if (in_array($status, ["PAID_OUT", "PAYMENT_ACCEPT"], true)) {
-            self::finalizePayment($request->idTransaction);
-            return response()->json(["status" => "PAID"]);
-        }
-
-        return response()->json(["status" => $status ?? "UNKNOWN"], 400);
-    }
 
     /**
      * Ask SuitPay (server-to-server, authenticated with our ci/cs credentials) for the

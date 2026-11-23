@@ -18,6 +18,14 @@ $hosts = static fn (string $env, string $default = '') => array_values(array_fil
 )));
 
 return [
+    // Installed gateway adapters (App\Core\Payments\Contracts\PaymentGatewayInterface).
+    'gateways' => [
+        'suitpay'     => App\Core\Payments\Gateways\SuitPayGateway::class,
+        'digitopay'   => App\Core\Payments\Gateways\DigitoPayGateway::class,
+        'mercadopago' => App\Core\Payments\Gateways\MercadoPagoGateway::class,
+        'sharkpay'    => App\Core\Payments\Gateways\SharkPayGateway::class,
+    ],
+
     'allowed_hosts' => [
         // Host taken from the existing SuitPay configuration in this codebase; confirm with SuitPay.
         'suitpay'     => $hosts('SUITPAY_ALLOWED_HOSTS', 'ws.suitpay.app'),

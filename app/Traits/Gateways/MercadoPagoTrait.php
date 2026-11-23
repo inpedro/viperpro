@@ -134,77 +134,8 @@ trait MercadoPagoTrait
         ];
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function mercadoPagoCallback($request)
-    {
-        $gateway = Gateway::first();
 
-        if($request->topic === 'payment') {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $gateway->mp_access_token,
-            ])->get('https://api.mercadopago.com/v1/payments/' .$request->id);
 
-            if($response->successful()) {
-                $mp = $response->json();
-                $orderCheck = Transaction::where('payment_id', $mp['id'])->where('status', 0)->first();
-
-                if(!empty($orderCheck)) {
-
-                    switch ($mp['status']) {
-                        case 'approved':
-                            $orderCheck->update(['status' => 1]);
-                            self::finalizePaymentMP($mp['id']);
-                            return response()->json(['status' => true, 'message' => 'sucesso']);
-                        case 'rejected':
-                            return response()->json(['status' => true, 'message' => 'sucesso']);
-                        case 'cancelled':
-                            return response()->json(['status' => true, 'message' => 'sucesso']);
-                        case 'refunded':
-                            return response()->json(['status' => true, 'message' => 'sucesso']);
-                        default:
-                            break;
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function consultStatusTransactionMP($request)
-    {
-        return self::mpVerifyAndSettle((string) $request->idTransaction)
-            ? response()->json(["status" => "PAID"])
-            : response()->json(["status" => false], 400);
-    }
-
-    /**
-     * Look the payment up on the Mercado Pago Payments API (GET /v1/payments/{id}) and settle
-     * it only if it is approved and its amount/currency match what we expected.
-     */
-    public static function mpVerifyAndSettle(string $paymentId): bool
-    {
-        $gateway = Gateway::first();
-        $token   = $gateway?->getAttributes()["mp_access_token"] ?? "";
-
-        if ($paymentId === "" || ! ctype_digit($paymentId) || $token === "") {
-            return false;
-        }
-
-        $response = Http::timeout(15)->withToken($token)->get("https://api.mercadopago.com/v1/payments/".$paymentId);
-        if (! $response->successful() || $response->json("status") !== "approved") {
-            return false;
-        }
-
-        return \App\Core\Payments\DepositSettlementService::settle(
-            $paymentId,
-            number_format((float) $response->json("transaction_amount"), 2, ".", ""),
-            $response->json("currency_id")
-        );
-    }
 
     /**
      * @param $idTransaction

@@ -105,10 +105,7 @@ class AffiliateWithdrawResource extends Resource
                     ->requiresConfirmation()
                     ->modalDescription(fn (AffiliateWithdraw $withdrawal) => 'Cancel this withdrawal of '.\Helper::amountFormatDecimal($withdrawal->amount).' and return the funds to the player?')
                     ->action(function (AffiliateWithdraw $withdrawal) {
-                        $gateway = \App\Core\Payments\GatewayControllers::forDefaultGateway();
-                        $gateway
-                            ? $gateway->cancelWithdrawal($withdrawal->id, 'affiliate')
-                            : \Filament\Notifications\Notification::make()->title('No payout gateway configured')->danger()->send();
+                        \App\Filament\Admin\Support\WithdrawalActions::cancel($withdrawal->id, 'affiliate');
                     }),
                 Action::make('approve_payment')
                     ->label('Pay out')
@@ -118,10 +115,7 @@ class AffiliateWithdrawResource extends Resource
                     ->requiresConfirmation()
                     ->modalDescription(fn (AffiliateWithdraw $withdrawal) => 'Send a payout of '.\Helper::amountFormatDecimal($withdrawal->amount).' through the default gateway?')
                     ->action(function (AffiliateWithdraw $withdrawal) {
-                        $gateway = \App\Core\Payments\GatewayControllers::forDefaultGateway();
-                        $gateway
-                            ? $gateway->approveWithdrawal($withdrawal->id, 'affiliate')
-                            : \Filament\Notifications\Notification::make()->title('No payout gateway configured')->danger()->send();
+                        \App\Filament\Admin\Support\WithdrawalActions::approve($withdrawal->id, 'affiliate');
                     }),
                 //Tables\Actions\EditAction::make(),
             ])

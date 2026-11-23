@@ -3,9 +3,9 @@
 namespace App\Http\Middleware;
 
 use App\Core\Security\CallbackLog;
+use App\Core\Security\ProviderCallbackAuth;
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\IpUtils;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -16,51 +16,15 @@ class AuthenticateProviderCallback
 {
     public function handle(Request $request, Closure $next, string $provider): Response
     {
-        $config = config("game_providers.callbacks.{$provider}");
+        $reason = ProviderCallbackAuth::check($provider, $request);
 
-        if (! is_array($config)) {
-            return $this->reject($request, $provider, 'unknown provider', 503);
-        }
+        if ($reason !== null) {
+            CallbackLog::record('provider', $provider, $request, 'rejected', $reason);
+            $status = in_array($reason, [ProviderCallbackAuth::NOT_CONFIGURED, 'unknown provider'], true) ? 503 : 403;
 
-        $ips    = (array) ($config['allowed_ips'] ?? []);
-        $secret = (string) ($config['shared_secret'] ?? '');
-        $source = (string) ($config['secret_source'] ?? '');
-
-        if ($ips === [] && $secret === '') {
-            return $this->reject($request, $provider, 'callback authentication not configured', 503);
-        }
-
-        if ($ips !== [] && ! IpUtils::checkIp((string) $request->ip(), $ips)) {
-            return $this->reject($request, $provider, 'source ip not allowed', 403);
-        }
-
-        if ($secret !== '') {
-            $presented = $this->presentedSecret($request, $source);
-            if ($presented === null || ! hash_equals($secret, $presented)) {
-                return $this->reject($request, $provider, 'invalid shared secret', 403);
-            }
+            return response()->json(['status' => 0, 'msg' => 'UNAUTHORIZED'], $status);
         }
 
         return $next($request);
-    }
-
-    private function presentedSecret(Request $request, string $source): ?string
-    {
-        [$kind, $name] = array_pad(explode(':', $source, 2), 2, '');
-
-        $value = match ($kind) {
-            'header' => $request->header($name),
-            'body'   => $request->input($name),
-            default  => null,
-        };
-
-        return is_string($value) && $value !== '' ? $value : null;
-    }
-
-    private function reject(Request $request, string $provider, string $reason, int $status): Response
-    {
-        CallbackLog::record('provider', $provider, $request, 'rejected', $reason);
-
-        return response()->json(['status' => 0, 'msg' => 'UNAUTHORIZED'], $status);
     }
 }

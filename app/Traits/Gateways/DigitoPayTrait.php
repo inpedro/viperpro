@@ -108,25 +108,6 @@ trait DigitoPayTrait
         ];
     }
 
-    /**
-     * Consult Status Transaction
-     * Consultar o status da transação
-
-     *
-     * @param $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public static function digitoPayConsultStatusTransaction($request)
-    {
-        $status = self::digitoPayFetchStatus((string) $request->idTransaction);
-
-        if ($status === "REALIZADO") {
-            self::digitoPayFinalizePayment($request->idTransaction);
-            return response()->json(["status" => "PAID"]);
-        }
-
-        return response()->json(["status" => $status ?? "UNKNOWN"], 400);
-    }
 
     /**
      * Server-to-server status lookup (the endpoint this integration already used for polling).

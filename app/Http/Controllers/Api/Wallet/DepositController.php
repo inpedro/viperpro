@@ -2,52 +2,38 @@
 
 namespace App\Http\Controllers\Api\Wallet;
 
+use App\Core\Payments\Contracts\Capability;
+use App\Core\Payments\PaymentGateways;
 use App\Http\Controllers\Controller;
 use App\Models\Deposit;
-use App\Traits\Gateways\DigitoPayTrait;
-use App\Traits\Gateways\MercadoPagoTrait;
-use App\Traits\Gateways\SharkPayTrait;
-use App\Traits\Gateways\SuitpayTrait;
 use Illuminate\Http\Request;
 
 class DepositController extends Controller
 {
-    use SuitpayTrait, SharkPayTrait, MercadoPagoTrait, DigitoPayTrait;
-
     /**
-     * @param Request $request
-     * @return array|false[]
+     * Start a deposit through an installed, configured gateway. The client used to be able to
+     * pick any gateway name, enabled or not; it must now be installed and pass its health check.
      */
     public function submitPayment(Request $request)
     {
-        \Log::info($request->gateway);
-        switch ($request->gateway) {
-            case 'digitopay':
-                return self::digitoPayRequestQrcode($request);
-            case 'mercadopago':
-                return self::requestQrcodeMercadoPago($request);
-            case 'sharkpay':
-                return self::requestQrcodeSharkPay($request);
-            case 'suitpay':
-                return self::requestQrcode($request);
+        $id = strtolower((string) $request->input('gateway'));
+
+        if (! PaymentGateways::has($id)) {
+            return response()->json(['error' => trans('Payment method not available')], 422);
         }
+
+        $gateway = PaymentGateways::get($id);
+        if (! $gateway->supports(Capability::DEPOSIT) || ! $gateway->getHealthStatus()->isUsable()) {
+            return response()->json(['error' => trans('Payment method not available')], 422);
+        }
+
+        return $gateway->createDeposit($request);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function consultStatusTransactionPix(Request $request)
-    {
-        return self::consultStatusTransaction($request);
-    }
-
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $deposits = Deposit::whereUserId(auth('api')->id())->paginate();
+
         return response()->json(['deposits' => $deposits], 200);
     }
-
 }

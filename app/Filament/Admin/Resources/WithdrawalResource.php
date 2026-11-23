@@ -157,10 +157,7 @@ class WithdrawalResource extends Resource
                     ->requiresConfirmation()
                     ->modalDescription(fn (Withdrawal $withdrawal) => 'Cancel this withdrawal of '.\Helper::amountFormatDecimal($withdrawal->amount).' and return the funds to the player?')
                     ->action(function (Withdrawal $withdrawal) {
-                        $gateway = \App\Core\Payments\GatewayControllers::forDefaultGateway();
-                        $gateway
-                            ? $gateway->cancelWithdrawal($withdrawal->id, 'user')
-                            : \Filament\Notifications\Notification::make()->title('No payout gateway configured')->danger()->send();
+                        \App\Filament\Admin\Support\WithdrawalActions::cancel($withdrawal->id, 'user');
                     }),
                 Action::make('approve_payment')
                     ->label('Pay out')
@@ -170,10 +167,7 @@ class WithdrawalResource extends Resource
                     ->requiresConfirmation()
                     ->modalDescription(fn (Withdrawal $withdrawal) => 'Send a payout of '.\Helper::amountFormatDecimal($withdrawal->amount).' through the default gateway?')
                     ->action(function (Withdrawal $withdrawal) {
-                        $gateway = \App\Core\Payments\GatewayControllers::forDefaultGateway();
-                        $gateway
-                            ? $gateway->approveWithdrawal($withdrawal->id, 'user')
-                            : \Filament\Notifications\Notification::make()->title('No payout gateway configured')->danger()->send();
+                        \App\Filament\Admin\Support\WithdrawalActions::approve($withdrawal->id, 'user');
                     }),
                 Tables\Actions\EditAction::make(),
             ])
