@@ -1,13 +1,15 @@
 <?php
 
-namespace App\Core\Payments\Gateways;
+namespace Addons\Payments\SharkPay;
+
+use App\Core\Payments\Gateways\AbstractPaymentGateway;
+use App\Core\Payments\GatewayCredentials;
 
 use App\Core\Payments\Contracts\Capability;
 use App\Core\Payments\Data\VerificationResult;
 use App\Core\Security\TrustedEndpoint;
 use App\Models\SuitPayPayment;
 use App\Models\Transaction;
-use App\Traits\Gateways\SharkPayTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -32,7 +34,7 @@ class SharkPayGateway extends AbstractPaymentGateway
     public function validateConfiguration(): array
     {
         $problems = [];
-        if (self::gatewayAttribute('public_key') === '' || self::gatewayAttribute('private_key') === '') {
+        if (GatewayCredentials::get('payment.sharkpay', 'public_key', 'public_key') === '' || GatewayCredentials::get('payment.sharkpay', 'private_key', 'private_key') === '') {
             $problems[] = 'SharkPay public/private key is not set';
         }
         if (! TrustedEndpoint::isAllowed('sharkpay', self::$uriSharkPay)) {

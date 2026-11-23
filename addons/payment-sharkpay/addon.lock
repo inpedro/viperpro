@@ -1,0 +1,10 @@
+{
+    "id": "payment.sharkpay",
+    "version": "1.0.0",
+    "files": {
+        "README.md": "ab8e6d1b71268261f0f0b3424eaa53e1fbe219e83871422d5305e7026bfd1fde",
+        "addon.json": "02944fb5bfb09fcae2b56dbdcd575db585e2a974236ceca3c282ddbe466c6a70",
+        "src/SharkPayGateway.php": "f3a09ec926fd368405190ed660867664e3702b21a362bec327cecff58a7a2f1f",
+        "src/SharkPayTrait.php": "ab400b074e6d26c1797c16b9dce00942687c94f1cebc45880f41275c829aabd7"
+    }
+}

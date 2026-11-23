@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Core\Payments\Gateways;
+namespace Addons\Payments\MercadoPago;
+
+use App\Core\Payments\Gateways\AbstractPaymentGateway;
+use App\Core\Payments\GatewayCredentials;
 
 use App\Core\Payments\Contracts\Capability;
 use App\Core\Payments\Data\VerificationResult;
 use App\Models\SuitPayPayment;
-use App\Traits\Gateways\MercadoPagoTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -32,7 +34,7 @@ class MercadoPagoGateway extends AbstractPaymentGateway
 
     public function validateConfiguration(): array
     {
-        return self::gatewayAttribute('mp_access_token') === '' ? ['Mercado Pago access token is not set'] : [];
+        return GatewayCredentials::get('payment.mercadopago', 'access_token', 'mp_access_token') === '' ? ['Mercado Pago access token is not set'] : [];
     }
 
     public function createDeposit(Request $request): mixed
@@ -43,7 +45,7 @@ class MercadoPagoGateway extends AbstractPaymentGateway
     /** GET /v1/payments/{id}; reports status, transaction_amount and currency_id. */
     public function verifyDeposit(string $paymentId): VerificationResult
     {
-        $token = self::gatewayAttribute('mp_access_token');
+        $token = GatewayCredentials::get('payment.mercadopago', 'access_token', 'mp_access_token');
         if ($paymentId === '' || ! ctype_digit($paymentId) || $token === '') {
             return new VerificationResult(VerificationResult::UNKNOWN);
         }

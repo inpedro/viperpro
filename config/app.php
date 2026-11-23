@@ -168,6 +168,7 @@ return [
         /*
          * Application Service Providers...
          */
+        App\Core\Addons\AddonServiceProvider::class,
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
         App\Providers\BroadcastServiceProvider::class,

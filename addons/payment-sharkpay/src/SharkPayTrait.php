@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Traits\Gateways;
+namespace Addons\Payments\SharkPay;
+
+use App\Core\Payments\GatewayCredentials;
 
 use App\Models\AffiliateHistory;
 use App\Models\Deposit;
@@ -29,8 +31,7 @@ trait SharkPayTrait
      */
     private static function generateCredentialsSharkPay()
     {
-        $gateway = Gateway::first();
-        $response = Http::withBasicAuth($gateway->getAttributes()['public_key'], $gateway->getAttributes()['private_key'])->post(self::$uriSharkPay.'auth');
+        $response = Http::withBasicAuth(GatewayCredentials::get("payment.sharkpay", "public_key", "public_key"), GatewayCredentials::get("payment.sharkpay", "private_key", "private_key"))->post(self::$uriSharkPay.'auth');
         if($response->successful()) {
             $json = $response->json();
             $token = $json['success']['token'];
@@ -53,7 +54,7 @@ trait SharkPayTrait
     {
         $setting = \Helper::getSetting();
         $rules = [
-            'amount' => ['required', 'max:'.$setting->min_deposit, 'max:'.$setting->max_deposit],
+            'amount' => ['required', 'numeric', 'min:'.$setting->min_deposit, 'max:'.$setting->max_deposit],
             'cpf'    => ['required', 'max:255'],
         ];
 

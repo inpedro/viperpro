@@ -1,16 +1,18 @@
 <?php
 
-namespace App\Core\Payments\Gateways;
+namespace Addons\Payments\DigitoPay;
+
+use App\Core\Payments\Gateways\AbstractPaymentGateway;
+use App\Core\Payments\GatewayCredentials;
 
 use App\Core\Payments\Contracts\Capability;
 use App\Core\Payments\Data\VerificationResult;
 use App\Core\Security\TrustedEndpoint;
 use App\Models\DigitoPayPayment;
-use App\Traits\Gateways\DigitoPayTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
-class DigitoPayGateway extends AbstractPaymentGateway
+class DigitoPayGateway extends AbstractPaymentGateway implements \App\Core\Payments\Contracts\SupportsManualPayout
 {
     use DigitoPayTrait;
 
@@ -30,12 +32,13 @@ class DigitoPayGateway extends AbstractPaymentGateway
     public function validateConfiguration(): array
     {
         $problems = [];
-        foreach (['digitopay_cliente_id' => 'client id', 'digitopay_cliente_secret' => 'client secret'] as $col => $label) {
-            if (self::gatewayAttribute($col) === '') {
-                $problems[] = "DigitoPay {$label} is not set";
-            }
+        if (GatewayCredentials::get('payment.digitopay', 'client_id', 'digitopay_cliente_id') === '') {
+            $problems[] = 'DigitoPay client id is not set';
         }
-        if (! TrustedEndpoint::isAllowed('digitopay', self::gatewayAttribute('digitopay_uri'))) {
+        if (GatewayCredentials::get('payment.digitopay', 'client_secret', 'digitopay_cliente_secret') === '') {
+            $problems[] = 'DigitoPay client secret is not set';
+        }
+        if (! TrustedEndpoint::isAllowed('digitopay', GatewayCredentials::get('payment.digitopay', 'api_url', 'digitopay_uri'))) {
             $problems[] = 'DigitoPay API URL is missing or not in DIGITOPAY_ALLOWED_HOSTS (empty by default)';
         }
 
@@ -69,6 +72,25 @@ class DigitoPayGateway extends AbstractPaymentGateway
             'pix_key'             => $withdrawal->pix_key,
             'pix_type'            => $withdrawal->pix_type,
             'amount'              => $withdrawal->amount,
+            'digitoPayPayment_id' => $payment->id,
+        ]);
+    }
+
+    public function manualPayout(array $data): bool
+    {
+        $payment = DigitoPayPayment::create([
+            'withdrawal_id' => 0,
+            'user_id'       => $data['user_id'] ?? 0,
+            'pix_key'       => $data['pix_key'],
+            'pix_type'      => $data['pix_type'],
+            'amount'        => $data['amount'],
+            'observation'   => 'digitopay:manual '.($data['observation'] ?? ''),
+        ]);
+
+        return (bool) self::digitoPayPixCashOut([
+            'pix_key'  => $data['pix_key'],
+            'pix_type' => $data['pix_type'],
+            'amount'   => $data['amount'],
             'digitoPayPayment_id' => $payment->id,
         ]);
     }

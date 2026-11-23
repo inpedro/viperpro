@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Traits\Gateways;
+namespace Addons\Payments\MercadoPago;
+
+use App\Core\Payments\GatewayCredentials;
 
 use App\Models\AffiliateHistory;
 use App\Models\Deposit;
@@ -72,7 +74,7 @@ trait MercadoPagoTrait
     {
         $setting = Helper::getSetting();
         $rules = [
-            'amount' => ['required', 'max:'.$setting->min_deposit, 'max:'.$setting->max_deposit],
+            'amount' => ['required', 'numeric', 'min:'.$setting->min_deposit, 'max:'.$setting->max_deposit],
             'cpf'    => ['required', 'max:255'],
         ];
 
@@ -81,7 +83,6 @@ trait MercadoPagoTrait
             return response()->json($validator->errors(), 400);
         }
 
-        $gateway = Gateway::first();
         $stringGenerate = Helper::generateRandomString(15);
 
         $token = Helper::MakeToken([
@@ -92,7 +93,7 @@ trait MercadoPagoTrait
 
         $response = Http::withHeaders([
             'X-Idempotency-Key' => $token,
-            'Authorization' => 'Bearer ' . $gateway->mp_access_token,
+            'Authorization' => 'Bearer ' . GatewayCredentials::get("payment.mercadopago", "access_token", "mp_access_token"),
         ])->post('https://api.mercadopago.com/v1/payments', [
             "transaction_amount" => floatval($request->amount),
             "description" => 'Pagamento',

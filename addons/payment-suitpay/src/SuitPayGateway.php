@@ -1,16 +1,18 @@
 <?php
 
-namespace App\Core\Payments\Gateways;
+namespace Addons\Payments\SuitPay;
+
+use App\Core\Payments\Gateways\AbstractPaymentGateway;
+use App\Core\Payments\GatewayCredentials;
 
 use App\Core\Payments\Contracts\Capability;
 use App\Core\Payments\Data\VerificationResult;
 use App\Core\Security\TrustedEndpoint;
 use App\Models\SuitPayPayment;
-use App\Traits\Gateways\SuitpayTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
-class SuitPayGateway extends AbstractPaymentGateway
+class SuitPayGateway extends AbstractPaymentGateway implements \App\Core\Payments\Contracts\SupportsManualPayout
 {
     use SuitpayTrait;
 
@@ -31,12 +33,13 @@ class SuitPayGateway extends AbstractPaymentGateway
     public function validateConfiguration(): array
     {
         $problems = [];
-        foreach (['suitpay_cliente_id' => 'client id', 'suitpay_cliente_secret' => 'client secret'] as $col => $label) {
-            if (self::gatewayAttribute($col) === '') {
-                $problems[] = "SuitPay {$label} is not set";
-            }
+        if (GatewayCredentials::get('payment.suitpay', 'client_id', 'suitpay_cliente_id') === '') {
+            $problems[] = 'SuitPay client id is not set';
         }
-        if (! TrustedEndpoint::isAllowed('suitpay', self::gatewayAttribute('suitpay_uri'))) {
+        if (GatewayCredentials::get('payment.suitpay', 'client_secret', 'suitpay_cliente_secret') === '') {
+            $problems[] = 'SuitPay client secret is not set';
+        }
+        if (! TrustedEndpoint::isAllowed('suitpay', GatewayCredentials::get('payment.suitpay', 'api_url', 'suitpay_uri'))) {
             $problems[] = 'SuitPay API URL is missing or not in SUITPAY_ALLOWED_HOSTS';
         }
 
@@ -70,6 +73,25 @@ class SuitPayGateway extends AbstractPaymentGateway
             'pix_key'        => $withdrawal->pix_key,
             'pix_type'       => $withdrawal->pix_type,
             'amount'         => $withdrawal->amount,
+            'suitpayment_id' => $payment->id,
+        ]);
+    }
+
+    public function manualPayout(array $data): bool
+    {
+        $payment = SuitPayPayment::create([
+            'withdrawal_id' => 0,
+            'user_id'       => $data['user_id'] ?? 0,
+            'pix_key'       => $data['pix_key'],
+            'pix_type'      => $data['pix_type'],
+            'amount'        => $data['amount'],
+            'observation'   => 'suitpay:manual '.($data['observation'] ?? ''),
+        ]);
+
+        return (bool) self::pixCashOut([
+            'pix_key'  => $data['pix_key'],
+            'pix_type' => $data['pix_type'],
+            'amount'   => $data['amount'],
             'suitpayment_id' => $payment->id,
         ]);
     }

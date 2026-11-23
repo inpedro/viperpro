@@ -6,15 +6,17 @@ use App\Core\Payments\Contracts\PaymentGatewayInterface;
 use InvalidArgumentException;
 
 /**
- * Registry of installed payment gateway adapters (config/payments.php 'gateways').
- * Phase 3 replaces the static config list with the addon registry.
+ * Registry of payment gateway adapters: config/payments.php 'gateways' plus the
+ * 'contributes.payment_gateways' of every loaded addon.
  */
 class PaymentGateways
 {
     /** @return array<string, class-string<PaymentGatewayInterface>> */
     public static function registered(): array
     {
-        return (array) config('payments.gateways', []);
+        // Core-registered adapters (config) plus those contributed by loaded, enabled addons.
+        return (array) config('payments.gateways', [])
+            + app(\App\Core\Addons\AddonManager::class)->contributedPaymentGateways();
     }
 
     public static function get(string $id): PaymentGatewayInterface

@@ -3,7 +3,6 @@
 namespace App\Filament\Admin\Pages;
 
 use App\Livewire\LatestPixPayments;
-use App\Traits\Gateways\DigitoPayTrait;
 use App\Models\User;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -15,7 +14,6 @@ use Filament\Pages\Page;
 
 class DigitoPayPaymentPage extends Page
 {
-    use DigitoPayTrait;
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 
@@ -35,7 +33,18 @@ class DigitoPayPaymentPage extends Page
      */
     public static function canAccess(): bool
     {
-        return auth()->user()->hasRole('admin');
+        // Only when the gateway addon is enabled; the page never references addon classes directly.
+        return auth()->user()->hasRole('admin') && self::gateway() !== null;
+    }
+
+    private static function gateway(): ?\App\Core\Payments\Contracts\SupportsManualPayout
+    {
+        if (! \App\Core\Payments\PaymentGateways::has('digitopay')) {
+            return null;
+        }
+        $gateway = \App\Core\Payments\PaymentGateways::get('digitopay');
+
+        return $gateway instanceof \App\Core\Payments\Contracts\SupportsManualPayout ? $gateway : null;
     }
 
     public ?array $data = [];
@@ -104,34 +113,33 @@ class DigitoPayPaymentPage extends Page
      */
     public function submit(): void
     {
-        if(env('APP_DEMO')) {
-            Notification::make()
-                ->title('Atenção')
-                ->body('Você não pode realizar está alteração na versão demo')
-                ->danger()
-                ->send();
+        $gateway = self::gateway();
+        if (! $gateway) {
+            Notification::make()->title('Gateway unavailable')->danger()->send();
             return;
         }
 
-        $resp = self::digitoPayPixCashOut([
-            'pix_key' => $this->data['pix_key'],
-            'pix_type' => $this->data['pix_type'],
-            'amount' => $this->data['amount']
+        $data = [
+            'user_id'     => $this->data['user_id'] ?? null,
+            'pix_key'     => (string) ($this->data['pix_key'] ?? ''),
+            'pix_type'    => (string) ($this->data['pix_type'] ?? ''),
+            'amount'      => (string) \App\Core\Money\Amount::normalize((string) ($this->data['amount'] ?? '')),
+            'observation' => $this->data['observation'] ?? null,
+        ];
+
+        if ($data['pix_key'] === '' || $data['amount'] === '' || \App\Core\Money\Amount::toMinor($data['amount']) <= 0) {
+            Notification::make()->title('Invalid payout')->body('Key and a positive amount are required.')->danger()->send();
+            return;
+        }
+
+        $ok = $gateway->manualPayout($data);
+        \App\Core\Audit\Audit::record('payout.manual', 'gateway', 'digitopay', [
+            'amount' => $data['amount'], 'pix_type' => $data['pix_type'], 'user_id' => $data['user_id'], 'accepted' => $ok,
         ]);
 
-        if($resp) {
-            Notification::make()
-                ->title('Saque solicitado')
-                ->body('Saque solicitado com sucesso')
-                ->success()
-                ->send();
-        }else{
-            Notification::make()
-                ->title('Erro no saque')
-                ->body('Erro ao solicitar o saque')
-                ->danger()
-                ->send();
-        }
+        $ok
+            ? Notification::make()->title('Payout requested')->success()->send()
+            : Notification::make()->title('Payout failed')->body('The gateway rejected the payout.')->danger()->send();
     }
 
     /**

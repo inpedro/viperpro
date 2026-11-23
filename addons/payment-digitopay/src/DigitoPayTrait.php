@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Traits\Gateways;
+namespace Addons\Payments\DigitoPay;
+
+use App\Core\Payments\GatewayCredentials;
 
 use App\Models\AffiliateHistory;
 use App\Models\Deposit;
@@ -32,14 +34,9 @@ trait DigitoPayTrait
      */
     private static function digitoPayGenerateCredentials()
     {
-        $setting = Gateway::first();
-        if (empty($setting)) {
-            return false;
-        }
-
-        self::$uri     = (string) ($setting->getAttributes()["digitopay_uri"] ?? "");
-        $clientId      = $setting->getAttributes()["digitopay_cliente_id"] ?? "";
-        $clienteSecret = $setting->getAttributes()["digitopay_cliente_secret"] ?? "";
+        self::$uri     = (string) (GatewayCredentials::get("payment.digitopay", "api_url", "digitopay_uri"));
+        $clientId      = GatewayCredentials::get("payment.digitopay", "client_id", "digitopay_cliente_id");
+        $clienteSecret = GatewayCredentials::get("payment.digitopay", "client_secret", "digitopay_cliente_secret");
 
         // Credentials are only ever sent to an allowlisted HTTPS host (see config/payments.php).
         if ($clientId === "" || $clienteSecret === "" || ! \App\Core\Security\TrustedEndpoint::isAllowed("digitopay", self::$uri)) {
@@ -68,7 +65,7 @@ trait DigitoPayTrait
     {
         $setting = Helper::getSetting();
         $rules = [
-            'amount' => ['required', 'max:'.$setting->min_deposit, 'max:'.$setting->max_deposit],
+            'amount' => ['required', 'numeric', 'min:'.$setting->min_deposit, 'max:'.$setting->max_deposit],
             'cpf'    => ['required', 'max:255'],
         ];
 

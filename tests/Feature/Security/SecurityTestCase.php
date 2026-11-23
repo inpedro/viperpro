@@ -38,6 +38,9 @@ abstract class SecurityTestCase extends TestCase
             'cpa_value' => 10,
             'cpa_baseline' => 40,
         ]);
+
+        // Deployment step: install + enable the bundled addons (payment gateways live there now).
+        $this->assertSame(0, \Illuminate\Support\Facades\Artisan::call('addon:sync', ['--enable' => true]), \Illuminate\Support\Facades\Artisan::output());
     }
 
     protected function makeUser(array $attributes = []): User

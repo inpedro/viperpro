@@ -1,0 +1,49 @@
+{
+    "id": "payment.digitopay",
+    "name": "DigitoPay Payments",
+    "version": "1.0.0",
+    "description": "DigitoPay PIX deposits and payouts (Brazil).",
+    "author": "Viper Pro (legacy integration, refactored)",
+    "category": "payments",
+    "requires": {
+        "platform": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Addons\\Payments\\DigitoPay\\": "src/"
+        }
+    },
+    "contributes": {
+        "payment_gateways": {
+            "digitopay": "Addons\\Payments\\DigitoPay\\DigitoPayGateway"
+        }
+    },
+    "permissions": [
+        "payments.digitopay.configure",
+        "payments.digitopay.payout"
+    ],
+    "config": [
+        {
+            "key": "api_url",
+            "label": "API base URL",
+            "type": "url",
+            "secret": false,
+            "required": true
+        },
+        {
+            "key": "client_id",
+            "label": "Client ID",
+            "type": "string",
+            "secret": false,
+            "required": true
+        },
+        {
+            "key": "client_secret",
+            "label": "Client secret",
+            "type": "string",
+            "secret": true,
+            "required": true
+        }
+    ],
+    "docs": "README.md"
+}

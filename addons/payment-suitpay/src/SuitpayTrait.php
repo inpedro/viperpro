@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Traits\Gateways;
+namespace Addons\Payments\SuitPay;
+
+use App\Core\Payments\GatewayCredentials;
 
 use App\Models\AffiliateHistory;
 use App\Models\Deposit;
@@ -36,14 +38,9 @@ trait SuitpayTrait
      */
     private static function generateCredentials()
     {
-        $setting = Gateway::first();
-        if (empty($setting)) {
-            return false;
-        }
-
-        self::$uri           = $setting->getAttributes()["suitpay_uri"] ?? "";
-        self::$clienteId     = $setting->getAttributes()["suitpay_cliente_id"] ?? "";
-        self::$clienteSecret = $setting->getAttributes()["suitpay_cliente_secret"] ?? "";
+        self::$uri           = GatewayCredentials::get("payment.suitpay", "api_url", "suitpay_uri");
+        self::$clienteId     = GatewayCredentials::get("payment.suitpay", "client_id", "suitpay_cliente_id");
+        self::$clienteSecret = GatewayCredentials::get("payment.suitpay", "client_secret", "suitpay_cliente_secret");
 
         return self::$clienteId !== "" && self::$clienteSecret !== ""
             && \App\Core\Security\TrustedEndpoint::isAllowed("suitpay", self::$uri);
@@ -59,7 +56,7 @@ trait SuitpayTrait
     {
         $setting = \Helper::getSetting();
         $rules = [
-            'amount' => ['required', 'max:'.$setting->min_deposit, 'max:'.$setting->max_deposit],
+            'amount' => ['required', 'numeric', 'min:'.$setting->min_deposit, 'max:'.$setting->max_deposit],
             'cpf'    => ['required', 'max:255'],
         ];
 
