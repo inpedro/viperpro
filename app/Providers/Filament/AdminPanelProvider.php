@@ -133,6 +133,12 @@ class AdminPanelProvider extends PanelProvider
                             ->items([
                                 ...MissionResource::getNavigationItems(),
                                 ...VipResource::getNavigationItems(),
+                                NavigationItem::make('addons')
+                                    ->icon('heroicon-o-puzzle-piece')
+                                    ->label(fn (): string => 'Addons')
+                                    ->url(fn (): string => \App\Filament\Admin\Pages\AddonManagerPage::getUrl())
+                                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.addons'))
+                                    ->visible(fn (): bool => auth()->user()->hasRole('admin')),
                             ])
                         : NavigationGroup::make()
                     ,

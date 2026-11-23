@@ -62,8 +62,31 @@ Deliverables: `ARCHITECTURE_AUDIT.md`, `SECURITY_AUDIT.md`, `INTEGRATION_INVENTO
 
 **Migration:** `2026_11_24_000001_create_ledger_tables` (rollback drops the three tables). After deploying, run `php artisan wallet:reconcile --open`.
 
-## Phase 3: Addon framework
-`addon.json` manifest validated against a JSON Schema (id, version, category, `requires.platform` semver, permissions, config schema, migrations path, health check class). Addons are Composer packages exposing a service provider and installed from a signed, trusted registry, never from uploaded archives. An `AddonManager` (enable/disable, dependency resolution, per-tenant activation, migration runner, health) plus a Filament addon manager page. The first addons are the existing gateways and providers, re-packaged from their Phase 2 adapters.
+## Phase 3: Addon framework (**done**)
+
+| Item | Status |
+|---|---|
+| Validated `addon.json` manifests, semver, platform and addon dependencies | done |
+| Integrity (`addon.lock`) + Ed25519 signatures (`addon.sig`), trusted keys, no symlinks | done |
+| Lifecycle: install / enable / disable / update / uninstall (data kept unless `--purge`), migrations, permissions | done |
+| Encrypted, masked, validated addon configuration | done |
+| Boot loader (PSR-4 + providers) with per-boot lock-hash tamper check | done |
+| Admin addon manager page (state, verification problems, health, configure) | done |
+| `audit_logs` table + `Audit::record()` | done |
+| Payment gateways (SuitPay, DigitoPay, Mercado Pago, SharkPay) as independent addons | done |
+| Scheduled `wallet:reconcile` and `addon:package verify` | done |
+| Stripe and BsPay as addons | **open** (Stripe routes are unmounted; BsPay disabled) |
+| Game providers as addons (`contributes.game_providers`) | Phase 7 (needs real adapters) |
+| Per-tenant addon activation | Phase 4 |
+
+Full documentation: `docs/ADDONS.md`. **Breaking:** run `php artisan addon:sync --enable` after deploying, or no payment gateway is available.
+
+Also fixed in Phase 3:
+* Deposit amount validation enforced `max:<min_deposit>` without `numeric`. That was a string-length check, so there were effectively no deposit limits; it now enforces min and max.
+* The DigitoPay manual payout page called the cash-out without the payment-record ID it requires.
+
+## Decision log
+* **Rollover rules (`Helper::payWithRollover`) are preserved exactly**, including their latent bugs: decimal-string `=== 0` comparisons never match, so some rollover-completion conversions never fire. Changing them changes player payouts and needs explicit product sign-off. Until then they are journaled as `game.settlement` and listed in `docs/LEDGER.md`.
 
 ## Phase 4: Multi-tenancy and white-label
 Shared DB + `tenant_id` + global scope (decision in `ARCHITECTURE_AUDIT.md` §5). `TenantResolver` by domain; tenant-aware auth guard, cache prefixes, storage prefixes, queue payloads, webhook routes (`/t/{tenantRouteKey}/…` or a per-domain callback URL). Singleton rows (`settings`, `gateways`, `games_keys`, `custom_layouts`) become per-tenant with encrypted secret columns. A Super Admin panel is separated from the Tenant Admin panel. Tenant-isolation test suite.
