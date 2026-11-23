@@ -88,8 +88,31 @@ Also fixed in Phase 3:
 ## Decision log
 * **Rollover rules (`Helper::payWithRollover`) are preserved exactly**, including their latent bugs: decimal-string `=== 0` comparisons never match, so some rollover-completion conversions never fire. Changing them changes player payouts and needs explicit product sign-off. Until then they are journaled as `game.settlement` and listed in `docs/LEDGER.md`.
 
-## Phase 4: Multi-tenancy and white-label
-Shared DB + `tenant_id` + global scope (decision in `ARCHITECTURE_AUDIT.md` §5). `TenantResolver` by domain; tenant-aware auth guard, cache prefixes, storage prefixes, queue payloads, webhook routes (`/t/{tenantRouteKey}/…` or a per-domain callback URL). Singleton rows (`settings`, `gateways`, `games_keys`, `custom_layouts`) become per-tenant with encrypted secret columns. A Super Admin panel is separated from the Tenant Admin panel. Tenant-isolation test suite.
+## Phase 4: Multi-tenancy and white-label (**done, core**)
+
+| Item | Status |
+|---|---|
+| Shared-DB tenancy: `tenants`, `tenant_domains`, `tenant_id` on 36 tables, backfill to tenant #1 | done |
+| Global scope (fail closed), stamped writes, foreign/moved `tenant_id` refused | done |
+| Domain resolution, suspended tenants, unknown hosts, platform domains | done |
+| Tenant-aware auth (scoped users, JWT `tid`, per-tenant password resets), panels, cache, uploads, webhooks, ledger, reconcile | done |
+| Per-tenant addon activation and encrypted credentials | done |
+| Platform panel: casinos (domains, suspend/activate, create admin), platform addons, audit log | done |
+| Tenant provisioning (settings, layout) | done |
+| Tenant isolation test suite | done (15 tests) |
+| Legal pages, SEO, SMS per tenant; subscription plans/billing | **open** (Phases 5, 6, 8) |
+| Spatie teams (per-tenant custom roles) | **open** |
+
+**Breaking changes**
+* Unknown hosts are served as tenant #1 only while `TENANCY_FALLBACK_DEFAULT=true` (the default).
+* Users' e-mail uniqueness is per tenant.
+* JWTs issued before this release have no `tid` claim and are rejected (players log in again).
+* Password-reset rows moved to `tenant_password_resets`.
+* Addon credentials are per tenant (the existing configuration was copied to tenant #1).
+* Uploads go under `tenants/{id}/uploads` (existing files keep their paths).
+* Fixed a typo in `create_vip_users_table` (FK to `´vips`) that broke fresh MySQL installs.
+
+**Migrations:** `2026_11_26_000001_add_multi_tenancy` and `2026_11_26_000002_create_tenant_addons_table`. Both are reversible (tested up → down → up on SQLite). Full detail in `docs/TENANCY.md`.
 
 ## Phase 5: Internationalization
 English default; Albanian (`sq`) translations; locale files for the existing `es`/`pt_BR`. Move every hardcoded string (Filament and Vue) to translation keys. RTL support. Configurable phone (libphonenumber), address and registration fields. PIX/CPF become an optional Brazil addon (field set + validator + gateways). Locale-aware money and date formatting. Timezone per tenant.

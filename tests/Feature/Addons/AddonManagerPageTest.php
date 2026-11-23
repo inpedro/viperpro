@@ -30,7 +30,10 @@ class AddonManagerPageTest extends SecurityTestCase
         $this->assertSame('very-secret-cs', app(\App\Core\Addons\AddonManager::class)->config('payment.suitpay', 'client_secret'));
         $this->assertSame('ci-2', app(\App\Core\Addons\AddonManager::class)->config('payment.suitpay', 'client_id'));
 
+        // Tenant admins deactivate for their casino; platform-wide disable is refused here.
         $page->call('runAction', 'disable', 'payment.suitpay');
+        $this->assertTrue(app(\App\Core\Addons\AddonManager::class)->isEnabled('payment.suitpay'));
+        $page->call('runAction', 'deactivate', 'payment.suitpay');
         $this->assertFalse(\App\Core\Payments\PaymentGateways::has('suitpay'));
     }
 

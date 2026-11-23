@@ -16,6 +16,11 @@ class Tenant extends Model
 
     protected $casts = ['settings' => 'array'];
 
+    protected static function booted(): void
+    {
+        static::created(fn (Tenant $tenant) => \App\Core\Tenancy\TenantProvisioner::provision($tenant));
+    }
+
     public function domains(): HasMany
     {
         return $this->hasMany(TenantDomain::class);

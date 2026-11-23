@@ -18,6 +18,10 @@ return [
 
     'default_tenant_id' => 1,
 
+    // Defaults for newly provisioned casinos (edited afterwards by the tenant admin).
+    'default_currency'        => env('TENANCY_DEFAULT_CURRENCY', 'EUR'),
+    'default_currency_symbol' => env('TENANCY_DEFAULT_CURRENCY_SYMBOL', '€'),
+
     // Hosts that serve the platform (super admin) console instead of a casino.
     'platform_domains' => $list('PLATFORM_DOMAINS'),
 ];

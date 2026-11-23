@@ -12,7 +12,7 @@ use Illuminate\Console\Command;
  */
 class AddonSyncCommand extends Command
 {
-    protected $signature = 'addon:sync {--enable : enable newly installed bundled addons}';
+    protected $signature = 'addon:sync {--enable : enable newly installed bundled addons platform-wide and activate them for the default tenant}';
     protected $description = 'Install/update bundled addons after a deployment';
 
     public function handle(AddonManager $addons): int
@@ -30,6 +30,10 @@ class AddonSyncCommand extends Command
                     $addons->install($id);
                     if ($this->option('enable')) {
                         $addons->enable($id);
+                        // Single-brand convenience: also activate for the current (default) tenant.
+                        if (\App\Core\Tenancy\Tenancy::id()) {
+                            $addons->activateForTenant($id);
+                        }
                     }
                     $this->info("installed {$id} {$manifest->version()}".($this->option('enable') ? ' (enabled)' : ''));
                 } elseif ($installed->version !== $manifest->version()) {

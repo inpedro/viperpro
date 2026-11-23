@@ -3,6 +3,8 @@
 namespace App\Core\Addons;
 
 use App\Core\Addons\Models\InstalledAddon;
+use App\Core\Addons\Models\TenantAddon;
+use App\Core\Tenancy\Tenancy;
 use App\Core\Audit\Audit;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
@@ -53,15 +55,77 @@ class AddonManager
         $this->markLoaded($manifest);
     }
 
-    /** @return array<string, class-string> gateway id => adapter class, from loaded addons */
+    /** @return array<string, class-string> gateway id => adapter class, from loaded addons active for this tenant */
     public function contributedPaymentGateways(): array
     {
         $out = [];
-        foreach ($this->loaded as $manifest) {
-            $out += $manifest->paymentGateways();
+        foreach ($this->loaded as $id => $manifest) {
+            if ($this->isActiveForTenant($id)) {
+                $out += $manifest->paymentGateways();
+            }
         }
 
         return $out;
+    }
+
+    // ---- per-tenant activation ------------------------------------------------------------
+
+    public function isActiveForTenant(string $id): bool
+    {
+        if (! Tenancy::id()) {
+            return false; // platform context: tenant integrations are not in play
+        }
+
+        try {
+            return (bool) TenantAddon::where('addon_id', $id)->value('enabled');
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    /** Activate a platform-enabled addon for the current tenant. */
+    public function activateForTenant(string $id): void
+    {
+        Tenancy::requireId();
+
+        if (! $this->isEnabled($id)) {
+            throw new AddonException("Addon [{$id}] is not enabled on this platform");
+        }
+
+        foreach (array_keys($this->manifest($id)->addonDependencies()) as $dep) {
+            if (! $this->isActiveForTenant($dep)) {
+                throw new AddonException("Activate [{$dep}] first: [{$id}] depends on it");
+            }
+        }
+
+        TenantAddon::updateOrCreate(['addon_id' => $id], ['enabled' => true]);
+        Audit::record('addon.tenant_activated', 'addon', $id);
+    }
+
+    public function deactivateForTenant(string $id): void
+    {
+        Tenancy::requireId();
+
+        $dependents = array_keys(array_filter(
+            $this->enabledManifests(),
+            fn (AddonManifest $m, string $other) => array_key_exists($id, $m->addonDependencies()) && $this->isActiveForTenant($other),
+            ARRAY_FILTER_USE_BOTH
+        ));
+        if ($dependents !== []) {
+            throw new AddonException("Cannot deactivate [{$id}]: required by ".implode(', ', $dependents));
+        }
+
+        TenantAddon::where('addon_id', $id)->update(['enabled' => false]);
+        Audit::record('addon.tenant_deactivated', 'addon', $id);
+    }
+
+    private function tenantRecord(string $id): ?TenantAddon
+    {
+        try {
+            return Tenancy::id() ? TenantAddon::where('addon_id', $id)->first() : null;
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     /** @return array<string, AddonManifest> */
@@ -275,9 +339,11 @@ class AddonManager
      */
     public function configure(string $id, array $values): array
     {
-        $addon = $this->installed($id);
+        $this->installed($id);
+        Tenancy::requireId(); // configuration (credentials) is per tenant
+        $record = TenantAddon::firstOrCreate(['addon_id' => $id], ['enabled' => false]);
         $schema = $this->manifest($id)->configSchema();
-        $current = (array) ($addon->config ?? []);
+        $current = (array) ($record->config ?? []);
         $errors = [];
         $new = [];
 
@@ -316,7 +382,7 @@ class AddonManager
             return $errors;
         }
 
-        $addon->forceFill(['config' => $new])->save();
+        $record->forceFill(['config' => $new])->save();
 
         // Never log values; only which keys changed.
         $changed = array_keys(array_filter($new, fn ($v, $k) => ($current[$k] ?? null) !== $v, ARRAY_FILTER_USE_BOTH));
@@ -327,8 +393,7 @@ class AddonManager
 
     public function config(string $id, string $key, mixed $default = null): mixed
     {
-        $addon = $this->installedOrNull($id);
-        $value = $addon?->config[$key] ?? null;
+        $value = $this->tenantRecord($id)?->config[$key] ?? null;
 
         return ($value === null || $value === '') ? $default : $value;
     }
@@ -336,10 +401,11 @@ class AddonManager
     /** Config with secrets masked, for display. */
     public function maskedConfig(string $id): array
     {
-        $addon = $this->installed($id);
+        $this->installed($id);
+        $config = (array) ($this->tenantRecord($id)?->config ?? []);
         $out = [];
         foreach ($this->manifest($id)->configSchema() as $field) {
-            $value = $addon->config[$field['key']] ?? null;
+            $value = $config[$field['key']] ?? null;
             $out[$field['key']] = ($field['secret'] ?? false) && $value !== null && $value !== '' ? '********' : $value;
         }
 

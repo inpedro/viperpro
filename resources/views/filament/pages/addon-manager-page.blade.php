@@ -18,7 +18,7 @@
                     <span class="text-xs font-normal text-gray-500">{{ $addon['id'] }} · v{{ $addon['version'] }} · {{ $addon['category'] }} · {{ $addon['trust'] }}</span>
                 </x-slot>
                 <x-slot name="headerEnd">
-                    <x-filament::badge :color="match($addon['state']) { 'enabled' => 'success', 'installed' => 'warning', default => 'gray' }">
+                    <x-filament::badge :color="match($addon['state']) { 'enabled', 'active' => 'success', 'installed' => 'warning', default => 'gray' }">
                         {{ $addon['state'] }}
                     </x-filament::badge>
                 </x-slot>
@@ -47,7 +47,13 @@
                     @if ($addon['state'] === 'enabled')
                         <x-filament::button size="sm" color="danger" wire:click="runAction('disable', '{{ $addon['id'] }}')" wire:confirm="Disable {{ $addon['id'] }}?">Disable</x-filament::button>
                     @endif
-                    @if ($addon['installed'] && $addon['installed'] !== $addon['version'])
+                    @if ($addon['state'] === 'inactive')
+                        <x-filament::button size="sm" color="success" wire:click="runAction('activate', '{{ $addon['id'] }}')" wire:confirm="Activate {{ $addon['id'] }} for this casino?">Activate</x-filament::button>
+                    @endif
+                    @if ($addon['state'] === 'active')
+                        <x-filament::button size="sm" color="danger" wire:click="runAction('deactivate', '{{ $addon['id'] }}')" wire:confirm="Deactivate {{ $addon['id'] }} for this casino?">Deactivate</x-filament::button>
+                    @endif
+                    @if ($this->getMode() === 'platform' && $addon['installed'] && $addon['installed'] !== $addon['version'])
                         <x-filament::button size="sm" color="warning" wire:click="runAction('update', '{{ $addon['id'] }}')" wire:confirm="Update {{ $addon['id'] }} from {{ $addon['installed'] }} to {{ $addon['version'] }}?">Update</x-filament::button>
                     @endif
                     @if ($addon['configurable'])

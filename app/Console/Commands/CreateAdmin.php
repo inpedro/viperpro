@@ -15,19 +15,30 @@ use Spatie\Permission\Models\Role;
  */
 class CreateAdmin extends Command
 {
-    protected $signature = 'viper:create-admin {email} {--name=Administrator}';
+    protected $signature = 'viper:create-admin {email} {--name=Administrator} {--tenant=1 : tenant id for a casino admin} {--platform : create a platform super admin (no tenant) instead}';
 
     protected $description = 'Create a platform administrator (password is prompted, never passed as an argument)';
 
     public function handle(): int
     {
+        if ($this->option('platform')) {
+            \App\Core\Tenancy\Tenancy::setPlatform();
+        } else {
+            \App\Core\Tenancy\Tenancy::set(\App\Core\Tenancy\Models\Tenant::findOrFail((int) $this->option('tenant')));
+        }
+
         $email    = (string) $this->argument('email');
         $password = (string) $this->secret('Password (min 12 characters)');
 
         $validator = Validator::make(compact('email', 'password'), [
-            'email'    => 'required|email|unique:users,email',
+            'email'    => 'required|email',
             'password' => 'required|string|min:12',
         ]);
+
+        if (User::where('email', $email)->exists()) {
+            $this->error('A user with this e-mail already exists in this context.');
+            return self::FAILURE;
+        }
 
         if ($validator->fails()) {
             foreach ($validator->errors()->all() as $error) {
@@ -45,12 +56,9 @@ class CreateAdmin extends Command
                 'role_id'  => 0,
             ])->save();
 
-            Role::findOrCreate('admin', 'web');
-            $user->assignRole('admin');
-
-            if (! Wallet::where('user_id', $user->id)->exists()) {
-                Wallet::create(['user_id' => $user->id, 'active' => 1]);
-            }
+            $role = $this->option('platform') ? 'super-admin' : 'admin';
+            Role::findOrCreate($role, 'web');
+            $user->assignRole($role);
         });
 
         $this->info("Administrator {$email} created.");

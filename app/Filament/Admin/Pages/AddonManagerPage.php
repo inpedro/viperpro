@@ -17,9 +17,9 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 
 /**
- * Addon manager: view, install, enable/disable, update, configure and health-check addons.
- * Code never arrives through this page: only addons already present in the configured addon
- * paths (deployed via the release pipeline) and passing integrity/signature checks can be installed.
+ * Tenant addon page: the casino's admins activate/deactivate addons the platform has made
+ * available, and enter their own (encrypted) credentials. Installing/enabling code
+ * platform-wide is a super-admin action (App\Filament\Platform\Pages\PlatformAddonsPage).
  */
 class AddonManagerPage extends Page implements HasForms
 {
@@ -35,13 +35,27 @@ class AddonManagerPage extends Page implements HasForms
 
     protected static string $view = 'filament.pages.addon-manager-page';
 
+    /**
+     * tenant | platform. Deliberately NOT a public Livewire property (those can be set from the
+     * browser); the platform page overrides this method.
+     */
+    protected function mode(): string
+    {
+        return 'tenant';
+    }
+
     public ?string $configuring = null;
 
     public ?array $configData = [];
 
     public static function canAccess(): bool
     {
-        return (bool) auth()->user()?->hasRole('admin');
+        return (bool) auth()->user()?->hasRole('admin') && \App\Core\Tenancy\Tenancy::id() !== null;
+    }
+
+    public function getMode(): string
+    {
+        return $this->mode();
     }
 
     /** @return array<int, array<string, mixed>> */
@@ -50,14 +64,18 @@ class AddonManagerPage extends Page implements HasForms
         $manager = app(AddonManager::class);
         $rows = [];
 
-        foreach ($manager->discover(true) as $id => $manifest) {
+        $source = $this->mode() === 'platform' ? $manager->discover(true) : $manager->enabledManifests();
+
+        foreach ($source as $id => $manifest) {
             $installed = $manager->installedOrNull($id);
             $health = null;
 
-            foreach (array_keys($manifest->paymentGateways()) as $gatewayId) {
-                if (PaymentGateways::has($gatewayId)) {
-                    $status = PaymentGateways::get($gatewayId)->getHealthStatus();
-                    $health = $status->status.($status->messages ? ': '.implode(' ', $status->messages) : '');
+            if ($this->mode() === 'tenant') {
+                foreach (array_keys($manifest->paymentGateways()) as $gatewayId) {
+                    if (PaymentGateways::has($gatewayId)) {
+                        $status = PaymentGateways::get($gatewayId)->getHealthStatus();
+                        $health = $status->status.($status->messages ? ': '.implode(' ', $status->messages) : '');
+                    }
                 }
             }
 
@@ -69,10 +87,12 @@ class AddonManagerPage extends Page implements HasForms
                 'category'    => $manifest->category(),
                 'trust'       => $manager->trustLevel($id),
                 'description' => $manifest->data['description'] ?? '',
-                'state'       => $installed ? ($installed->enabled ? 'enabled' : 'installed') : 'available',
-                'problems'    => $manager->check($id),
+                'state'       => $this->mode() === 'platform'
+                    ? ($installed ? ($installed->enabled ? 'enabled' : 'installed') : 'available')
+                    : ($manager->isActiveForTenant($id) ? 'active' : 'inactive'),
+                'problems'    => $this->mode() === 'platform' ? $manager->check($id) : [],
                 'health'      => $health,
-                'configurable'=> $installed !== null && $manifest->configSchema() !== [],
+                'configurable'=> $this->mode() === 'tenant' && $manifest->configSchema() !== [],
             ];
         }
 
@@ -89,12 +109,14 @@ class AddonManagerPage extends Page implements HasForms
         $manager = app(AddonManager::class);
 
         try {
-            match ($action) {
-                'install' => $manager->install($id),
-                'enable'  => $manager->enable($id),
-                'disable' => $manager->disable($id),
-                'update'  => $manager->update($id),
-                default   => throw new AddonException('Unknown action'),
+            match ([$this->mode(), $action]) {
+                ['tenant', 'activate']   => $manager->activateForTenant($id),
+                ['tenant', 'deactivate'] => $manager->deactivateForTenant($id),
+                ['platform', 'install']  => $manager->install($id),
+                ['platform', 'enable']   => $manager->enable($id),
+                ['platform', 'disable']  => $manager->disable($id),
+                ['platform', 'update']   => $manager->update($id),
+                default                  => throw new AddonException('Action not allowed here'),
             };
             Notification::make()->title(ucfirst($action).": {$id}")->success()->send();
         } catch (AddonException $e) {

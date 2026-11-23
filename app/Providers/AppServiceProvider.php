@@ -42,6 +42,11 @@ class AppServiceProvider extends ServiceProvider
             }
         }
 
+        // Admin uploads (logos, banners, ...) go under the current tenant's storage prefix.
+        \Filament\Forms\Components\FileUpload::configureUsing(
+            fn (\Filament\Forms\Components\FileUpload $upload) => $upload->directory(fn () => \App\Core\Tenancy\Tenancy::storagePrefix().'/uploads')
+        );
+
         // Ledger safety net: journals any wallet balance change not made through WalletService.
         \App\Models\Wallet::observe(\App\Core\Wallet\WalletLedgerObserver::class);
 

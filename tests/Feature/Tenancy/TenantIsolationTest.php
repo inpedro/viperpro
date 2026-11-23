@@ -32,7 +32,7 @@ class TenantIsolationTest extends SecurityTestCase
         TenantDomain::create(['tenant_id' => $this->b->id, 'domain' => 'b.test', 'is_primary' => true]);
 
         // Brand B gets its own settings row (the singleton is per tenant).
-        Tenancy::runAs($this->b, fn () => Setting::create([
+        Tenancy::runAs($this->b, fn () => Setting::query()->first()->update([
             'software_name' => 'Brand B', 'currency_code' => 'USD', 'prefix' => '$',
             'min_deposit' => 1, 'max_deposit' => 100, 'min_withdrawal' => 1, 'max_withdrawal' => 100,
             'revshare_percentage' => 10, 'cpa_value' => 5, 'cpa_baseline' => 20, 'disable_rollover' => 1,
