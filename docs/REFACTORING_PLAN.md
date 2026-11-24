@@ -161,8 +161,28 @@ Also fixed: registration validated `unique:users` across all tenants, which bloc
 
 **Migration:** `2026_11_28_000001_add_theme_to_custom_layouts` (reversible). Details in `docs/THEMES.md`.
 
-## Phase 7: Integrations ecosystem
-Rebuild each provider and gateway adapter against its official documentation and sandbox: signed webhooks, idempotent bet/win/rollback with ledger references, health checks, webhook monitoring and a replay UI over `callback_logs`. New adapters (e.g. Adyen, Nuvei, licensed aggregators) only with real documentation and credentials.
+## Phase 7: Integrations ecosystem (**done for payments; game providers blocked on provider documentation**)
+
+| Item | Status |
+|---|---|
+| Stripe addon (Checkout, signed webhooks, tenant binding, refunds with ledger reversal), frontend redirect flow | done |
+| Unified `POST /payments/webhooks/{gateway}`; `WebhookResult` (credited / acknowledged / rejected) | done |
+| Payout methods declared by gateways; withdrawal API and payouts follow them | done |
+| Contract test harness for every gateway (`GatewayContractTest`) + fake provider clients | done |
+| Integrations admin page: health + webhook monitor; `integrations:status --all` hourly | done |
+| Boot-order bug: addons never loaded in real processes; fixed + process-level regression test | done |
+| Dead Stripe code removed (unmounted controller, trait, service, route files) | done |
+| Game provider adapters on `GameProviderInterface` (bets/wins/rollbacks via `WalletService`) | **blocked:** needs each provider's documentation and sandbox |
+| Sports data from a licensed provider (replacing the third-party Firebase project) | **blocked:** needs a provider contract |
+
+**Breaking changes**
+* `PaymentGatewayInterface::processWebhook()` returns `WebhookResult` and gains `getPayoutMethods()`.
+* The PIX addons are now 1.1.0: run `php artisan addon:sync`.
+* Withdrawal `type` must be one of the default gateway's payout methods or `bank`.
+* Authentic-but-not-creditable callbacks (already settled, amount mismatch) now return 200.
+* `stripe/session` and `stripe/publickey` are gone; Stripe deposits use `wallet/deposit/payment`.
+
+No new migrations. Full detail in `docs/INTEGRATIONS.md`.
 
 ## Phase 8: Administration and analytics
 MFA for admins, admin session management, audit log for every admin action, CSP, a reconciliation dashboard, CRM, analytics, removal/labelling of demo-agent accounts, and responsible-gaming tooling (limits, self-exclusion, reality checks).

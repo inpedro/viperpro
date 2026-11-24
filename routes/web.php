@@ -27,6 +27,7 @@ require(__DIR__ . '/groups/gateways/digitopay.php');
 require(__DIR__ . '/groups/gateways/sharkpay.php');
 require(__DIR__ . '/groups/gateways/mercadopago.php');
 require(__DIR__ . '/groups/gateways/suitpay.php');
+require(__DIR__ . '/groups/gateways/webhooks.php');
 
 /// SOCIAL
 require(__DIR__ . '/groups/auth/social.php');

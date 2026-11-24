@@ -1,7 +1,7 @@
 {
     "id": "payment.suitpay",
     "name": "SuitPay Payments",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "SuitPay PIX deposits and payouts (Brazil).",
     "author": "Viper Pro (legacy integration, refactored)",
     "category": "payments",

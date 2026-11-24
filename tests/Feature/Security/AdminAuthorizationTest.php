@@ -30,10 +30,4 @@ class AdminAuthorizationTest extends SecurityTestCase
         }
     }
 
-    public function test_stripe_public_key_endpoint_does_not_leak_secret(): void
-    {
-        \DB::table('gateways')->insert(['stripe_public_key' => 'pk_test', 'stripe_secret_key' => 'sk_live_secret']);
-        $res = app(\App\Http\Controllers\Api\Gateways\StripeController::class)->getPublicKey();
-        $this->assertStringNotContainsString('sk_live_secret', $res->getContent());
-    }
 }

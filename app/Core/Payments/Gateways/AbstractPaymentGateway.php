@@ -7,6 +7,7 @@ use App\Core\Integrations\UnsupportedCapability;
 use App\Core\Money\Money;
 use App\Core\Payments\Contracts\PaymentGatewayInterface;
 use App\Core\Payments\Data\VerificationResult;
+use App\Core\Payments\Data\WebhookResult;
 use App\Core\Payments\DepositSettlementService;
 use App\Core\Security\CallbackLog;
 use Illuminate\Http\Request;
@@ -26,27 +27,45 @@ abstract class AbstractPaymentGateway implements PaymentGatewayInterface
         return [];
     }
 
-    public function processWebhook(Request $request): bool
+    public function processWebhook(Request $request): WebhookResult
     {
         $source = $this->getIdentifier();
         $id = $this->callbackPaymentId($request);
 
         if ($id === '') {
             CallbackLog::record('payment', $source, $request, 'rejected', 'missing payment id');
-            return false;
+            return WebhookResult::rejected('missing payment id');
         }
 
+        return $this->verifyAndSettle($id, $request);
+    }
+
+    /** Server-to-server verification followed by idempotent settlement (shared by all adapters). */
+    protected function verifyAndSettle(string $id, Request $request): WebhookResult
+    {
+        $source = $this->getIdentifier();
         $verification = $this->verifyDeposit($id);
 
         if (! $verification->isPaid()) {
-            CallbackLog::record('payment', $source, $request, 'rejected', 'gateway status: '.($verification->providerStatus ?? $verification->status), $id);
-            return false;
+            $reason = 'gateway status: '.($verification->providerStatus ?? $verification->status);
+            CallbackLog::record('payment', $source, $request, 'rejected', $reason, $id);
+            return WebhookResult::rejected($reason);
         }
 
-        $settled = DepositSettlementService::settle($id, $verification->amount, $verification->currency);
-        CallbackLog::record('payment', $source, $request, $settled ? 'accepted' : 'ignored', $settled ? null : 'already settled, unknown or mismatched', $id);
+        if (DepositSettlementService::settle($id, $verification->amount, $verification->currency)) {
+            CallbackLog::record('payment', $source, $request, 'accepted', null, $id);
+            return WebhookResult::credited();
+        }
 
-        return $settled;
+        // Paid at the gateway but not creditable here: already settled (a retry), unknown to this
+        // tenant, or amount/currency mismatch (logged by the settlement service).
+        CallbackLog::record('payment', $source, $request, 'ignored', 'already settled, unknown or mismatched', $id);
+        return WebhookResult::acknowledged('not creditable');
+    }
+
+    public function getPayoutMethods(): array
+    {
+        return [];
     }
 
     public function getTransactionStatus(string $paymentId): ?string

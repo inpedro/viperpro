@@ -14,6 +14,6 @@ class WithdrawController extends Controller
     public function index()
     {
         $withdraws = Withdrawal::whereUserId(auth('api')->id())->paginate();
-        return response()->json(['withdraws' => $withdraws], 200);
+        return response()->json(['withdraws' => $withdraws, 'payout_methods' => \App\Core\Payments\PaymentGateways::payoutMethods()], 200);
     }
 }

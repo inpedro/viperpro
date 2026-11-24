@@ -5,6 +5,7 @@ namespace App\Core\Payments\Contracts;
 use App\Core\Integrations\HealthStatus;
 use App\Core\Money\Money;
 use App\Core\Payments\Data\VerificationResult;
+use App\Core\Payments\Data\WebhookResult;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
@@ -38,8 +39,11 @@ interface PaymentGatewayInterface
     /** Server-to-server confirmation. The only basis on which a deposit may be credited. */
     public function verifyDeposit(string $paymentId): VerificationResult;
 
-    /** Verifies (server-to-server) and settles a deposit callback. Returns true if it credited the wallet. */
-    public function processWebhook(Request $request): bool;
+    /** Authenticates/verifies (server-to-server) and settles a deposit callback. */
+    public function processWebhook(Request $request): WebhookResult;
+
+    /** @return string[] payout methods this gateway can send (e.g. "pix"); [] = no payouts */
+    public function getPayoutMethods(): array;
 
     public function createWithdrawal(Model $withdrawal, string $type): bool;
 

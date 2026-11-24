@@ -1,10 +1,10 @@
 {
     "id": "payment.mercadopago",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "files": {
         "README.md": "f16e42ddd4923a30721f2753d2634e2f7ad29a10f828e3ad79f0c127f583139e",
-        "addon.json": "d747a5feb527c0f1ae3e49e1aa6c7633f594fb618d759f5d24bc14a9dbe4f669",
-        "src/MercadoPagoGateway.php": "e4d91894ce1465258fbbe2ac719baec8050297f89ea66cc7c02c31f3fff04e9a",
+        "addon.json": "f133bb22e5248d0d68d672d436fb361347610fa4e0bb28a71c1071dd743a9c1c",
+        "src/MercadoPagoGateway.php": "e5726a9d6c8593e411787e70ad866799902926985bec30d210c41ad90daa3653",
         "src/MercadoPagoTrait.php": "bbfe2f5b6f8617a176b8cd2d644e89c1f974a0dbd2017f29f2f09c51cb4e7f77"
     }
 }

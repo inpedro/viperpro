@@ -416,5 +416,15 @@
     "Log in to see your favourite events.": "Você precisa fazer o login para ver seus eventos favoritos.",
     "Click to start": "Clique para começar",
     "New here?": "Novo por aqui?",
-    "Commission rates": "Taxas de comissões"
+    "Commission rates": "Taxas de comissões",
+    "Capabilities": "Capacidades",
+    "Health": "Saúde",
+    "Name": "Nome",
+    "Notes": "Notas",
+    "Payouts": "Pagamentos",
+    "Secrets are redacted before storage.": "Os segredos são ocultados antes do armazenamento.",
+    "Webhook monitor": "Monitor de webhooks",
+    "Webhooks": "Webhooks",
+    "Integrations": "Integrações",
+    "Payments": "Pagamentos"
 }

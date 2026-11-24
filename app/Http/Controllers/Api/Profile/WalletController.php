@@ -62,7 +62,8 @@ class WalletController extends Controller
         /// Verificar se é afiliado
         If(auth('api')->check()) {
 
-            if (! in_array($request->type, ['pix', 'bank'], true)) {
+            // Methods come from the casino's payout gateway ("bank" = paid manually by the operator).
+            if (! in_array($request->type, \App\Core\Payments\PaymentGateways::payoutMethods(), true)) {
                 return response()->json(['error' => trans('Invalid withdrawal type')], 400);
             }
 

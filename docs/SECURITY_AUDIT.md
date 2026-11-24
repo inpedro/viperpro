@@ -57,6 +57,8 @@ Severity: **C** = exploitable anonymously for money or full account takeover; **
 | 27 | M | Layout config printed with raw `json_encode` inside `<script>`: a stored `</script>` in any layout field broke out of the script. | `@json` (escapes `<`, `>`, `&`, quotes). |
 | 28 | H | The SPA imported Firebase from `www.gstatic.com` and read sports data from a **third party's** Firebase project (`footballapi-77676`, API key in the source). Availability: the whole site failed to load when the CDN was blocked. Integrity: displayed data came from an unknown party. | The route is lazy-loaded (availability fixed). **Open:** replace with a licensed data provider (Phase 7) and remove the embedded third-party key. |
 | 29 | M | Theme overrides could have become a CSS injection path. | Strict validation; anything else is dropped. Covered by tests. |
+| 30 | C | The deposit widget put the Stripe **secret key** into browser state (`elementsOptions.clientSecret = stripe_secret_key`), confirming finding #2 was in active use. | Stripe rebuilt as an addon; the server creates the Checkout Session and the browser only receives the hosted `checkout_url`. |
+| 31 | H | Addons were never loaded at boot in real processes (the loader queried the DB in `register()`, before Eloquent's resolver exists), so production would have had no payment gateways. | Loading moved to `boot()`; `AddonBootTest` runs real separate processes. |
 
 ## 3. Deceptive or non-compliant features
 

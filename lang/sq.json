@@ -416,5 +416,15 @@
     "Log in to see your favourite events.": "Hyni për të parë ngjarjet tuaja të preferuara.",
     "Click to start": "Klikoni për të filluar",
     "New here?": "I ri këtu?",
-    "Commission rates": "Normat e komisionit"
+    "Commission rates": "Normat e komisionit",
+    "Capabilities": "Aftësitë",
+    "Health": "Gjendja",
+    "Name": "Emri",
+    "Notes": "Shënime",
+    "Payouts": "Pagesat dalëse",
+    "Secrets are redacted before storage.": "Të dhënat sekrete fshihen para ruajtjes.",
+    "Webhook monitor": "Monitori i webhook-eve",
+    "Webhooks": "Webhook-et",
+    "Integrations": "Integrimet",
+    "Payments": "Pagesat"
 }

@@ -47,4 +47,17 @@ class PaymentGateways
     {
         return array_map(fn (string $class) => app($class), self::registered());
     }
+
+    /**
+     * Withdrawal methods players may request: the default gateway's payout methods plus "bank"
+     * (a manual transfer the operator pays outside the platform and approves/cancels in admin).
+     *
+     * @return string[]
+     */
+    public static function payoutMethods(): array
+    {
+        $gateway = self::default();
+
+        return array_values(array_unique(array_merge($gateway ? $gateway->getPayoutMethods() : [], ['bank'])));
+    }
 }

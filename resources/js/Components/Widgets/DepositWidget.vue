@@ -65,34 +65,20 @@
                 </ul>
             </div>
         </div>
-        <div v-if="paymentType === 'stripe' && publishableKey && setting && setting.stripe_is_enable" class="p-4">
-            <stripe-checkout
-                ref="checkoutRef"
-                :pk="publishableKey"
-                :sessionId="sessionId"
-            />
-            <div class="flex w-full mt-3 mb-3">
-                <div class="w-36 mr-2">
-                    <label for="currency" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ $t('Currency') }}</label>
-                    <select id="currency" v-model="currency" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                        <option value="USD">$ {{ $t('Dollar') }}</option>
-                        <option value="BRL">R$ {{ $t('Real') }}</option>
-                    </select>
-                </div>
-                <div class="w-full">
-                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ $t('Amount') }}</label>
-                    <input type="number"
-                           v-model="amount"
-                           class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                           :min="setting.min_deposit"
-                           :max="setting.max_deposit"
-                           :placeholder="$t('0,00')"
-                           required
-                    >
-                </div>
+        <div v-if="paymentType === 'stripe' && setting && setting.stripe_is_enable" class="p-4">
+            <!-- Stripe Checkout: the session is created server-side in the wallet's currency; no keys reach the browser. -->
+            <div class="w-full mt-3 mb-3">
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ $t('Amount') }} ({{ wallet?.currency }})</label>
+                <input type="number"
+                       v-model="amount"
+                       class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                       :min="setting.min_deposit"
+                       :max="setting.max_deposit"
+                       :placeholder="$t('0,00')"
+                       required
+                >
             </div>
-
-            <button :disabled="!sessionId" @click.prevent="checkoutStripe" class="ui-button-blue rounded w-full">{{ $t('Pay With Stripe') }}</button>
+            <button :disabled="stripeLoading" @click.prevent="checkoutStripe" class="ui-button-blue rounded w-full">{{ $t('Pay With Stripe') }}</button>
         </div>
         <div v-if="setting && paymentType === 'pix' && (setting.suitpay_is_enable || setting.mercadopago_is_enable || setting.digitopay_is_enable)">
             <div v-if="showPixQRCode && wallet" class="flex flex-col ">
@@ -242,12 +228,11 @@ import { formatMoney } from '@/Services/money.js';
     import HttpApi from "@/Services/HttpApi.js";
     import QRCodeVue3 from "qrcode-vue3";
     import {useAuthStore} from "@/Stores/Auth.js";
-    import { StripeCheckout } from '@vue-stripe/vue-stripe';
     import {useSettingStore} from "@/Stores/SettingStore.js";
 
     export default {
         props: ['showMobile', 'title', 'isFull'],
-        components: { QRCodeVue3, StripeCheckout },
+        components: { QRCodeVue3 },
         data() {
 
             return {
@@ -270,19 +255,9 @@ import { formatMoney } from '@/Services/money.js';
                 intervalId: null,
                 paymentType: null,
 
-                /// stripe
-                elementsOptions: {
-                    appearance: {}, // appearance options
-                },
-                confirmParams: {
-                    return_url: null, // success url
-                },
-                successURL: null,
-                cancelURL: null,
                 amount: null,
                 currency: null,
-                publishableKey: null,
-                sessionId: null,
+                stripeLoading: false,
                 paymentGateway: '',
             }
         },
@@ -319,37 +294,27 @@ import { formatMoney } from '@/Services/money.js';
             this.paymentType = null;
         },
         methods: {
-            getSession: function() {
-                const _this = this;
-                HttpApi.post('stripe/session', { amount: _this.amount, currency: _this.currency}).then(response => {
-                    if(response.data.id) {
-                        _this.sessionId = response.data.id;
-                    }
-                }).catch(error => { });
-            },
-            checkoutStripe: function() {
+            checkoutStripe: async function() {
                 const _toast = useToast();
-                if(this.amount <= 0 || this.amount === '') {
+                if (!this.amount || Number(this.amount) <= 0) {
                     _toast.error(trans('You need to enter a value'));
                     return;
                 }
-
-                this.$refs.checkoutRef.redirectToCheckout();
-            },
-            getPublicKeyStripe: function() {
-                const _this = this;
-                HttpApi.post('stripe/publickey', {}).then(response => {
-                    _this.$nextTick(() => {
-                        _this.publishableKey = response.data.stripe_public_key;
-                        _this.elementsOptions.clientSecret  = response.data.stripe_secret_key;
-                        _this.confirmParams.return_url      = response.data.successURL;
-                    });
-
-                }).catch(error => { });
+                this.stripeLoading = true;
+                try {
+                    const { data } = await HttpApi.post('wallet/deposit/payment', { gateway: 'stripe', amount: this.amount, accept_bonus: this.accept_bonus ?? false });
+                    if (data.checkout_url) {
+                        window.location.href = data.checkout_url; // Stripe-hosted payment page
+                        return;
+                    }
+                    _toast.error(trans('Payment could not be started'));
+                } catch (e) {
+                    _toast.error(e?.response?.data?.error || trans('Payment could not be started'));
+                }
+                this.stripeLoading = false;
             },
             setPaymentMethod: function(type, gateway) {
                 if(type === 'stripe') {
-                    this.getPublicKeyStripe();
                 }
                 this.paymentType = type;
                 this.paymentGateway = gateway;
@@ -460,7 +425,6 @@ import { formatMoney } from '@/Services/money.js';
                     _this.amount  = settingData.max_deposit;
 
                     if(_this.paymentType === 'stripe' && settingData.stripe_is_enable) {
-                        _this.getSession();
                     }
                 }
             },
@@ -470,25 +434,10 @@ import { formatMoney } from '@/Services/money.js';
                 this.getWallet();
                 this.getSetting();
 
-                if(this.paymentType === 'stripe') {
-                    this.getSession();
-                    this.currency = 'USD';
-                }
             }
         },
         watch: {
-            amount(oldValue, newValue) {
-                if(this.paymentType === 'stripe') {
-                    this.getSession();
-                    this.currency = 'USD';
-                }
 
-            },
-            currency(oldValue, newValue) {
-                if(this.paymentType === 'stripe') {
-                    this.getSession();
-                }
-            }
         },
     };
 </script>

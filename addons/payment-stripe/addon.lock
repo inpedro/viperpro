@@ -1,0 +1,9 @@
+{
+    "id": "payment.stripe",
+    "version": "1.0.0",
+    "files": {
+        "README.md": "854c8a8c5767240929435c0f3825dfdd040e3c5b268d7f6462dc01aaea670741",
+        "addon.json": "7c5e635c4f7d84e4b7e8aa9ef7dfb8de8bbf3c1c93315cdab9d43f088065ee5d",
+        "src/StripeGateway.php": "a516c107c683a3372509223c8eb91aec434634b6712d9a2ab26521c8f8b2d122"
+    }
+}

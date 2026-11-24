@@ -416,5 +416,15 @@
     "Log in to see your favourite events.": "Log in to see your favourite events.",
     "Click to start": "Click to start",
     "New here?": "New here?",
-    "Commission rates": "Commission rates"
+    "Commission rates": "Commission rates",
+    "Capabilities": "Capabilities",
+    "Health": "Health",
+    "Name": "Name",
+    "Notes": "Notes",
+    "Payouts": "Payouts",
+    "Secrets are redacted before storage.": "Secrets are redacted before storage.",
+    "Webhook monitor": "Webhook monitor",
+    "Webhooks": "Webhooks",
+    "Integrations": "Integrations",
+    "Payments": "Payments"
 }

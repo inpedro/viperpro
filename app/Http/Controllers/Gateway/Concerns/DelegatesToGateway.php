@@ -24,7 +24,7 @@ trait DelegatesToGateway
     /** Deposit callback: verified server-to-server and settled idempotently by the adapter. */
     public function callbackMethod(Request $request)
     {
-        return response()->json([], $this->gateway()->processWebhook($request) ? 200 : 400);
+        return response()->json([], $this->gateway()->processWebhook($request)->httpStatus());
     }
 
     /** Payout status callbacks are recorded only; payouts are confirmed by the admin flow. */

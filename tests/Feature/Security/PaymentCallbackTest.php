@@ -81,7 +81,10 @@ class PaymentCallbackTest extends SecurityTestCase
             'status' => 'approved', 'transaction_amount' => 1.00, 'currency_id' => 'EUR',
         ])]);
 
-        $this->postJson('/mercadopago/callback', ['type' => 'payment', 'data' => ['id' => '123456']])->assertStatus(400);
+        // Authentic but not creditable (amount mismatch): acknowledged so the gateway stops retrying,
+        // never credited, logged for manual review.
+        $this->postJson('/mercadopago/callback', ['type' => 'payment', 'data' => ['id' => '123456']])->assertStatus(200);
         $this->assertEquals(0, (float) $this->wallet($user)->balance_withdrawal);
+        $this->assertSame('ignored', \Illuminate\Support\Facades\DB::table('callback_logs')->where('source', 'mercadopago')->latest('id')->value('outcome'));
     }
 }

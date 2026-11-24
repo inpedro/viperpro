@@ -17,7 +17,15 @@ class AddonServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(AddonManager::class);
+    }
 
+    /**
+     * Loading happens in boot(): Eloquent's connection resolver is only available once the
+     * DatabaseServiceProvider has booted (querying in register() silently loaded nothing).
+     * Providers registered here are booted immediately by the container.
+     */
+    public function boot(): void
+    {
         $manager = $this->app->make(AddonManager::class);
 
         foreach ($manager->enabledManifests() as $id => $manifest) {

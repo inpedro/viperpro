@@ -1,10 +1,10 @@
 {
     "id": "payment.suitpay",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "files": {
         "README.md": "adb3f59ea7bed51d9df48186aa472e0bb414d733195902ed65e76eed1b86926a",
-        "addon.json": "ba29900ab57a3326e8acb0f1c9c37fe47a1f5c9a3b90ccb3c91d900bdbd63dc9",
-        "src/SuitPayGateway.php": "fd0d58ceb69ced5e63ae5d3e3ce317d4ef1e8ae127eb2b95ea484ee21f08ad31",
+        "addon.json": "c9ab82212f4def6d6e4d2ce98a6e0aa7e8b2f3248fe431e6b95cc15e93106c26",
+        "src/SuitPayGateway.php": "92811fcacbe826af70b47315cac971870d4595449bec414922c3da49ae57145e",
         "src/SuitpayTrait.php": "2b8023b7e536fa6612a3f16a32ffd55eb06cc497d8844f3ab3f341095530ed79"
     }
 }

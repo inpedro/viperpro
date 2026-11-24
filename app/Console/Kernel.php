@@ -17,6 +17,9 @@ class Kernel extends ConsoleKernel
 
         // Full per-file integrity/signature verification of every addon on disk.
         $schedule->command('addon:package verify')->hourly()->withoutOverlapping();
+
+        // Integration health per casino (warnings in the log for active-but-unusable gateways).
+        $schedule->command('integrations:status --all')->hourly()->withoutOverlapping();
     }
 
     /**

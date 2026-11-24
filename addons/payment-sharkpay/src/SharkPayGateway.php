@@ -72,8 +72,18 @@ class SharkPayGateway extends AbstractPaymentGateway
         return new VerificationResult(self::mapStatus($status, ['1']), null, null, $status);
     }
 
+    public function getPayoutMethods(): array
+    {
+        return ['pix'];
+    }
+
     public function createWithdrawal(Model $withdrawal, string $type): bool
     {
+        // Only PIX payouts go through this gateway (a "bank" request is paid manually by the operator).
+        if (($withdrawal->type ?? 'pix') !== 'pix') {
+            return false;
+        }
+
         $payment = SuitPayPayment::create([
             'withdrawal_id' => $withdrawal->id,
             'user_id'       => $withdrawal->user_id,
