@@ -152,7 +152,7 @@ Also fixed: registration validated `unique:users` across all tenants, which bloc
 | Remaining Portuguese UI strings, `R$` amounts → translations + `Intl` money formatting | done |
 | Screenshots of all themes (`docs/screenshots`) | done |
 | Wallet/deposit/withdraw, profile, VIP, promotions, auth modals rebuilt on the design system | **open** (with Phase 8) |
-| Legal pages as tenant-managed content | **open** (Phase 8) |
+| Legal pages as tenant-managed content | done (Phase 8) |
 
 **Breaking changes**
 * `/` serves the new lobby; the old homepage is at `/classic`.
@@ -184,8 +184,32 @@ Also fixed: registration validated `unique:users` across all tenants, which bloc
 
 No new migrations. Full detail in `docs/INTEGRATIONS.md`.
 
-## Phase 8: Administration and analytics
-MFA for admins, admin session management, audit log for every admin action, CSP, a reconciliation dashboard, CRM, analytics, removal/labelling of demo-agent accounts, and responsible-gaming tooling (limits, self-exclusion, reality checks).
+## Phase 8: Administration and analytics (**done, core**)
+
+| Item | Status |
+|---|---|
+| TOTP MFA for admin/super-admin (enrol, recovery codes, replay protection), per-session challenge | done |
+| Staff session list + revocation (admin and platform) | done |
+| Audit of every Filament create/update/delete (field names only) + security events | done |
+| Security headers; baseline CSP enforced, strict CSP Report-Only | done |
+| JWT revocation (`tokens_valid_after`) on password reset and self-exclusion | done |
+| Responsible gaming: deposit limits with cooling-off, self-exclusion, reality checks, enforced server-side | done |
+| Operator-managed, sanitized, localized legal pages (old template text removed) | done |
+| Ledger-based analytics per casino and platform-wide; found and fixed a query bug (`pluck(DB::raw)`) via tests | done |
+| Demo-agent accounts labelled "Demo account (play money)" | done |
+| Reconciliation dashboard (UI on top of `wallet:reconcile`) | **open** (CLI exists) |
+| CRM / player segmentation / marketing suppression | **open** |
+| Filament admin labels still Portuguese (~290) | **open** |
+| Wallet/profile/VIP/promotions/auth modals on the design system | **open** (carried from Phase 6) |
+
+**Breaking changes**
+* Admins and super-admins must enrol TOTP on their next panel visit (`MFA_ENFORCE=false` disables this; not recommended).
+* CSP and security headers on every response. Custom JS that loads plugins (`<object>`/`<embed>`) or a `<base>` tag stops working; other sites can no longer frame the casino.
+* `/terms/*` pages show the operator's published legal documents. Until they're published they show a "not published yet" notice instead of the old Portuguese template.
+* Tokens issued before a password reset or self-exclusion are rejected.
+* Deposits can be refused with 403 (limit or self-exclusion); excluded players can't launch games.
+
+**Migration:** `2026_11_29_000001_phase8_admin_security_rg_legal` (reversible: drops the three new tables and the new user columns). Details in `docs/ADMINISTRATION.md` and `docs/RESPONSIBLE_GAMING.md`.
 
 ## Phase 9: QA and release
 Full regression, tenant-isolation, load and penetration tests; staging deployment on MySQL/InnoDB; documentation review; legal sign-off.

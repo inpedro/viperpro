@@ -246,7 +246,7 @@ class AuthController extends Controller
         }
 
         DB::transaction(function () use ($user, $request) {
-            $user->forceFill(["password" => $request->password, "remember_token" => Str::random(60)])->save();
+            $user->forceFill(["password" => $request->password, "remember_token" => Str::random(60), "tokens_valid_after" => now()])->save(); // revokes existing JWTs
             // Single use.
             DB::table("tenant_password_resets")->where("tenant_id", Tenancy::requireId())->where("email", $request->email)->delete();
         });

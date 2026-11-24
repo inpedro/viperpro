@@ -47,6 +47,22 @@ class AppServiceProvider extends ServiceProvider
             fn (\Filament\Forms\Components\FileUpload $upload) => $upload->directory(fn () => \App\Core\Tenancy\Tenancy::storagePrefix().'/uploads')
         );
 
+        // Audit every model change made from a staff panel (attribute names only, never values).
+        \Illuminate\Support\Facades\Event::listen(['eloquent.created: *', 'eloquent.updated: *', 'eloquent.deleted: *'], function (string $event, array $models) {
+            if (! auth()->check() || \Filament\Facades\Filament::getCurrentPanel() === null) {
+                return;
+            }
+            $model = $models[0] ?? null;
+            $skip = [\App\Core\Ledger\Models\LedgerJournal::class, \App\Core\Ledger\Models\LedgerEntry::class, \App\Core\Ledger\Models\LedgerAccount::class,
+                \App\Core\Security\AdminSession::class, \App\Core\Security\CallbackLogEntry::class, \App\Core\Audit\AuditLog::class];
+            if (! $model instanceof \Illuminate\Database\Eloquent\Model || in_array($model::class, $skip, true)) {
+                return;
+            }
+            $action = strtok(substr($event, strlen('eloquent.')), ':');
+            $changed = array_values(array_diff(array_keys($action === 'updated' ? $model->getChanges() : $model->getAttributes()), ['updated_at', 'created_at']));
+            \App\Core\Audit\Audit::record("admin.{$action}", class_basename($model), $model->getKey(), ['fields' => $changed]);
+        });
+
         // Ledger safety net: journals any wallet balance change not made through WalletService.
         \App\Models\Wallet::observe(\App\Core\Wallet\WalletLedgerObserver::class);
 

@@ -130,6 +130,8 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
      * @var array<int, string>
      */
     protected $hidden = [
+        'mfa_secret',
+        'mfa_recovery_codes',
         'password',
         'remember_token',
     ];
@@ -142,6 +144,10 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'mfa_secret' => 'encrypted',
+        'mfa_recovery_codes' => 'encrypted:array',
+        'mfa_enabled_at' => 'datetime',
+        'tokens_valid_after' => 'datetime',
     ];
 
     protected $appends = ['dateHumanReadable', 'createdAt', 'totalLikes'];

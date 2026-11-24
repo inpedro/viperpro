@@ -171,7 +171,8 @@ class UserResource extends Resource
                             ->columnSpanFull()
                         ,
                         Forms\Components\Toggle::make('is_demo_agent')
-                            ->label('Influencer')
+                            ->label(__('Demo account (play money)'))
+                            ->helperText(__('Plays only with the demo balance, with the same odds as everyone else. Wins are not real money and are never shown in public feeds. Anyone streaming with a demo account must disclose it.'))
                             ->columnSpanFull()
                         ,
                         Forms\Components\Toggle::make('status')
@@ -210,6 +211,10 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
+                Tables\Columns\IconColumn::make('is_demo_agent')
+                    ->label(__('Demo'))
+                    ->boolean()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('wallet.total_balance')

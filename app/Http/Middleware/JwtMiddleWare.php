@@ -29,6 +29,15 @@ class JWTMiddleWare
                 // No token in the request (e.g. an authenticated test client): user check only.
             }
 
+            // Tokens issued before a password reset / "log out everywhere" are revoked.
+            try {
+                $iat = (int) auth('api')->payload()->get('iat');
+                if ($user->tokens_valid_after !== null && $iat < $user->tokens_valid_after->getTimestamp()) {
+                    $sameTenant = false;
+                }
+            } catch (\Tymon\JWTAuth\Exceptions\JWTException) {
+            }
+
             if ($sameTenant) {
                 return $next($request);
             }

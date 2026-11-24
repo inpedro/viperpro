@@ -81,6 +81,12 @@ class GameController extends Controller
         if (in_array($action, $validEndpoints)) {
             if(isset($tokenOpen['status']) && $tokenOpen['status'])
             {
+                // A self-exclusion taken mid-session stops play immediately (game tokens live up to 4 h).
+                $player = isset($tokenOpen['id']) ? \App\Models\User::find($tokenOpen['id']) : null;
+                if ($action === 'spin' && $player && \App\Core\ResponsibleGaming\ResponsibleGaming::isExcluded($player)) {
+                    return response()->json(['error' => trans('Your account is self-excluded. Games are not available.')], 403);
+                }
+
                 $game = Game::whereStatus(1)->where('game_code', $tokenOpen['game'])->first();
                 if(!empty($game)) {
                     $controller = \Helper::createController($game->game_code);
@@ -161,6 +167,9 @@ class GameController extends Controller
         $game = Game::with(['categories', 'provider'])->whereStatus(1)->find($id);
         if(!empty($game)) {
             if(auth('api')->check()) {
+                if (\App\Core\ResponsibleGaming\ResponsibleGaming::isExcluded(auth('api')->user())) {
+                    return response()->json(['error' => trans('Your account is self-excluded. Games are not available.'), 'status' => false], 403);
+                }
                 $wallet = Wallet::where('user_id', auth('api')->user()->id)->first();
                 if($wallet->total_balance > 0) {
                     $game->increment('views');

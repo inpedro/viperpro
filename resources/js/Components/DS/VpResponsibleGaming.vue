@@ -5,7 +5,7 @@
             {{ $t('Gambling can be addictive. Play responsibly and only bet what you can afford to lose.') }}
             {{ $t('Players must be 18 or older (or the legal age in their jurisdiction).') }}
         </p>
-        <RouterLink :to="{ name: 'serviceTerms' }" class="shrink-0 font-semibold text-vp-primary hover:underline">{{ $t('Responsible gaming') }}</RouterLink>
+        <RouterLink :to="{ name: 'responsibleGaming' }" class="shrink-0 font-semibold text-vp-primary hover:underline">{{ $t('Responsible gaming') }}</RouterLink>
     </div>
 </template>
 

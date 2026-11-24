@@ -133,6 +133,19 @@ class AdminPanelProvider extends PanelProvider
                             ->items([
                                 ...MissionResource::getNavigationItems(),
                                 ...VipResource::getNavigationItems(),
+                                NavigationItem::make('analytics')
+                                    ->icon('heroicon-o-chart-bar')
+                                    ->label(fn (): string => __('Analytics'))
+                                    ->url(fn (): string => \App\Filament\Admin\Pages\AnalyticsPage::getUrl())
+                                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.analytics'))
+                                    ->visible(fn (): bool => auth()->user()->hasRole('admin')),
+                                ...\App\Filament\Admin\Resources\LegalPageResource::getNavigationItems(),
+                                NavigationItem::make('staff-sessions')
+                                    ->icon('heroicon-o-computer-desktop')
+                                    ->label(fn (): string => __('Staff sessions'))
+                                    ->url(fn (): string => \App\Filament\Admin\Pages\AdminSessionsPage::getUrl())
+                                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.staff-sessions'))
+                                    ->visible(fn (): bool => auth()->user()->hasRole('admin')),
                                 NavigationItem::make('integrations')
                                     ->icon('heroicon-o-signal')
                                     ->label(fn (): string => __('Integrations'))
@@ -268,7 +281,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])
+                \App\Http\Middleware\AdminSessionGuard::class,
+            ], isPersistent: true)
             ->plugin(FilamentSpatieRolesPermissionsPlugin::make())
             ;
     }

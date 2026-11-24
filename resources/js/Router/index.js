@@ -1,6 +1,8 @@
 import {createWebHistory, createRouter} from "vue-router";
 import HomePage from "@/Pages/Home/HomePage.vue";
 import LobbyHome from "@/Pages/Lobby/LobbyHome.vue";
+import LegalPage from "@/Pages/Legal/LegalPage.vue";
+import ResponsibleGamingPage from "@/Pages/ResponsibleGaming/ResponsibleGamingPage.vue";
 import SportPage from "@/Pages/Sport/SportPage.vue";
 import {useAuthStore} from "@/Stores/Auth.js";
 import AffiliatePage from "@/Pages/Profile/AffiliatePage.vue";
@@ -12,11 +14,6 @@ import WalletPage from "@/Pages/Profile/WalletPage.vue";
 import DepositPage from "@/Pages/Profile/DepositPage.vue";
 import WithdrawPage from "@/Pages/Profile/WithdrawPage.vue";
 import TransactionPage from "@/Pages/Profile/TransactionPage.vue";
-import ConditionsReference from "@/Pages/Terms/ConditionsReference.vue";
-import ServiceTerms from "@/Pages/Terms/ServiceTerms.vue";
-import PrivacyPolicy from "@/Pages/Terms/PrivacyPolicy.vue";
-import BonusTerms from "@/Pages/Terms/BonusTerms.vue";
-import WelcomeBonus from "@/Pages/Terms/WelcomeBonus.vue";
 import SupportPage from "@/Pages/Home/SupportPage.vue";
 import PromotionPage from "@/Pages/Home/PromotionPage.vue";
 import SupportCenterPage from "@/Pages/Home/SupportCenterPage.vue";
@@ -37,6 +34,16 @@ import ForgotPassword from "@/Pages/Auth/ForgotPassword.vue";
 import ResetPassword from "@/Pages/Auth/ResetPassword.vue";
 
 export const routes = [
+    {
+        name: 'legalPage',
+        path: '/legal/:slug',
+        component: LegalPage
+    },
+    {
+        name: 'responsibleGaming',
+        path: '/responsible-gaming',
+        component: ResponsibleGamingPage
+    },
     {
         // Previous homepage, kept reachable during the redesign transition (docs/THEMES.md).
         name: 'classicHome',
@@ -188,29 +195,39 @@ export const routes = [
         }
     },
     {
+        // Operator-managed content (Admin → Legal pages); the old template text is not used.
         name: 'termsConditionsReference',
         path: '/terms/conditions-reference',
-        component: ConditionsReference
+        component: LegalPage,
+        props: { slug: 'referral' }
     },
     {
+        // Operator-managed content (Admin → Legal pages); the old template text is not used.
         name: 'serviceTerms',
         path: '/terms/service',
-        component: ServiceTerms
+        component: LegalPage,
+        props: { slug: 'terms' }
     },
     {
+        // Operator-managed content (Admin → Legal pages); the old template text is not used.
         name: 'privacyPolicy',
         path: '/terms/privacy-policy',
-        component: PrivacyPolicy
+        component: LegalPage,
+        props: { slug: 'privacy' }
     },
     {
+        // Operator-managed content (Admin → Legal pages); the old template text is not used.
         name: 'bonusTerms',
         path: '/terms/bonus',
-        component: BonusTerms
+        component: LegalPage,
+        props: { slug: 'bonus' }
     },
     {
+        // Operator-managed content (Admin → Legal pages); the old template text is not used.
         name: 'welcomeBonus',
         path: '/terms/bonus-welcome',
-        component: WelcomeBonus
+        component: LegalPage,
+        props: { slug: 'welcome-bonus' }
     },
     {
         name: 'dataPage',

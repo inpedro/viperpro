@@ -60,11 +60,21 @@ Severity: **C** = exploitable anonymously for money or full account takeover; **
 | 30 | C | The deposit widget put the Stripe **secret key** into browser state (`elementsOptions.clientSecret = stripe_secret_key`), confirming finding #2 was in active use. | Stripe rebuilt as an addon; the server creates the Checkout Session and the browser only receives the hosted `checkout_url`. |
 | 31 | H | Addons were never loaded at boot in real processes (the loader queried the DB in `register()`, before Eloquent's resolver exists), so production would have had no payment gateways. | Loading moved to `boot()`; `AddonBootTest` runs real separate processes. |
 
+### Found and fixed in Phase 8
+
+| # | Sev | Finding | Resolution |
+|---|---|---|---|
+| 32 | H | No MFA for staff: one phished admin password = arbitrary JS for every player (custom JS fields). | TOTP MFA required for admin roles, per-session challenge, revocable sessions. |
+| 33 | M | Stolen player JWTs stayed valid after a password reset. | `tokens_valid_after` check in `JwtMiddleWare`. |
+| 34 | M | No security headers / CSP. | Baseline CSP enforced + headers; strict CSP Report-Only. |
+| 35 | M | Template legal pages stated terms (in Portuguese, for another operator) the platform does not apply. | Removed; operator-managed documents, sanitized server-side. |
+| 36 | L | Analytics queries used `pluck(DB::raw(...))`, which crashes as soon as there is data (caught by the new tests before release). | Aliased `selectRaw`. |
+
 ## 3. Deceptive or non-compliant features
 
 | Finding | Action |
 |---|---|
-| "Demo agent" accounts received a 90% win rate plus scripted wins, a mechanism for staging fake big-win streams. | Removed: every account gets identical odds. The flag still controls a separate demo balance; Phase 8 should remove the feature or label it unmistakably. |
+| "Demo agent" accounts received a 90% win rate plus scripted wins, a mechanism for staging fake big-win streams. | Removed: every account gets identical odds. Phase 8 relabelled the flag "Demo account (play money)"; those wins never reach public feeds. Disclosure while streaming is an operator obligation. |
 | `/api/spin/winners` returned 200 Faker-generated names and a hardcoded "total bonus". | Now returns only real redemptions (names masked). |
 | The sports bets feed showed hardcoded rows with invented players and stakes. | Removed; honest empty state until a real feed exists. |
 | The affiliate page listed invented programme "rules" (another brand's wallet, checks the code doesn't perform). | Replaced with statements that match the platform, plus a link to the operator's referral terms. |
@@ -74,9 +84,8 @@ Severity: **C** = exploitable anonymously for money or full account takeover; **
 
 * **Ledger coverage:** all balance changes are journaled, but several legacy paths are only *observed* (no idempotency key, coarse types). See `docs/LEDGER.md`.
 * **Provider transaction idempotency and rollback** are inconsistent per provider. Mitigated only by caller authentication (Phase 7, needs provider documentation).
-* **No MFA or admin session management** (Phase 8).
-* **Stored HTML/JS injection by admins** (`custom_js`, `custom_header`, `custom_body`, `custom_css` rendered with `{!! !!}`) is intentional operator functionality, but an admin-account compromise therefore means script running for all players. Mitigate with MFA, audit logging and a CSP (Phase 8).
-* **JWT:** no refresh-token rotation or revocation list beyond the package default (Phase 2).
+* **Stored HTML/JS injection by admins** (`custom_js`, `custom_header`, `custom_body`, `custom_css` rendered with `{!! !!}`) is intentional operator functionality, but an admin-account compromise therefore means script running for all players. Phase 8 added MFA, staff session revocation, audit logging and a baseline CSP. The strict CSP is Report-Only until custom JS is inventoried.
+* **JWT:** tokens are revoked on password reset and self-exclusion (`tokens_valid_after`, Phase 8). There is still no refresh-token rotation.
 * **Social login and file uploads** are unaudited beyond the avatar `image|mimes` rule.
 * **Git history** still contains the leaked key, the log and the seeded admin hash.
 * **Unmounted code** (BsPay, KaGaming, Vibra, Slotegrator, Stripe routes) must go through review before being mounted.
@@ -84,7 +93,7 @@ Severity: **C** = exploitable anonymously for money or full account takeover; **
 ## 5. Legal and licensing dependencies
 
 * `public/originals/*` contains clients named after and modelled on commercial PG Soft titles. Distribution and operation need rights from the IP owner; otherwise remove them.
-* Real-money operation requires a licence in each target jurisdiction, plus KYC, age verification, AML and responsible-gaming controls. None exist yet.
+* Real-money operation requires a licence in each target jurisdiction, plus KYC, age verification, AML and responsible-gaming controls. Phase 8 added deposit limits, self-exclusion and reality checks (`RESPONSIBLE_GAMING.md`). KYC, age verification, AML and national exclusion registers do not exist yet.
 
 ## 6. Release gates (must all pass before real money)
 

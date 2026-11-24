@@ -27,6 +27,13 @@ class DepositController extends Controller
             return response()->json(['error' => trans('Payment method not available')], 422);
         }
 
+        // Responsible gaming: self-exclusion and deposit limits are enforced server-side.
+        if ($user = auth('api')->user()) {
+            if ($reason = \App\Core\ResponsibleGaming\ResponsibleGaming::depositBlockReason($user, (string) \App\Core\Money\Amount::normalize((string) round((float) $request->input('amount'), 2)))) {
+                return response()->json(['error' => $reason], 403);
+            }
+        }
+
         return $gateway->createDeposit($request);
     }
 

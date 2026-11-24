@@ -39,6 +39,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
             require(__DIR__ . '/groups/api/profile/favorites.php');
             require(__DIR__ . '/groups/api/profile/recents.php');
             require(__DIR__ . '/groups/api/profile/vip.php');
+            require(__DIR__ . '/groups/api/profile/responsible_gaming.php');
         });
 
     Route::prefix('wallet')
@@ -61,6 +62,7 @@ Route::prefix('categories')
 
 require(__DIR__ . '/groups/api/games/index.php');
 require(__DIR__ . '/groups/api/lobby/index.php');
+require(__DIR__ . '/groups/api/content/legal.php');
 require(__DIR__ . '/groups/api/gateways/digitopay.php');
 require(__DIR__ . '/groups/api/gateways/suitpay.php');
 
