@@ -25,6 +25,7 @@ class CustomLayout extends Model
      * @var array
      */
     protected $fillable = [
+        'theme', 'theme_overrides',
         'font_family_default',
         'primary_color',
         'primary_opacity_color',

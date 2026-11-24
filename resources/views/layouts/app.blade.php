@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="{{ \App\Core\Localization\Locales::htmlLang() }}" dir="{{ \App\Core\Localization\Locales::direction() }}" class="dark">
+@php $theme = \App\Core\Theming\Theme::tokens() @endphp
+<html lang="{{ \App\Core\Localization\Locales::htmlLang() }}" dir="{{ \App\Core\Localization\Locales::direction() }}" class="{{ ($theme['scheme'] ?? 'dark') === 'light' ? 'light' : 'dark' }}" @if($theme) data-theme="{{ $theme['key'] }}" @endif>
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
@@ -109,7 +110,17 @@
         @endif
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
+            @if($theme)
+            {{-- Theme tokens (config/themes.php + validated overrides). Emitted after the legacy
+                 custom_layouts variables so the theme wins; values are hex/px/allowlisted only. --}}
+            @if($fontsUrl = \App\Core\Theming\Theme::googleFontsUrl($theme))
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link rel="stylesheet" href="{{ $fontsUrl }}">
+            @endif
+            <style>:root{ {!! \App\Core\Theming\Theme::cssVariables($theme) !!} } body{font-family:var(--vp-font);background:var(--vp-bg);color:var(--vp-text);} h1,h2,h3,.vp-heading{font-family:var(--vp-font-heading);}</style>
+        @endif
+</head>
     <body color-theme="dark" class="bg-base text-gray-800 dark:text-gray-300 ">
         <div id="viperpro"></div>
 
@@ -144,7 +155,7 @@
 
         @if(!empty($custom))
             <script>
-                const custom = {!! json_encode($custom)  !!};
+                const custom = @json($custom);
             </script>
         @endif
     </body>

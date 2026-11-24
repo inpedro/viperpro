@@ -360,5 +360,21 @@
     "Settings saved": "Cilësimet u ruajtën",
     "Required": "I detyrueshëm",
     "Optional": "Opsional",
-    "Hidden": "I fshehur"
+    "Hidden": "I fshehur",
+    "Theme": "Tema",
+    "Brand overrides": "Personalizimet e markës",
+    "Optional. Leave empty to use the theme defaults.": "Opsionale. Lërini bosh për të përdorur vlerat e temës.",
+    "Primary colour": "Ngjyra kryesore",
+    "Accent colour": "Ngjyra theksuese",
+    "Corner radius (px)": "Rrumbullakimi i qosheve (px)",
+    "Font": "Shkronja",
+    "Theme default": "Sipas temës",
+    "Current custom colours (legacy)": "Ngjyrat aktuale të personalizuara (e vjetër)",
+    "Dark premium": "Premium i errët",
+    "Luxury casino": "Kazino luksoze",
+    "Clean modern": "Modern dhe i pastër",
+    "Modern gaming": "Lojëra moderne",
+    "Theme saved": "Tema u ruajt",
+    "Preview": "Parapamje",
+    "Play now": "Luaj tani"
 }

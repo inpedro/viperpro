@@ -360,5 +360,21 @@
     "Settings saved": "Settings saved",
     "Required": "Required",
     "Optional": "Optional",
-    "Hidden": "Hidden"
+    "Hidden": "Hidden",
+    "Theme": "Theme",
+    "Brand overrides": "Brand overrides",
+    "Optional. Leave empty to use the theme defaults.": "Optional. Leave empty to use the theme defaults.",
+    "Primary colour": "Primary colour",
+    "Accent colour": "Accent colour",
+    "Corner radius (px)": "Corner radius (px)",
+    "Font": "Font",
+    "Theme default": "Theme default",
+    "Current custom colours (legacy)": "Current custom colours (legacy)",
+    "Dark premium": "Dark premium",
+    "Luxury casino": "Luxury casino",
+    "Clean modern": "Clean modern",
+    "Modern gaming": "Modern gaming",
+    "Theme saved": "Theme saved",
+    "Preview": "Preview",
+    "Play now": "Play now"
 }

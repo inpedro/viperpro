@@ -60,6 +60,7 @@ Route::prefix('categories')
     });
 
 require(__DIR__ . '/groups/api/games/index.php');
+require(__DIR__ . '/groups/api/lobby/index.php');
 require(__DIR__ . '/groups/api/gateways/digitopay.php');
 require(__DIR__ . '/groups/api/gateways/suitpay.php');
 

@@ -133,6 +133,12 @@ class AdminPanelProvider extends PanelProvider
                             ->items([
                                 ...MissionResource::getNavigationItems(),
                                 ...VipResource::getNavigationItems(),
+                                NavigationItem::make('theme')
+                                    ->icon('heroicon-o-swatch')
+                                    ->label(fn (): string => __('Theme'))
+                                    ->url(fn (): string => \App\Filament\Admin\Pages\ThemePage::getUrl())
+                                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.theme'))
+                                    ->visible(fn (): bool => auth()->user()->hasRole('admin')),
                                 NavigationItem::make('localization')
                                     ->icon('heroicon-o-language')
                                     ->label(fn (): string => __('Languages & registration'))

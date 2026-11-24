@@ -360,5 +360,21 @@
     "Settings saved": "Configurações salvas",
     "Required": "Obrigatório",
     "Optional": "Opcional",
-    "Hidden": "Oculto"
+    "Hidden": "Oculto",
+    "Theme": "Tema",
+    "Brand overrides": "Personalização da marca",
+    "Optional. Leave empty to use the theme defaults.": "Opcional. Deixe em branco para usar os padrões do tema.",
+    "Primary colour": "Cor principal",
+    "Accent colour": "Cor de destaque",
+    "Corner radius (px)": "Arredondamento dos cantos (px)",
+    "Font": "Fonte",
+    "Theme default": "Padrão do tema",
+    "Current custom colours (legacy)": "Cores personalizadas atuais (legado)",
+    "Dark premium": "Premium escuro",
+    "Luxury casino": "Cassino de luxo",
+    "Clean modern": "Moderno e limpo",
+    "Modern gaming": "Gaming moderno",
+    "Theme saved": "Tema salvo",
+    "Preview": "Pré-visualização",
+    "Play now": "Jogar agora"
 }

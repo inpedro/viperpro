@@ -38,7 +38,7 @@ final class TenantProvisioner
             }
 
             if (! CustomLayout::query()->exists()) {
-                CustomLayout::create(['custom_header' => '', 'custom_body' => '']);
+                CustomLayout::create(['custom_header' => '', 'custom_body' => '', 'theme' => (string) config('themes.default', 'obsidian')]);
             }
         });
     }
