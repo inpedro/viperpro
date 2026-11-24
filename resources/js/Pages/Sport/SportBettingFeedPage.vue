@@ -69,45 +69,10 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="border-b border-gray-200 dark:border-gray-700">
-                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap bg-gray-50 dark:text-white dark:bg-gray-800">
-                                        Phoenix Suns - San Antonio Spurs
-                                    </th>
-                                    <td class="px-6 py-4">
-                                        2x1
-                                    </td>
-                                    <td class="px-6 py-4 bg-gray-50 dark:bg-gray-800">
-                                        3.050
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        R$ 150
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        R$ 350
-                                    </td>
-                                    <td class="flex px-6 py-4">
-                                        <i class="fa-regular fa-user mr-2"></i> **** Jose
-                                    </td>
-                                </tr>
-                                <tr class="border-b border-gray-200 dark:border-gray-700">
-                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap bg-gray-50 dark:text-white dark:bg-gray-800">
-                                        Phoenix Suns - San Antonio Spurs
-                                    </th>
-                                    <td class="px-6 py-4">
-                                        2x1
-                                    </td>
-                                    <td class="px-6 py-4 bg-gray-50 dark:bg-gray-800">
-                                        3.050
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        R$ 150
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        R$ 350
-                                    </td>
-                                    <td class="flex px-6 py-4">
-                                        <i class="fa-regular fa-user mr-2"></i> **** Jose
-                                    </td>
+                                <!-- Previously hardcoded rows with invented users and stakes (fabricated activity, removed).
+                                     A real feed must come from settled bets via an API. -->
+                                <tr>
+                                    <td colspan="6" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">{{ $t('No data to show') }}</td>
                                 </tr>
                             </tbody>
                         </table>

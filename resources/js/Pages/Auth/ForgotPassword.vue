@@ -43,6 +43,7 @@
 
 
 <script>
+import { trans } from 'laravel-vue-i18n';
 
 import {useToast} from "vue-toastification";
 import {useAuthStore} from "@/Stores/Auth.js";
@@ -90,7 +91,7 @@ export default {
                 .then(async response =>  {
 
                     _this.isLoading = false;
-                    _toast.success('Um token foi enviado para você em sua caixa de E-mail!');
+                    _toast.success(trans('If the address is registered, a password reset link has been sent.'));
                 })
                 .catch(error => {
                     const _this = this;

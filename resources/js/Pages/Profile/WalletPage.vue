@@ -13,7 +13,7 @@
                                     <i class="fa-sharp fa-regular fa-dollar-sign text-2xl"></i>
                                 </div>
                                 <div class="leading-4 ml-3">
-                                    <span>Saldo Total</span>
+                                    <span>{{ $t('Total Balance') }}</span>
                                     <h1 class="text-lg font-bold text-yellow-400">{{ state.currencyFormat(parseFloat(wallet.balance), wallet.currency) }}</h1>
                                 </div>
                             </div>
@@ -22,7 +22,7 @@
                                     <i class="fa-sharp fa-regular fa-dollar-sign text-2xl"></i>
                                 </div>
                                 <div class="leading-4 ml-3">
-                                    <span>Saldo de Bônus</span>
+                                    <span>{{ $t('Bonus balance') }}</span>
                                     <h1 class="text-lg font-bold text-yellow-400">{{ state.currencyFormat(parseFloat(wallet.balance_bonus), wallet.currency) }}</h1>
                                 </div>
                             </div>
@@ -60,7 +60,7 @@
                                        <i class="fa-sharp fa-regular fa-dollar-sign text-2xl"></i>
                                    </div>
                                    <div class="leading-4 ml-3">
-                                       <span>Rollover de Bônus</span>
+                                       <span>{{ $t('Bonus rollover') }}</span>
                                        <h1 class="text-lg font-bold text-yellow-400">{{ state.currencyFormat(parseFloat(wallet.balance_bonus_rollover), wallet.currency) }}</h1>
                                    </div>
                                </div>
@@ -112,7 +112,7 @@
                                        </div>
                                    </div>
 
-                                    <span v-if="wallet.active === 1" class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Ativo</span>
+                                    <span v-if="wallet.active === 1" class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">{{ $t('Active') }}</span>
                                 </button>
                             </div>
                         </div>

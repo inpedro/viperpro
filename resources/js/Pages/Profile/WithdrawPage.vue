@@ -26,8 +26,8 @@
 
                             <div class="mt-5">
                                 <div class="dark:text-gray-400 mb-3 text-sm">
-                                    <label for="">Nome do titular da conta</label>
-                                    <input v-model="withdraw_deposit.name" type="text" class="input" placeholder="Digite o nome do titular da conta" required>
+                                    <label for="">{{ $t('Account holder name') }}</label>
+                                    <input v-model="withdraw_deposit.name" type="text" class="input" :placeholder="$t('Enter the account holder name')" required>
                                 </div>
 
                                 <div class="mt-5">
@@ -120,13 +120,13 @@
 
                             <div class="mt-5">
                                 <div class="dark:text-gray-400 mb-3">
-                                    <label for="">Nome do titular da conta</label>
-                                    <input v-model="withdraw.name" type="text" class="input" placeholder="Digite o nome do titular da conta" required>
+                                    <label for="">{{ $t('Account holder name') }}</label>
+                                    <input v-model="withdraw.name" type="text" class="input" :placeholder="$t('Enter the account holder name')" required>
                                 </div>
 
                                 <div class="dark:text-gray-400 mb-3">
                                     <label for="">Chave Pix</label>
-                                    <input v-model="withdraw.pix_key" type="text" class="input" placeholder="Digite a sua Chave pix" required>
+                                    <input v-model="withdraw.pix_key" type="text" class="input" :placeholder="$t('Enter your PIX key')" required>
                                 </div>
 
                                 <div class="dark:text-gray-400 mb-3">
@@ -136,7 +136,7 @@
                                         <option value="document">CPF/CNPJ</option>
                                         <option value="email">E-mail</option>
                                         <option value="phoneNumber">Telefone</option>
-                                        <option value="randomKey">Chave Aleatória</option>
+                                        <option value="randomKey">{{ $t('Random key') }}</option>
                                     </select>
                                 </div>
 

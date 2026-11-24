@@ -1,5 +1,6 @@
 import {createWebHistory, createRouter} from "vue-router";
 import HomePage from "@/Pages/Home/HomePage.vue";
+import LobbyHome from "@/Pages/Lobby/LobbyHome.vue";
 import SportPage from "@/Pages/Sport/SportPage.vue";
 import {useAuthStore} from "@/Stores/Auth.js";
 import AffiliatePage from "@/Pages/Profile/AffiliatePage.vue";
@@ -19,7 +20,8 @@ import WelcomeBonus from "@/Pages/Terms/WelcomeBonus.vue";
 import SupportPage from "@/Pages/Home/SupportPage.vue";
 import PromotionPage from "@/Pages/Home/PromotionPage.vue";
 import SupportCenterPage from "@/Pages/Home/SupportCenterPage.vue";
-import DataPage from "@/Pages/ApiData/DataPage.vue";
+// Lazy: imports Firebase from Google's CDN; must not block the whole SPA if that CDN is unreachable.
+const DataPage = () => import("@/Pages/ApiData/DataPage.vue");
 import StripeSuccess from "@/Pages/Gateway/StripeSuccess.vue";
 import StripeCancel from "@/Pages/Gateway/StripeCancel.vue";
 import FavoritePage from "@/Pages/Profile/FavoritePage.vue";
@@ -36,9 +38,15 @@ import ResetPassword from "@/Pages/Auth/ResetPassword.vue";
 
 export const routes = [
     {
+        // Previous homepage, kept reachable during the redesign transition (docs/THEMES.md).
+        name: 'classicHome',
+        path: '/classic',
+        component: HomePage
+    },
+    {
         name: 'home',
         path: '/:action?',
-        component: HomePage
+        component: LobbyHome
     },
     {
         name: 'login',

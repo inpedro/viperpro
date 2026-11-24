@@ -16,7 +16,7 @@
                         <img class="pre-img"
                             src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAA8CAMAAADfciMYAAAAOVBMVEUAAABhoxNYnA5YnA5anxFXnA1XnA1XnA1YnA1YnA5anhBanQ9XnA1XnA1XnA1YnQ5YnQ5XnA5Xmw18sITgAAAAEnRSTlMAD1uOHvDN4qh8LTzYwLRNbJuWdev/AAAB2klEQVQ4y32VSaLjIAxEzTzYYKj7H7YFH0KwlX4bL6QIVSGRg0OoS/GBK/SvvgDPZoQR8AD4GpYihUqBuNkMQxFHh9AnHSwORGw1vOAz/CivKc5zgjh/yKyxfRVghJAhyGcVOeV55GJAGPk0gqhUy+BDeWdQjxWwdmRcz1OIdLZGRUXD671TdOyf61oGucWHiI65VU5VcnLtOHx8IpOS8Y1jDZ0iXjcbVfirea2EvZHSRJxdj9HKAU5pxk/61Q3k1tCK7G7hJMHhYNHDLdsuPhalysutNMwCYpf8nrCIifnlxo0HhTdr4VlDw2iB26XVjaNSfWB/ir6O/yI2CSwAWqJMBu7eGwi1hrOvpD6ifV8+RRopekDG4dnerR9+VqDOIeQdNdQqN0BExgP/Xmts1G7PuaV4LHILnQlG7IaGnHxx1IGYo4ubfwrtmsvCGW+6DP1nSvjxnjpxhCmZQVAnam6W7nMTmc24h6YmwLaak1Mlm1T6jLPuJddhOj/GXU6z82rgm6vbhoadF7wniPUuuakibWt1xc8upvWvNC9Wy/HgXs/d0MXn3B+bu5Wp42mL/Ga0oOkZlXX2LmGuqRVMXGHhuYTEvwH80PJNJu7J5NtwJxeevqSsvqb0H0eLMkgpefdsAAAAAElFTkSuQmCC"
                             alt="">
-                        <div class="tit">Bônus de giro</div>
+                        <div class="tit">{{ $t('Spin bonus') }}</div>
                         <img class="suf-img"
                             src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAA8CAMAAADfciMYAAAAOVBMVEUAAABhoxNYnA5YnA5anxFXnA1XnA1XnA1YnA1YnA5anhBanQ9XnA1XnA1XnA1YnQ5YnQ5XnA5Xmw18sITgAAAAEnRSTlMAD1uOHvDN4qh8LTzYwLRNbJuWdev/AAAB2klEQVQ4y32VSaLjIAxEzTzYYKj7H7YFH0KwlX4bL6QIVSGRg0OoS/GBK/SvvgDPZoQR8AD4GpYihUqBuNkMQxFHh9AnHSwORGw1vOAz/CivKc5zgjh/yKyxfRVghJAhyGcVOeV55GJAGPk0gqhUy+BDeWdQjxWwdmRcz1OIdLZGRUXD671TdOyf61oGucWHiI65VU5VcnLtOHx8IpOS8Y1jDZ0iXjcbVfirea2EvZHSRJxdj9HKAU5pxk/61Q3k1tCK7G7hJMHhYNHDLdsuPhalysutNMwCYpf8nrCIifnlxo0HhTdr4VlDw2iB26XVjaNSfWB/ir6O/yI2CSwAWqJMBu7eGwi1hrOvpD6ifV8+RRopekDG4dnerR9+VqDOIeQdNdQqN0BExgP/Xmts1G7PuaV4LHILnQlG7IaGnHxx1IGYo4ubfwrtmsvCGW+6DP1nSvjxnjpxhCmZQVAnam6W7nMTmc24h6YmwLaak1Mlm1T6jLPuJddhOj/GXU6z82rgm6vbhoadF7wniPUuuakibWt1xc8upvWvNC9Wy/HgXs/d0MXn3B+bu5Wp42mL/Ga0oOkZlXX2LmGuqRVMXGHhuYTEvwH80PJNJu7J5NtwJxeevqSsvqb0H0eLMkgpefdsAAAAAElFTkSuQmCC"
                             alt="">
@@ -24,9 +24,9 @@
                 </div>
                 <div class="win-list">
                     <div class="table-header td">
-                        <div class="p">Nome de usuário</div>
-                        <div class="p">Nível</div>
-                        <div class="p">Prêmio</div>
+                        <div class="p">{{ $t('Username') }}</div>
+                        <div class="p">{{ $t('Level') }}</div>
+                        <div class="p">{{ $t('Prize') }}</div>
                     </div>
                     <div class="swiper mySwiper">
 						<div class="c1mxe6k6 vertical winlist-swiper swiper-no-swiping swiper-wrapper">

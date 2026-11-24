@@ -49,12 +49,23 @@ Severity: **C** = exploitable anonymously for money or full account takeover; **
 | 24 | M | `MercadoPagoTrait::mercadoPagoCallback` (dead code) marked the transaction paid before settlement, so it could never credit. | Removed. | — |
 | 25 | H | No audit trail of balance changes. | Double-entry ledger plus observer for legacy paths; `wallet:reconcile`. | `LedgerTest` |
 
+### Found and fixed in Phases 5–6
+
+| # | Sev | Finding | Resolution |
+|---|---|---|---|
+| 26 | M | Registration validated `unique:users` globally: the same e-mail could not join another brand, and the response revealed the account existed there. | Unique per tenant (`RegistrationPolicy`). |
+| 27 | M | Layout config printed with raw `json_encode` inside `<script>`: a stored `</script>` in any layout field broke out of the script. | `@json` (escapes `<`, `>`, `&`, quotes). |
+| 28 | H | The SPA imported Firebase from `www.gstatic.com` and read sports data from a **third party's** Firebase project (`footballapi-77676`, API key in the source). Availability: the whole site failed to load when the CDN was blocked. Integrity: displayed data came from an unknown party. | The route is lazy-loaded (availability fixed). **Open:** replace with a licensed data provider (Phase 7) and remove the embedded third-party key. |
+| 29 | M | Theme overrides could have become a CSS injection path. | Strict validation; anything else is dropped. Covered by tests. |
+
 ## 3. Deceptive or non-compliant features
 
 | Finding | Action |
 |---|---|
 | "Demo agent" accounts received a 90% win rate plus scripted wins, a mechanism for staging fake big-win streams. | Removed: every account gets identical odds. The flag still controls a separate demo balance; Phase 8 should remove the feature or label it unmistakably. |
 | `/api/spin/winners` returned 200 Faker-generated names and a hardcoded "total bonus". | Now returns only real redemptions (names masked). |
+| The sports bets feed showed hardcoded rows with invented players and stakes. | Removed; honest empty state until a real feed exists. |
+| The affiliate page listed invented programme "rules" (another brand's wallet, checks the code doesn't perform). | Replaced with statements that match the platform, plus a link to the operator's referral terms. |
 | The in-house slot outcomes are picked from pre-set win/lose lists weighted by `games.rtp` (a hit frequency, not an RTP). Not a certified RNG. | The final pick now uses `random_int`. **These games must not be offered for real money** without independent RNG/game certification in the target jurisdiction. |
 
 ## 4. Remaining vulnerabilities and risks (open)

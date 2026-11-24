@@ -41,6 +41,56 @@ final class Theme
         return self::exists($key) ? $key : null;
     }
 
+    /**
+     * Tokens for the design-system components when the tenant has not picked a theme:
+     * derived from its existing custom_layouts colours (hex-validated), Obsidian as fallback.
+     * Legacy mode never overrides the --ci-* variables, so existing pages look exactly as before.
+     */
+    public static function legacyTokens(): array
+    {
+        $t = self::presets()[(string) config('themes.default', 'obsidian')];
+        $t['key'] = 'legacy';
+        $t['legacy'] = true;
+
+        try {
+            $row = CustomLayout::query()->first();
+        } catch (\Throwable) {
+            $row = null;
+        }
+        if (! $row) {
+            return $t;
+        }
+
+        $map = [
+            'bg' => 'background_color', 'surface' => 'gray_dark_color', 'surface-2' => 'gray_over_color',
+            'border' => 'gray_light_color', 'text' => 'text_color', 'muted' => 'sub_text_color',
+            'primary' => 'primary_color', 'accent' => 'secundary_color',
+        ];
+        foreach ($map as $token => $column) {
+            $hex = self::normalizeHex($row->getAttributes()[$column] ?? null);
+            if ($hex !== null) {
+                $t['colors'][$token] = $hex;
+            }
+        }
+        $t['colors']['primary-contrast'] = self::contrastFor($t['colors']['primary']);
+
+        return $t;
+    }
+
+    /** #RGB / #RRGGBB / #RRGGBBAA -> #RRGGBB, anything else -> null. */
+    public static function normalizeHex(mixed $value): ?string
+    {
+        if (! is_string($value) || ! preg_match('/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/', trim($value))) {
+            return null;
+        }
+        $h = substr(trim($value), 1);
+        if (strlen($h) === 3) {
+            $h = $h[0].$h[0].$h[1].$h[1].$h[2].$h[2];
+        }
+
+        return '#'.strtoupper(substr($h, 0, 6));
+    }
+
     /** Resolved tokens (preset + sanitized overrides), or null in legacy mode. */
     public static function tokens(?string $key = null, ?array $overrides = null): ?array
     {
@@ -111,6 +161,10 @@ final class Theme
         $vars['--vp-font'] = $fonts[$t['font']]['family'] ?? $fonts['system']['family'];
         $vars['--vp-font-heading'] = $fonts[$t['heading_font']]['family'] ?? $vars['--vp-font'];
 
+        if (! empty($t['legacy'])) {
+            return implode('', array_map(fn ($k, $v) => "{$k}:{$v};", array_keys($vars), $vars));
+        }
+
         // Legacy variables used across existing pages, so they adopt the theme too.
         $c = $t['colors'];
         $vars += [
@@ -128,9 +182,19 @@ final class Theme
             '--background-color' => $c['bg'],
             '--standard-color' => $c['surface'],
             '--border-radius' => $t['radius'].'px',
+            // Layout chrome (nav, sidebar, cards, inputs): one value for both schemes, since the
+            // theme fixes the scheme.
+            '--sidebar-color' => $c['surface'], '--sidebar-color-dark' => $c['surface'],
+            '--navtop-color' => $c['surface'], '--navtop-color-dark' => $c['surface'],
+            '--side-menu' => $c['surface-2'], '--side-menu-dark' => $c['surface-2'],
+            '--footer-color' => $c['surface'], '--footer-color-dark' => $c['surface'],
+            '--card-color' => $c['surface'], '--card-color-dark' => $c['surface'],
+            '--input-primary' => $c['surface-2'], '--input-primary-dark' => $c['surface-2'],
+            '--carousel-banners' => $c['surface'], '--carousel-banners-dark' => $c['surface'],
         ];
 
-        return implode('', array_map(fn ($k, $v) => "{$k}:{$v};", array_keys($vars), $vars));
+        // !important: the legacy layout block declares some of these with !important too.
+        return implode('', array_map(fn ($k, $v) => "{$k}:{$v} !important;", array_keys($vars), $vars));
     }
 
     public static function googleFontsUrl(array $t): ?string

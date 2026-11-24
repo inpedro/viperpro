@@ -140,8 +140,26 @@ Also fixed: registration validated `unique:users` across all tenants, which bloc
 
 **Migration:** `2026_11_27_000001_add_localization_settings` (reversible). Full detail in `docs/LOCALIZATION.md`.
 
-## Phase 6: Frontend redesign
-Design tokens per tenant; themes Obsidian / Royal / Minimal / Neon; lobby, player dashboard, wallet, promotions, VIP, affiliate, responsible-gaming pages. Remove the cloned game assets unless licensed.
+## Phase 6: Frontend redesign (**done: design system, themes, lobby**)
+
+| Item | Status |
+|---|---|
+| Design tokens + four themes (Obsidian, Royal, Minimal, Neon), per-tenant selection with safe overrides, admin page with preview | done |
+| Existing pages adopt the theme through the legacy variable mapping; legacy mode for un-themed tenants | done |
+| Design-system components (`resources/js/Components/DS`) | done |
+| New lobby homepage: hero, search, categories, providers, featured/popular/new rails, grid, URL filters, responsible-gaming notice | done |
+| Normalized lobby API | done |
+| Remaining Portuguese UI strings, `R$` amounts → translations + `Intl` money formatting | done |
+| Screenshots of all themes (`docs/screenshots`) | done |
+| Wallet/deposit/withdraw, profile, VIP, promotions, auth modals rebuilt on the design system | **open** (with Phase 8) |
+| Legal pages as tenant-managed content | **open** (Phase 8) |
+
+**Breaking changes**
+* `/` serves the new lobby; the old homepage is at `/classic`.
+* Tailwind uses `darkMode: 'class'`: the theme decides light/dark instead of the visitor's OS.
+* The sports bets feed and the affiliate rules no longer show fabricated content.
+
+**Migration:** `2026_11_28_000001_add_theme_to_custom_layouts` (reversible). Details in `docs/THEMES.md`.
 
 ## Phase 7: Integrations ecosystem
 Rebuild each provider and gateway adapter against its official documentation and sandbox: signed webhooks, idempotent bet/win/rollback with ledger references, health checks, webhook monitoring and a replay UI over `callback_logs`. New adapters (e.g. Adyen, Nuvei, licensed aggregators) only with real documentation and credentials.

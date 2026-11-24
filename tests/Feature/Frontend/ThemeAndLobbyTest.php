@@ -39,14 +39,17 @@ class ThemeAndLobbyTest extends SecurityTestCase
 
     public function test_legacy_mode_keeps_existing_colours_and_theme_mode_emits_tokens(): void
     {
-        $this->get('/')->assertOk()->assertDontSee('data-theme=', false)->assertDontSee('--vp-primary', false);
+        // Legacy: tokens derived from the tenant's colours, but --ci-* variables are not overridden.
+        \Illuminate\Support\Facades\DB::table('custom_layouts')->update(['primary_color' => '#1da639']);
+        $this->get('/')->assertOk()->assertDontSee('data-theme=', false)
+            ->assertSee('--vp-primary:#1DA639', false)->assertDontSee('--ci-primary-color:#', false);
 
         CustomLayout::query()->update(['theme' => 'minimal']);
         $this->get('/')->assertOk()
             ->assertSee('data-theme="minimal"', false)
             ->assertSee('class="light"', false)
-            ->assertSee('--vp-primary:#111827', false)
-            ->assertSee('--ci-primary-color:#111827', false);
+            ->assertSee('--vp-primary:#111827 !important', false)
+            ->assertSee('--ci-primary-color:#111827 !important', false);
     }
 
     public function test_overrides_cannot_inject_css(): void
@@ -61,7 +64,7 @@ class ThemeAndLobbyTest extends SecurityTestCase
 
         CustomLayout::query()->update(['theme' => 'obsidian', 'theme_overrides' => json_encode(['primary' => 'x;}</style><script>bad()</script>', 'accent' => '#123456'])]);
         // Not in the CSS, and not able to break out of the inline <script> config either.
-        $this->get('/')->assertOk()->assertDontSee('<script>bad()', false)->assertDontSee('x;}</style>', false)->assertSee('--vp-accent:#123456', false);
+        $this->get('/')->assertOk()->assertDontSee('<script>bad()', false)->assertDontSee('x;}</style>', false)->assertSee('--vp-accent:#123456 !important', false);
     }
 
     public function test_primary_override_gets_an_accessible_contrast_colour(): void

@@ -1,5 +1,5 @@
 <!doctype html>
-@php $theme = \App\Core\Theming\Theme::tokens() @endphp
+@php $theme = \App\Core\Theming\Theme::tokens(); $tokens = $theme ?? \App\Core\Theming\Theme::legacyTokens(); @endphp
 <html lang="{{ \App\Core\Localization\Locales::htmlLang() }}" dir="{{ \App\Core\Localization\Locales::direction() }}" class="{{ ($theme['scheme'] ?? 'dark') === 'light' ? 'light' : 'dark' }}" @if($theme) data-theme="{{ $theme['key'] }}" @endif>
     <head>
         <meta charset="UTF-8">
@@ -71,17 +71,17 @@
                 --sidebar-color-dark: {{ $custom['sidebar_color_dark'] }} !important;
 
 
-                --navtop-color {{ $custom['navtop_color'] }};
+                --navtop-color: {{ $custom['navtop_color'] }};
                 --navtop-color-dark: {{ $custom['navtop_color_dark'] }};
 
 
-                --side-menu {{ $custom['side_menu'] }};
+                --side-menu: {{ $custom['side_menu'] }};
                 --side-menu-dark: {{ $custom['side_menu_dark'] }};
 
-                --footer-color {{ $custom['footer_color'] }};
+                --footer-color: {{ $custom['footer_color'] }};
                 --footer-color-dark: {{ $custom['footer_color_dark'] }};
 
-                --card-color {{ $custom['card_color'] }};
+                --card-color: {{ $custom['card_color'] }};
                 --card-color-dark: {{ $custom['card_color_dark'] }};
             }
             .navtop-color{
@@ -110,16 +110,14 @@
         @endif
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-            @if($theme)
-            {{-- Theme tokens (config/themes.php + validated overrides). Emitted after the legacy
-                 custom_layouts variables so the theme wins; values are hex/px/allowlisted only. --}}
-            @if($fontsUrl = \App\Core\Theming\Theme::googleFontsUrl($theme))
-                <link rel="preconnect" href="https://fonts.googleapis.com">
-                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-                <link rel="stylesheet" href="{{ $fontsUrl }}">
-            @endif
-            <style>:root{ {!! \App\Core\Theming\Theme::cssVariables($theme) !!} } body{font-family:var(--vp-font);background:var(--vp-bg);color:var(--vp-text);} h1,h2,h3,.vp-heading{font-family:var(--vp-font-heading);}</style>
+            {{-- Design tokens (config/themes.php + validated overrides, or derived from the legacy custom
+             colours). Emitted after the legacy variables; values are hex/px/allowlisted fonts only. --}}
+        @if($fontsUrl = \App\Core\Theming\Theme::googleFontsUrl($tokens))
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link rel="stylesheet" href="{{ $fontsUrl }}">
         @endif
+        <style>:root{ {!! \App\Core\Theming\Theme::cssVariables($tokens) !!} }@if($theme) body{font-family:var(--vp-font);background:var(--vp-bg);color:var(--vp-text);} h1,h2,h3,.vp-heading{font-family:var(--vp-font-heading);} .navtop-color,.dark .navtop-color{background-color:var(--vp-surface)!important;border-color:var(--vp-border)!important;} .bg-base,.dark .bg-base{background-color:var(--vp-bg)!important;} .dark .sidebar-base li{background-color:var(--vp-surface-2)!important;}@endif</style>
 </head>
     <body color-theme="dark" class="bg-base text-gray-800 dark:text-gray-300 ">
         <div id="viperpro"></div>
@@ -134,13 +132,14 @@
 
             window._token = '{{ csrf_token() }}';
             //if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            if (localStorage.getItem('color-theme') === 'light') {
-                document.documentElement.classList.remove('dark')
-                document.documentElement.classList.add('light');
-            } else {
-                document.documentElement.classList.remove('light')
-                document.documentElement.classList.add('dark')
-            }
+            // The server sets the theme's scheme on <html>; only an explicit visitor choice overrides it.
+            try {
+                const chosen = localStorage.getItem('color-theme');
+                if (chosen === 'light' || chosen === 'dark') {
+                    document.documentElement.classList.remove(chosen === 'light' ? 'dark' : 'light');
+                    document.documentElement.classList.add(chosen);
+                }
+            } catch (e) { /* storage unavailable: keep the theme's scheme */ }
         </script>
 
         @if(!empty($custom['custom_js']))

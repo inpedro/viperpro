@@ -98,7 +98,7 @@
             <div v-if="showPixQRCode && wallet" class="flex flex-col ">
                 <div class="w-full p-4 bg-white dark:bg-gray-700 rounded mb-3">
                     <div class="flex justify-between">
-                        <h2 class="text-lg">Falta pouco! Escaneie o código QR pelo seu app de pagamentos ou Internet Banking</h2>
+                        <h2 class="text-lg">{{ $t('Almost there! Scan the QR code with your payment or banking app') }}</h2>
                         <div class="text-4xl">
                             <i class="fa-regular fa-circle-dollar"></i>
                         </div>
@@ -113,10 +113,10 @@
                         <QRCodeVue3 :value="qrcodecopypast"/>
                     </div>
                     <div>
-                        <p class="font-bold">Código válido por 23 horas.</p>
+                        <p class="font-bold">{{ $t('Code valid for 23 hours.') }}</p>
                     </div>
                     <div class="mt-4">
-                        <p class="mb-3">Se preferir, você pode pagá-lo copiando e colando o código abaixo:</p>
+                        <p class="mb-3">{{ $t('If you prefer, copy and paste the code below:') }}</p>
                         <input id="pixcopiaecola" type="text" class="input" v-model="qrcodecopypast">
                     </div>
 
@@ -183,7 +183,7 @@
                             <label class="inline-flex items-center mb-5 cursor-pointer">
                                 <input type="checkbox" v-model="deposit.accept_bonus" value="" class="sr-only peer">
                                 <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:w-5 after:h-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
-                                <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Aceitar Bônus</span>
+                                <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">{{ $t('Accept bonus') }}</span>
                             </label>
                         </div>
 
@@ -236,6 +236,8 @@
 </template>
 
 <script>
+import { trans } from 'laravel-vue-i18n';
+import { formatMoney } from '@/Services/money.js';
     import {useToast} from "vue-toastification";
     import HttpApi from "@/Services/HttpApi.js";
     import QRCodeVue3 from "qrcode-vue3";
@@ -328,7 +330,7 @@
             checkoutStripe: function() {
                 const _toast = useToast();
                 if(this.amount <= 0 || this.amount === '') {
-                    _toast.error('Você precisa digitar um valor');
+                    _toast.error(trans('You need to enter a value'));
                     return;
                 }
 
@@ -369,12 +371,12 @@
                 }
 
                 if(parseFloat(_this.deposit.amount) < parseFloat(_this.setting.min_deposit)) {
-                    _toast.error('O valor mínimo de depósito é de '+ _this.setting.min_deposit);
+                    _toast.error(trans('The minimum deposit is :amount', { amount: formatMoney(_this.setting.min_deposit, _this.setting.currency_code) }));
                     return;
                 }
 
                 if(parseFloat(_this.deposit.amount) > parseFloat(_this.setting.max_deposit)) {
-                    _toast.error('O valor máximo de depósito é de '+ _this.setting.min_deposit);
+                    _toast.error(trans('The maximum deposit is :amount', { amount: formatMoney(_this.setting.max_deposit, _this.setting.currency_code) }));
                     return;
                 }
 
@@ -406,7 +408,7 @@
                 const _toast = useToast();
 
                 HttpApi.post(_this.paymentGateway+'/consult-status-transaction', { idTransaction: idTransaction }).then(response => {
-                    _toast.success('Pedido concluído com sucesso');
+                    _toast.success(trans('Request completed successfully'));
                     clearInterval(_this.intervalId);
                     _this.openModalDeposit();
                 }).catch(error => {
@@ -423,7 +425,7 @@
 
                 // Copia o conteúdo para a área de transferência
                 document.execCommand("copy");
-                _toast.success('Pix Copiado com sucesso');
+                _toast.success(trans('Code copied successfully'));
             },
             setAmount: function(amount) {
                 this.deposit.amount = amount;

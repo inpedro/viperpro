@@ -20,7 +20,7 @@
                     </div>
 					<div class="modal-footer spin-footer" id="spin-footer">
 						<div class="left-cont">
-							<div class="tit">Bônus total</div>
+							<div class="tit">{{ $t('Total bonus') }}</div>
 							<div class="amount">{{ totalBonus }}</div>
 						</div>
 						<div class="right-cont" @click="OpenWinList()">
