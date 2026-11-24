@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: intl, sodium, gd, zip, pdo_sqlite
+          coverage: none
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+          php artisan jwt:secret --force
+      - name: Tests
+        run: php artisan test
+      - name: Translations complete
+        run: php artisan lang:check --strict
+      - name: Addon integrity
+        run: php artisan addon:package verify
+      - name: Dependency audit
+        run: composer audit --no-dev --abandoned=ignore || echo "::warning::composer audit reported advisories (see docs/RELEASE_CHECKLIST.md)"
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build

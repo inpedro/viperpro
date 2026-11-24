@@ -24,9 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('gateways', function (Blueprint $table) {
-            $table->dropColumn('digitopay_uri');
-            $table->dropColumn('digitopay_cliente_id');
-            $table->dropColumn('digitopay_cliente_secret');
+            $table->dropColumn(['digitopay_uri', 'digitopay_cliente_id', 'digitopay_cliente_secret']);
         });
     }
 };

@@ -6,7 +6,7 @@ _Phase 0 deliverable. Recorded 2026-11-23 against `main` @ `2b42044` (the reposi
 
 | Layer | Technology | Notes |
 |---|---|---|
-| Backend | Laravel 10, PHP ^8.1 | `composer.lock` pins `lcobucci/clock 2.3.0`, which refuses PHP 8.3 (install needs `--ignore-platform-req=php` or a lock update). |
+| Backend | Laravel 10, PHP ^8.1 | `composer.lock` pins `lcobucci/clock 2.3.0`, which refuses PHP 8.3 (install needs `--ignore-platform-req=php` or a lock update). _Fixed in Phase 9._ |
 | Admin | Filament 3 (two panels: `/admin`, `/affiliate`) | Spatie roles `admin`, `afiliado`. |
 | Player API | REST under `/api`, JWT (`tymon/jwt-auth`) guard `api` | Sanctum installed but only used by the default `/api/user` route. |
 | Frontend | Vue 3 + Vite + Pinia + Tailwind + Flowbite, 84 `.vue` files | Single catch-all route `{view}` serves the SPA (`routes/groups/layouts/app.php`). |

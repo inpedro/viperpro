@@ -23,8 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('settings', function (Blueprint $table) {
-            $table->dropColumn('withdrawal_limit');
-            $table->dropColumn('withdrawal_period');
+            $table->dropColumn(['withdrawal_limit', 'withdrawal_period']);
         });
     }
 };

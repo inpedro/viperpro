@@ -25,10 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('gateways', function (Blueprint $table) {
-            $table->dropColumn('mp_client_id');
-            $table->dropColumn('mp_client_secret');
-            $table->dropColumn('mp_public_key');
-            $table->dropColumn('mp_access_token');
+            $table->dropColumn(['mp_client_id', 'mp_client_secret', 'mp_public_key', 'mp_access_token']);
         });
     }
 };

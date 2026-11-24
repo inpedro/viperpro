@@ -25,10 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('games_keys', function (Blueprint $table) {
-            $table->dropColumn('worldslot_agent_code');
-            $table->dropColumn('worldslot_agent_token');
-            $table->dropColumn('worldslot_agent_secret_key');
-            $table->dropColumn('worldslot_api_endpoint');
+            $table->dropColumn(['worldslot_agent_code', 'worldslot_agent_token', 'worldslot_agent_secret_key', 'worldslot_api_endpoint']);
         });
     }
 };

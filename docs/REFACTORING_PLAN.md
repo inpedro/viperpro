@@ -211,9 +211,22 @@ No new migrations. Full detail in `docs/INTEGRATIONS.md`.
 
 **Migration:** `2026_11_29_000001_phase8_admin_security_rg_legal` (reversible: drops the three new tables and the new user columns). Details in `docs/ADMINISTRATION.md` and `docs/RESPONSIBLE_GAMING.md`.
 
-## Phase 9: QA and release
-Full regression, tenant-isolation, load and penetration tests; staging deployment on MySQL/InnoDB; documentation review; legal sign-off.
+## Phase 9: QA and release (**done in-repo; staging, pen-test and legal sign-off pending**)
+
+| Item | Status |
+|---|---|
+| CI workflow: tests, `lang:check --strict`, addon integrity, dependency audit, frontend build | done |
+| Migration round-trip test; fixed 21 migrations whose `down()` failed (several `dropColumn` calls, wrong table/column names) | done |
+| `composer.lock` installs on PHP 8.3 (`lcobucci/jwt` 4.3, `lcobucci/clock` 3.x) | done |
+| In-range dependency updates (Laravel 10.50, Livewire 3.8, Filament 3.3, commonmark 2.10, Guzzle 7.17): 81 → 5 advisories | done |
+| Laravel 12 upgrade (the 5 remaining advisories have no Laravel 10 fix) | **open** |
+| `DEPLOYMENT.md`, `RELEASE_CHECKLIST.md`, `CHANGELOG.md` | done |
+| MySQL staging run, load test, penetration test, legal sign-off | **open** (needs staging and people) |
+
+**Breaking changes:** the dependency updates span minor versions of Filament and Livewire, so custom Filament views should be checked. The Filament assets in `public/` were republished. `JWTMiddleWare` was renamed `JwtMiddleWare` (PSR-4), which matters only to code that referenced the old casing.
+
+No schema changes; the fixed `down()` methods only affect rollbacks.
 
 ## Working assumptions
 * Tests run on SQLite in memory (`phpunit.xml`). Engine-specific behaviour (InnoDB locks) must also be verified on staging MySQL.
-* `composer install` currently needs `--ignore-platform-req=php` on PHP 8.3 because of `lcobucci/clock 2.3.0`; updating `tymon/jwt-auth`/`lcobucci/*` is part of Phase 2.
+* `composer install` works on PHP 8.3 without platform overrides (lock updated in Phase 9).

@@ -23,8 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('settings', function (Blueprint $table) {
-            $table->dropColumn('cpa_value');
-            $table->dropColumn('cpa_baseline');
+            $table->dropColumn(['cpa_value', 'cpa_baseline']);
         });
     }
 };

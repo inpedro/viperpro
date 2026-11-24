@@ -23,8 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('wallets', function (Blueprint $table) {
-            $table->dropColumn('vip_level');
-            $table->dropColumn('vip_points');
+            $table->dropColumn(['vip_level', 'vip_points']);
         });
     }
 };

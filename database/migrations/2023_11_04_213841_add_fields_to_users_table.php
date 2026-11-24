@@ -36,20 +36,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('oauth_id');
-            $table->dropColumn('oauth_type');
-            $table->dropColumn('avatar');
-            $table->dropColumn('last_name');
-            $table->dropColumn('cpf');
-            $table->dropColumn('phone');
-            $table->dropColumn('logged_in');
-            $table->dropColumn('banned');
-            $table->dropColumn('inviter');
-            $table->dropColumn('affiliate_revenue_share');
-            $table->dropColumn('affiliate_cpa');
-            $table->dropColumn('affiliate_baseline');
-            $table->dropColumn('is_agent');
-            $table->dropColumn('status');
+            $table->dropColumn(['oauth_id', 'oauth_type', 'last_name', 'cpf', 'phone', 'logged_in', 'banned', 'inviter', 'inviter_code', 'affiliate_revenue_share', 'affiliate_cpa', 'affiliate_baseline', 'is_demo_agent', 'status']);
         });
     }
 };
