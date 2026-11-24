@@ -114,8 +114,31 @@ Also fixed in Phase 3:
 
 **Migrations:** `2026_11_26_000001_add_multi_tenancy` and `2026_11_26_000002_create_tenant_addons_table`. Both are reversible (tested up → down → up on SQLite). Full detail in `docs/TENANCY.md`.
 
-## Phase 5: Internationalization
-English default; Albanian (`sq`) translations; locale files for the existing `es`/`pt_BR`. Move every hardcoded string (Filament and Vue) to translation keys. RTL support. Configurable phone (libphonenumber), address and registration fields. PIX/CPF become an optional Brazil addon (field set + validator + gateways). Locale-aware money and date formatting. Timezone per tenant.
+## Phase 5: Internationalization (**done, player-facing**)
+
+| Item | Status |
+|---|---|
+| English default, UTC storage default, locale registry with native names, ICU locale and direction | done |
+| Per-tenant enabled locales, default locale and display timezone; admin page | done |
+| Locale resolution (player, Accept-Language, tenant) and validated language updates | done |
+| Albanian (`sq`): 100% of the JSON strings and Laravel validation/auth/password messages | done (needs native review) |
+| Hardcoded Portuguese API messages → English keys in all locales (`pt_BR` keeps the original wording) | done |
+| RTL support (`<html dir>`, locale `dir`, data-driven selector) | done |
+| Locale-aware money, number and date formatting | done |
+| International phone; configurable national-ID field (CPF only when chosen) | done |
+| `lang:check --strict` completeness check (in the test suite) | done |
+| Filament admin labels (~290), Vue literals (10 files) | **Phase 8 / Phase 6** |
+
+**Breaking changes**
+* **Existing installs must set `APP_TIMEZONE=America/Sao_Paulo`**, or stored timestamps shift.
+* API messages now default to English unless the tenant/player locale says otherwise. Tenant #1 keeps `pt_BR` as its default.
+* `updateLanguage` returns 422 for locales the casino doesn't offer.
+* The registration password minimum is 8 characters (was 6).
+* Registered phone numbers are stored normalized (E.164 with `+` when given).
+
+Also fixed: registration validated `unique:users` across all tenants, which blocked the same e-mail at another brand and revealed that the account existed there. It is now unique per tenant.
+
+**Migration:** `2026_11_27_000001_add_localization_settings` (reversible). Full detail in `docs/LOCALIZATION.md`.
 
 ## Phase 6: Frontend redesign
 Design tokens per tenant; themes Obsidian / Royal / Minimal / Neon; lobby, player dashboard, wallet, promotions, VIP, affiliate, responsible-gaming pages. Remove the cloned game assets unless licensed.

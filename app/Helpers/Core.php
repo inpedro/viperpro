@@ -240,7 +240,7 @@ class Core
     public static function getDistribution(): array
     {
         return [
-            'source' => 'Código Fonte',
+            'source' => 'In-house (source)',
             'evergame' => 'Evergame',
             'playigaming' => 'Play IGaming',
             'playgaming' => 'Play Gaming',
@@ -264,13 +264,13 @@ class Core
     {
         switch ($order) {
             case 'balance_bonus':
-                return 'Saldo Bônus';
+                return trans('Bonus balance');
 
             case 'balance':
-                return 'Saldo Depósito';
+                return trans('Deposit balance');
 
             case 'balance_withdrawal':
-                return 'Saldo de Saque';
+                return trans('Withdrawable balance');
 
         }
     }
@@ -282,10 +282,10 @@ class Core
     public static function getTypeOrder($order)
     {
         if($order == 'win') {
-            return 'Vitória';
+            return trans('Win');
         }
 
-        return 'Perda';
+        return trans('Loss');
     }
 
     /**
@@ -442,13 +442,13 @@ class Core
 
         switch ($key) {
             case 'document':
-                return 'Documento';
+                return trans('Document');
             case 'phoneNumber':
-                return 'Telefone';
+                return trans('Phone');
             case 'email':
                 return 'E-mail';
             case 'randomKey':
-                return 'Chave Aleatória';
+                return trans('Random key');
             default:
                 return $key;
         }
@@ -562,7 +562,7 @@ class Core
             return new $fullControllerName();
         } else {
             // Caso a classe não exista, você pode lidar com isso aqui
-            throw new \Exception("Controller não encontrado: $fullControllerName");
+            throw new \Exception("Controller not found: $fullControllerName");
         }
     }
 

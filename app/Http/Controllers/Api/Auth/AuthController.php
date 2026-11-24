@@ -71,15 +71,8 @@ class AuthController extends Controller
         try {
             $setting = \Helper::getSetting();
 
-             $rules = [
-                'name'          => 'required|string',
-                'email'         => 'required|email|unique:users',
-                'password'      => ['required', 'confirmed', Rules\Password::min(6)],
-                'phone'         => 'required',
-                //'cpf'         => 'required',
-                'term_a'        => 'required',
-                'agreement'     => 'required',
-            ];
+            // Fields and validation come from the tenant's registration policy (no Brazil defaults).
+            $rules = \App\Core\Localization\RegistrationPolicy::rules();
 
             $validator = \Validator::make($request->all(), $rules);
 
@@ -87,8 +80,14 @@ class AuthController extends Controller
                 return response()->json($validator->errors(), 400);
             }
 
-            $userData = $request->only(['name', 'password', 'email', 'phone', 'cpf']);
-            $userData['phone'] = \Helper::soNumero($userData['phone']);
+            $userData = $request->only(array_values(array_intersect(['name', 'password', 'email', 'phone', 'cpf'], array_keys($rules))));
+            if (! empty($userData['phone'])) {
+                $userData['phone'] = \App\Core\Localization\RegistrationPolicy::normalizePhone((string) $userData['phone']);
+            }
+            if (! empty($userData['cpf']) && \App\Core\Localization\RegistrationPolicy::config()['document_type'] === 'cpf') {
+                $userData['cpf'] = \Helper::soNumero($userData['cpf']);
+            }
+            $userData['language'] = app()->getLocale(); // the locale the player registered in
 
             /// criando dados do afiliado
             // Helper::getSetting() selects a fixed column list that omits these fields, so they were

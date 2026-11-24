@@ -24,6 +24,7 @@ class Setting extends Model
      * @var array
      */
     protected $fillable = [
+        'default_locale', 'enabled_locales', 'timezone', 'country_code', 'phone_field', 'document_field', 'document_type',
         'software_name',
         'software_description',
 

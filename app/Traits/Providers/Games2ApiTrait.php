@@ -73,11 +73,11 @@ trait Games2ApiTrait
                     $providerCheck = Provider::where('code', $provider['code'])->where('distribution', 'games2_api')->first();
                     if(empty($providerCheck)) {
                         Provider::create($data);
-                        echo "provedor salvo com sucesso \n";
+                        echo "provider saved \n";
                     }
                 }
             }else{
-                return response()->json(['status' => false, 'errors' => ['Erro ao carregar os jogos']]);
+                return response()->json(['status' => false, 'errors' => ['Could not load games']]);
             }
         }else{
             dd('NÂO AUTENTICADO');
@@ -122,10 +122,10 @@ trait Games2ApiTrait
                             Game::create($data);
                             sleep(2);
 
-                            echo "jogo criado com sucesso \n";
+                            echo "game created \n";
                         }
                     }else{
-                        return response()->json(['status' => false, 'errors' => ['Erro ao carregar os jogos']]);
+                        return response()->json(['status' => false, 'errors' => ['Could not load games']]);
                     }
                 }
             }

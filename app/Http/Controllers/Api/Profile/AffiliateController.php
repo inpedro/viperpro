@@ -120,7 +120,7 @@ class AffiliateController extends Controller
                 ->count();
 
             if ($withdrawalCount >= $withdrawalLimit) {
-                return response()->json(['message' => 'Você atingiu o limite de saques para este período'], 400);
+                return response()->json(['message' => trans('You have reached the withdrawal limit for this period')], 400);
             }
         }
 

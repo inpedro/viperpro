@@ -77,7 +77,7 @@ trait KaGamingTrait
                 ];
 
                 if(Game::create($data)) {
-                    echo "Cadastrado com sucesso \n <br/>";
+                    echo "registered \n <br/>";
                 }
             }
         }

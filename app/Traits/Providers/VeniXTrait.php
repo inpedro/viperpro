@@ -60,7 +60,7 @@ trait VeniXTrait
                         $providerCheck = Provider::where('code', $provider['code'])->where('distribution', 'venix')->first();
                         if(empty($providerCheck)) {
                             Provider::create($data);
-                            echo "provedor salvo com sucesso \n";
+                            echo "provider saved \n";
                         }
                     }
                 }
@@ -97,7 +97,7 @@ trait VeniXTrait
                             ];
 
                             Game::create($data);
-                            echo "jogo salvo com sucesso \n";
+                            echo "game saved \n";
                         }
                     }
                 }
@@ -157,7 +157,7 @@ trait VeniXTrait
                 case 'refund':
                     return $this->SetRefundVeniX($request);
                 default:
-                    return response()->json(['error' => 'Método desconhecido'], 400);
+                    return response()->json(['error' => 'Unknown method'], 400);
             }
         }
     }

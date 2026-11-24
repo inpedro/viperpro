@@ -74,15 +74,20 @@ class ProfileController extends Controller
      */
     public function updateLanguage(Request $request)
     {
-        if(auth('api')->check()) {
-            $user = auth('api')->user();
+        $language = (string) $request->input("language");
 
-            $user->language = $request->input('language');
-            $user->save();
-
-            return response()->json(['message' => 'Idioma atualizado com sucesso']);
+        // Only locales this casino offers; previously any string was stored and applied.
+        if (! \App\Core\Localization\Locales::isEnabled($language)) {
+            return response()->json(["error" => trans("Language not available")], 422);
         }
-        return response()->json(['message' => 'Idioma atualizado com sucesso, mas com dados salvo na sessão, faça login para salvar em seu perfil']);
+
+        if (auth("api")->check()) {
+            $user = auth("api")->user();
+            $user->language = $language;
+            $user->save();
+        }
+
+        return response()->json(["message" => trans("Language updated"), "language" => $language]);
     }
 
     /**
@@ -90,13 +95,7 @@ class ProfileController extends Controller
      */
     public function getLanguage(Request $request)
     {
-        $browserLanguages = $request->getLanguages();
-
-        $preferredLanguage = $browserLanguages[0] ?? 'en';
-        if(auth('api')->check()) {
-            return response()->json(['language' => auth('api')->user()->language]);
-        }
-
-        return response()->json(['language' => $preferredLanguage]);
+        // Already resolved by SetDefaultLanguage (user preference, Accept-Language, tenant default).
+        return response()->json(["language" => app()->getLocale()]);
     }
 }

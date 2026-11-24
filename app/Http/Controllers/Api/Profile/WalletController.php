@@ -102,7 +102,7 @@ class WalletController extends Controller
             }
 
             if($request->amount < 0) {
-                return response()->json(['error' => 'Você tem que solicitar um valor'], 400);
+                return response()->json(['error' => trans('You must request an amount')], 400);
             }
 
 
@@ -137,7 +137,7 @@ class WalletController extends Controller
             }
 
             if($request->amount > $setting->max_withdrawal) {
-                return response()->json(['error' => 'Você excedeu o limite máximo permitido de: '. $setting->max_withdrawal], 400);
+                return response()->json(['error' => trans('You exceeded the maximum allowed of :amount', ['amount' => $setting->max_withdrawal])], 400);
             }
 
             if($request->accept_terms == true) {
@@ -170,10 +170,10 @@ class WalletController extends Controller
                 ], 200);
             }
 
-            return response()->json(['error' => 'Você precisa aceitar os termos'], 400);
+            return response()->json(['error' => trans('You must accept the terms')], 400);
         }
 
-        return response()->json(['error' => 'Erro ao realizar o saqu'], 400);
+        return response()->json(['error' => trans('The withdrawal could not be processed')], 400);
     }
 
 

@@ -100,7 +100,7 @@ trait FiversGamesCommandTrait
 
                             Game::create($data);
 
-                            echo "jogo criado com sucesso \n";
+                            echo "game created \n";
                         }
                     }
                 }

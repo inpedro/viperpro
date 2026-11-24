@@ -664,7 +664,7 @@ trait SlotegratorTrait
             }else{
                 return response()->json([
                     'error_code' => "INTERNAL_ERROR",
-                    'error_description' => "Conexão não existe"
+                    'error_description' => "Connection does not exist"
                 ], ResponseAlias::HTTP_OK);
             }
         } catch (\Exception $e) {

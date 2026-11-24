@@ -65,9 +65,9 @@ trait StripeTrait
                 return $checkout;
             }
 
-            return response()->json(['error' => 'Erro ao criar sessão'], 500);
+            return response()->json(['error' => trans('Payment session could not be created')], 500);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Sessão não criada'], 500);
+            return response()->json(['error' => trans('Payment session could not be created')], 500);
         }
     }
 

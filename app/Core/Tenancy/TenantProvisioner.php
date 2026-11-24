@@ -29,6 +29,11 @@ final class TenantProvisioner
                     'cpa_baseline'        => 0,
                     'initial_bonus'       => 0,
                     'disable_rollover'    => 1,
+                    'default_locale'      => (string) config('locales.default', 'en'),
+                    'enabled_locales'     => json_encode([(string) config('locales.default', 'en')]),
+                    'timezone'            => 'UTC',
+                    'phone_field'         => 'required',
+                    'document_field'      => 'hidden',
                 ]);
             }
 

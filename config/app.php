@@ -70,7 +70,7 @@ return [
     |
     */
 
-    'timezone' => 'America/Sao_Paulo',
+    'timezone' => env('APP_TIMEZONE', 'UTC'), // tenants set their own (settings.timezone)
 
     /*
     |--------------------------------------------------------------------------
@@ -83,7 +83,7 @@ return [
     |
     */
 
-    'locale' => 'pt_BR',
+    'locale' => 'en', // platform default; tenants choose theirs (settings.default_locale)
 
     /*
     |--------------------------------------------------------------------------

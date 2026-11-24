@@ -133,6 +133,12 @@ class AdminPanelProvider extends PanelProvider
                             ->items([
                                 ...MissionResource::getNavigationItems(),
                                 ...VipResource::getNavigationItems(),
+                                NavigationItem::make('localization')
+                                    ->icon('heroicon-o-language')
+                                    ->label(fn (): string => __('Languages & registration'))
+                                    ->url(fn (): string => \App\Filament\Admin\Pages\LocalizationSettingsPage::getUrl())
+                                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.localization'))
+                                    ->visible(fn (): bool => auth()->user()->hasRole('admin')),
                                 NavigationItem::make('addons')
                                     ->icon('heroicon-o-puzzle-piece')
                                     ->label(fn (): string => 'Addons')

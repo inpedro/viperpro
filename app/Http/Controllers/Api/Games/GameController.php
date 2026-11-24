@@ -112,7 +112,7 @@ class GameController extends Controller
             $checkExist = GameFavorite::where('user_id', auth('api')->id())->where('game_id', $id)->first();
             if(!empty($checkExist)) {
                 if($checkExist->delete()) {
-                    return response()->json(['status' => true, 'message' => 'Removido com sucesso']);
+                    return response()->json(['status' => true, 'message' => trans('Removed successfully')]);
                 }
             }else{
                 $gameFavoriteCreate = GameFavorite::create([
@@ -121,7 +121,7 @@ class GameController extends Controller
                 ]);
 
                 if($gameFavoriteCreate) {
-                    return response()->json(['status' => true, 'message' => 'Criado com sucesso']);
+                    return response()->json(['status' => true, 'message' => trans('Created successfully')]);
                 }
             }
         }
@@ -137,7 +137,7 @@ class GameController extends Controller
             $checkExist = GameLike::where('user_id', auth('api')->id())->where('game_id', $id)->first();
             if(!empty($checkExist)) {
                 if($checkExist->delete()) {
-                    return response()->json(['status' => true, 'message' => 'Removido com sucesso']);
+                    return response()->json(['status' => true, 'message' => trans('Removed successfully')]);
                 }
             }else{
                 $gameLikeCreate = GameLike::create([
@@ -146,7 +146,7 @@ class GameController extends Controller
                 ]);
 
                 if($gameLikeCreate) {
-                    return response()->json(['status' => true, 'message' => 'Criado com sucesso']);
+                    return response()->json(['status' => true, 'message' => trans('Created successfully')]);
                 }
             }
         }
@@ -281,9 +281,9 @@ class GameController extends Controller
 
                     }
                 }
-                return response()->json(['error' => 'Você precisa ter saldo para jogar', 'status' => false, 'action' => 'deposit' ], 200);
+                return response()->json(['error' => trans('You need a balance to play'), 'status' => false, 'action' => 'deposit' ], 200);
             }
-            return response()->json(['error' => 'Você precisa tá autenticado para jogar', 'status' => false ], 400);
+            return response()->json(['error' => trans('You need to be logged in to play'), 'status' => false ], 400);
         }
         return response()->json(['error' => '', 'status' => false ], 400);
     }

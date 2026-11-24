@@ -60,7 +60,7 @@ trait PlayIGamingTrait
                         $providerCheck = Provider::where('code', $provider['code'])->where('distribution', 'playigaming')->first();
                         if(empty($providerCheck)) {
                             Provider::create($data);
-                            echo "provedor salvo com sucesso \n";
+                            echo "provider saved \n";
                         }
                     }
                 }
@@ -141,7 +141,7 @@ trait PlayIGamingTrait
             ];
 
             Game::create($data);
-            echo "jogo salvo com sucesso \n";
+            echo "game saved \n";
         }
     }
 
@@ -197,7 +197,7 @@ trait PlayIGamingTrait
                 case 'refund':
                     return $this->SetRefundPIG($request);
                 default:
-                    return response()->json(['error' => 'Método desconhecido'], 400);
+                    return response()->json(['error' => 'Unknown method'], 400);
             }
         }
     }
