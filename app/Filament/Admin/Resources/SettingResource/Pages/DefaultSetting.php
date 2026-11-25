@@ -18,7 +18,6 @@ use Filament\Support\Exceptions\Halt;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
-use Jackiedo\DotenvEditor\Facades\DotenvEditor;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class DefaultSetting extends Page implements HasForms
@@ -123,13 +122,7 @@ class DefaultSetting extends Page implements HasForms
                 }
             }
 
-            $envs = DotenvEditor::load(base_path('.env'));
 
-            $envs->setKeys([
-                'APP_NAME' => $this->data['software_name'],
-            ]);
-
-            $envs->save();
 
             if($setting->update($this->data)) {
                 Cache::put(\App\Core\Tenancy\Tenancy::key('setting'), $setting);

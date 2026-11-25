@@ -5,12 +5,12 @@ _Phase 9. "Verified here" means it was checked in this repository's test suite o
 ## Automated (CI: `.github/workflows/ci.yml`)
 | Check | State |
 |---|---|
-| Full test suite (`php artisan test`): security, ledger, payments contract, addons, tenancy isolation, localization, admin/RG | **verified here**: 120 tests |
+| Full test suite (`php artisan test`): security, ledger, payments contract, addons, tenancy isolation, localization, admin/RG | **verified here**: 123 tests, incl. a smoke test rendering every admin and platform page |
 | Every migration reverses and reapplies to an identical schema (`MigrationRoundTripTest`) | **verified here** |
 | Translations complete for en, sq, es, pt_BR (`lang:check --strict`) | **verified here** |
 | Addon integrity (`addon:package verify`) | **verified here** |
 | Frontend build | **verified here** |
-| `composer audit` | 81 → 5 advisories after in-range updates. **The remaining 5 are in Laravel 10, which is end-of-life**; fixes exist only in Laravel 12/13 (CRLF in the `email` rule, signed-URL path confusion, debug-page XSS, concurrency output injection). A Laravel 12 upgrade is required before production. Until then keep `APP_DEBUG=false` and don't put user-supplied e-mail addresses into raw mail headers. |
+| `composer audit` | **verified here: no advisories** (Laravel 12.74; was 81 on the original lock). Re-run on every release: CI reports new ones. |
 
 ## Must be done on staging (not possible in this environment)
 - [ ] Run the suite against **MySQL/InnoDB** (row-locking semantics differ from SQLite)

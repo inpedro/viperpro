@@ -70,6 +70,15 @@ Severity: **C** = exploitable anonymously for money or full account takeover; **
 | 35 | M | Template legal pages stated terms (in Portuguese, for another operator) the platform does not apply. | Removed; operator-managed documents, sanitized server-side. |
 | 36 | L | Analytics queries used `pluck(DB::raw(...))`, which crashes as soon as there is data (caught by the new tests before release). | Aliased `selectRaw`. |
 
+### Found and fixed during the Laravel 12 upgrade
+
+| # | Sev | Finding | Resolution |
+|---|---|---|---|
+| 37 | H | Four admin settings pages wrote the shared `.env` (`APP_NAME`, `MAIL_*`, legacy `STRIPE_*`). With several casinos, any casino admin changed the name and SMTP account of **every** casino, and a newline in a value could inject arbitrary environment variables (e.g. `APP_DEBUG`, DB credentials). | `.env` writes removed (package uninstalled); name and SMTP applied per tenant at runtime (`TenantRuntimeConfig`), covered by a test that also checks `.env` is untouched. |
+| 38 | M | Per-casino SMTP passwords stored in plain text. | Encrypted with `APP_KEY`; migration encrypts existing rows. |
+| 39 | L | The permissions filter used `eval()` on a config value. | Replaced with a plain `LIKE`. |
+| 40 | M | Laravel 10 is end-of-life. Its remaining advisories had no fix (CRLF in `email` rule, signed-URL path confusion, TokenGuard bypass < 10.50.4). | Upgraded to Laravel 12; `composer audit` clean. |
+
 ## 3. Deceptive or non-compliant features
 
 | Finding | Action |

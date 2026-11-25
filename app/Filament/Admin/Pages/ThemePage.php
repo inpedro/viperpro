@@ -48,7 +48,7 @@ class ThemePage extends Page implements HasForms
 
     public function mount(): void
     {
-        $layout = CustomLayout::query()->firstOrFail();
+        $layout = CustomLayout::current();
         $raw = $layout->getAttributes()['theme_overrides'] ?? null;
         $overrides = Theme::sanitizeOverrides(is_string($raw) ? (json_decode($raw, true) ?: []) : []);
 
@@ -104,7 +104,7 @@ class ThemePage extends Page implements HasForms
         $theme = Theme::exists($data['theme'] ?? null) ? $data['theme'] : null;
         $overrides = Theme::sanitizeOverrides(array_filter($data, fn ($v) => $v !== null && $v !== ''));
 
-        CustomLayout::query()->firstOrFail()->update([
+        CustomLayout::current()->update([
             'theme'           => $theme,
             'theme_overrides' => json_encode($overrides),
         ]);

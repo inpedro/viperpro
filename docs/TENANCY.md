@@ -32,7 +32,9 @@ Shared (not tenant-owned): the game catalogue (`games`, `providers`, `categories
 ## Per-tenant identity
 Each tenant has its own `settings` row (name, logos, favicon, currency, limits, bonus and affiliate rules), its own `custom_layouts` row (colours, fonts, custom CSS/JS), `setting_mails`, banners, VIP levels, missions, spin configuration, gateway credentials and addon activation. A new tenant is provisioned with neutral defaults (`TenantProvisioner`), which the tenant admin then edits in `/admin`.
 
-Not yet per-tenant (later phases): legal pages and SEO metadata (Phase 5/6 content model), SMS configuration, and theme selection beyond `custom_layouts` (Phase 6).
+`TenantRuntimeConfig` applies the casino's name (`app.name`) and SMTP account (`mail.*`) to each request once the tenant is resolved. `.env` values are only defaults; admin pages never write `.env`. Mail sent outside a request (queued jobs, `Tenancy::runAs`) uses the `.env` defaults unless the job applies the tenant config itself.
+
+Per-tenant since Phases 6 and 8: legal pages and theme selection. Not yet per-tenant: SEO metadata and SMS configuration.
 
 ## Operating
 ```bash

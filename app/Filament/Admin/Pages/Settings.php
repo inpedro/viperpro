@@ -17,7 +17,6 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Support\Facades\Cache;
-use Jackiedo\DotenvEditor\Facades\DotenvEditor;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 
@@ -291,13 +290,7 @@ class Settings extends Page implements HasForms
                     }
                 }
 
-                $envs = DotenvEditor::load(base_path('.env'));
 
-                $envs->setKeys([
-                    'APP_NAME' => $this->data['software_name'],
-                ]);
-
-                $envs->save();
 
                 if($setting->update($this->data)) {
 

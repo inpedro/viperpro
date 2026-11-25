@@ -10,7 +10,8 @@ The original Viper Pro rebuilt into a secure, modular, multi-tenant, internation
 * Game session tokens are signed; password reset is fixed; admin authorization is enforced.
 * Removed: exposed secrets, the anonymous DigitoPay Lambda default, the ZIP-upload code-execution path, the public log file, and demo-agent rigging.
 * Staff TOTP MFA, staff session revocation, audit of every admin change, CSP and security headers, JWT revocation.
-* Dependencies updated within their major versions (Livewire RCE, commonmark, Guzzle, Filament, Symfony advisories). The lock now installs on PHP 8.3.
+* Upgraded to **Laravel 12** (PHP 8.2+); `composer audit` is clean (81 advisories on the original lock, including a critical Livewire RCE).
+* Casino admins can no longer rewrite the shared `.env` (name/SMTP of every casino, variable injection); SMTP passwords are encrypted.
 
 ### Core (Phase 2)
 * Append-only double-entry ledger, `WalletService`, reconciliation command, `Money` value object.

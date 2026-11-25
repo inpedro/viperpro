@@ -25,4 +25,10 @@ class SpinConfigs extends Model
     {
         return json_decode($this->attributes['prizes'], true);
     }
+
+    /** The current casino's spin configuration, created empty (no prizes) if missing. */
+    public static function current(): self
+    {
+        return static::query()->first() ?? static::create(['prizes' => '[]']);
+    }
 }

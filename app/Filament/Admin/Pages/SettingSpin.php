@@ -52,7 +52,7 @@ class SettingSpin extends Page
      */
     public function mount(): void
     {
-        $this->setting = SpinConfigs::first();
+        $this->setting = SpinConfigs::current();
         $this->form->fill($this->setting->toArray());
     }
 
@@ -85,7 +85,7 @@ class SettingSpin extends Page
                 return;
             }
 
-            $setting = SpinConfigs::first();
+            $setting = SpinConfigs::current();
             if(!empty($setting)) {
 
                 $updatedData = [];

@@ -48,7 +48,7 @@ class LayoutCssCustom extends Page implements HasForms
      */
     public function mount(): void
     {
-        $this->custom = CustomLayout::first();
+        $this->custom = CustomLayout::current();
         $this->form->fill($this->custom->toArray());
     }
 
@@ -269,7 +269,7 @@ class LayoutCssCustom extends Page implements HasForms
                 return;
             }
 
-            $custom = CustomLayout::first();
+            $custom = CustomLayout::current();
 
             if(!empty($custom)) {
                 if($custom->update($this->data)) {

@@ -3,7 +3,7 @@
 _Phase 9. This covers staging. **Real-money operation also requires every item in `RELEASE_CHECKLIST.md`.**_
 
 ## Requirements
-* PHP 8.1–8.3 with `intl`, `sodium`, `gd`, `zip`, `pdo_mysql`. `composer install` no longer needs `--ignore-platform-req`: the JWT/clock lock was updated.
+* PHP 8.2+ (tested on 8.3) with `intl`, `sodium`, `gd`, `zip`, `pdo_mysql`. The application runs on **Laravel 12**.
 * MySQL 8 / MariaDB 10.6+, **InnoDB for every table**. Wallet and settlement locks rely on row locking.
 * Node 22 for the frontend build.
 * Redis is recommended for cache, queue and sessions.

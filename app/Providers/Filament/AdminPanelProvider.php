@@ -2,7 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 use App\Filament\Admin\Pages\AdvancedPage;
 use App\Filament\Admin\Pages\DashboardAdmin;
 use App\Filament\Admin\Pages\DigitoPayPaymentPage;
@@ -283,7 +282,6 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
                 \App\Http\Middleware\AdminSessionGuard::class,
             ], isPersistent: true)
-            ->plugin(FilamentSpatieRolesPermissionsPlugin::make())
             ;
     }
 }

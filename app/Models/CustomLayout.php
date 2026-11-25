@@ -79,4 +79,10 @@ class CustomLayout extends Model
         'youtube',
     ];
 
+    /** The current casino's layout row, created with defaults if it is missing. */
+    public static function current(): self
+    {
+        return static::query()->first()
+            ?? static::create(['custom_header' => '', 'custom_body' => '', 'theme' => (string) config('themes.default', 'obsidian')]);
+    }
 }

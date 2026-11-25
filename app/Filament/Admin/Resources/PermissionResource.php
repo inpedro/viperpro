@@ -125,19 +125,16 @@ class PermissionResource extends Resource
             ->filters([
                 Filter::make('models')
                     ->label('Models')
-                    ->form(function () {
-                        $commands = new \Althinect\FilamentSpatieRolesPermissions\Commands\Permission();
-                        $models = $commands->getAllModels();
-
-                        return array_map(function (\ReflectionClass $model) {
-                            return Checkbox::make($model->getShortName());
-                        }, $models);
-                    })
+                    ->form(fn () => array_map(
+                        fn (string $model) => Checkbox::make($model),
+                        collect(glob(app_path('Models/*.php')))->map(fn ($f) => basename($f, '.php'))->sort()->values()->all(),
+                    ))
                     ->query(function (Builder $query, array $data) {
                         return $query->where(function (Builder $query) use ($data) {
                             foreach ($data as $key => $value) {
                                 if ($value) {
-                                    $query->orWhere('name', 'like', eval(config('filament-spatie-roles-permissions.model_filter_key')));
+                                    // Permission names end with the model name (e.g. "view User").
+                                    $query->orWhere('name', 'like', '%'.$key);
                                 }
                             }
                         });

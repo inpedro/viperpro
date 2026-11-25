@@ -41,6 +41,7 @@ class ResolveTenant
         }
 
         Tenancy::set($tenant);
+        \App\Core\Tenancy\TenantRuntimeConfig::apply();
 
         return $next($request);
     }

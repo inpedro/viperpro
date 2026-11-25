@@ -1533,7 +1533,7 @@ class Core
 
         if(!$cached) {
             $c = SpinConfigs::latest()->first();
-            $str = $c->prizes;
+            $str = $c?->prizes ?? '[]';
             Cache::set($key, $str);
             $config = json_decode($str);
         } else {

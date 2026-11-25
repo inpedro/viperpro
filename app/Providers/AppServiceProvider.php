@@ -24,6 +24,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Labels of the role/permission resources (formerly provided by a Filament 3 plugin).
+        $this->loadTranslationsFrom(lang_path('vendor/filament-spatie-roles-permissions'), 'filament-spatie-roles-permissions');
+
 //        FilamentAsset::register([
 //            Js::make('filament-tools', base_path('vendor/sebastiaankloos/filament-code-editor/dist/filament-tools.js')),
 //        ]);

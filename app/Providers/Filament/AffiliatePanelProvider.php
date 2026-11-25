@@ -2,7 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 use App\Filament\Affiliate\Pages\DashboardAffiliate;
 use App\Filament\Affiliate\Resources\AffiliateWithdrawResource;
 use App\Filament\Affiliate\Resources\SubAffiliateResource;

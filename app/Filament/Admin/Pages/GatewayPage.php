@@ -10,7 +10,6 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Exceptions\Halt;
-use Jackiedo\DotenvEditor\Facades\DotenvEditor;
 
 class GatewayPage extends Page
 {
@@ -165,17 +164,6 @@ class GatewayPage extends Page
             $setting = Gateway::first();
             if(!empty($setting)) {
                 if($setting->update($this->data)) {
-                    if(!empty($this->data['stripe_public_key'])) {
-                        $envs = DotenvEditor::load(base_path('.env'));
-
-                        $envs->setKeys([
-                            'STRIPE_KEY' => $this->data['stripe_public_key'],
-                            'STRIPE_SECRET' => $this->data['stripe_secret_key'],
-                            'STRIPE_WEBHOOK_SECRET' => $this->data['stripe_webhook_key'],
-                        ]);
-
-                        $envs->save();
-                    }
 
                     Notification::make()
                         ->title('Chaves Alteradas')

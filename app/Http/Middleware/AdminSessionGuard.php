@@ -46,7 +46,7 @@ class AdminSessionGuard
                 'mfa_verified' => false, 'last_seen_at' => now(), 'created_at' => now(), 'updated_at' => now(),
             ]);
             $row = DB::table('admin_sessions')->where('session_hash', $hash)->first();
-        } elseif ($row->last_seen_at === null || now()->diffInSeconds($row->last_seen_at) > 60) {
+        } elseif ($row->last_seen_at === null || abs(now()->diffInSeconds(\Illuminate\Support\Carbon::parse($row->last_seen_at))) > 60) {
             DB::table('admin_sessions')->where('id', $row->id)->update(['last_seen_at' => now(), 'ip' => $request->ip()]);
         }
 
