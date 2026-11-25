@@ -32,7 +32,7 @@ class PaymentSetting extends Page implements HasForms
      */
     public function getTitle(): string | Htmlable
     {
-        return __('Pagamentos');
+        return __('Payments');
     }
 
     public Setting $record;
@@ -68,8 +68,8 @@ class PaymentSetting extends Page implements HasForms
         try {
             if(env('APP_DEMO')) {
                 Notification::make()
-                    ->title('Atenção')
-                    ->body('Você não pode realizar está alteração na versão demo')
+                    ->title(__('Attention'))
+                    ->body(__('You cannot make this change in the demo version'))
                     ->danger()
                     ->send();
                 return;
@@ -81,8 +81,8 @@ class PaymentSetting extends Page implements HasForms
                 Cache::put(\App\Core\Tenancy\Tenancy::key('setting'), $setting);
 
                 Notification::make()
-                    ->title('Dados alterados')
-                    ->body('Dados alterados com sucesso!')
+                    ->title(__('Data updated'))
+                    ->body(__('Data updated successfully.'))
                     ->success()
                     ->send();
 
@@ -103,59 +103,59 @@ class PaymentSetting extends Page implements HasForms
     {
         return $form
             ->schema([
-                Section::make('Ajuste de Taxas')
-                    ->description('Formulário ajustar as taxas da plataforma')
+                Section::make(__('Fee settings'))
+                    ->description(__('Platform fees'))
                     ->schema([
                         TextInput::make('min_deposit')
-                            ->label('Min Deposito')
+                            ->label(__('Min deposit'))
                             ->numeric()
                             ->maxLength(191),
                         TextInput::make('max_deposit')
-                            ->label('Max Deposito')
+                            ->label(__('Max deposit'))
                             ->numeric()
                             ->maxLength(191),
                         TextInput::make('min_withdrawal')
-                            ->label('Min Saque')
+                            ->label(__('Min withdrawal'))
                             ->numeric()
                             ->maxLength(191),
                         TextInput::make('max_withdrawal')
-                            ->label('Max Saque')
+                            ->label(__('Max withdrawal'))
                             ->numeric()
                             ->maxLength(191),
                         TextInput::make('initial_bonus')
-                            ->label('Bônus Inicial (%)')
+                            ->label(__('Initial bonus (%)'))
                             ->numeric()
                             ->suffix('%')
                             ->maxLength(191),
                         TextInput::make('currency_code')
-                            ->label('Moeda')
+                            ->label(__('Currency'))
                             ->maxLength(191),
 //                        Select::make('decimal_format')->options([
-//                            'dot' => 'Dot',
+//                            'dot' => __('Dot'),
 //                        ]),
 //                        Select::make('currency_position')->options([
-//                            'left' => 'Left',
-//                            'right' => 'Right',
+//                            'left' => __('Left'),
+//                            'right' => __('Right'),
 //                        ]),
 
                         Group::make()
-                            ->label('Porcentagem de Sub-Afiliados')
+                            ->label(__('Sub-affiliate percentages'))
                             ->schema([
                             TextInput::make('perc_sub_lv1')
-                                ->label('% Sub afiliado LV1')
+                                ->label(__('Sub-affiliate level 1 (%)'))
                                 ->numeric()
                                 ->maxLength(191),
                             TextInput::make('perc_sub_lv2')
-                                ->label('% Sub afiliado LV2')
+                                ->label(__('Sub-affiliate level 2 (%)'))
                                 ->numeric()
                                 ->maxLength(191),
                             TextInput::make('perc_sub_lv3')
-                                ->label('% Sub afiliado LV3')
+                                ->label(__('Sub-affiliate level 3 (%)'))
                                 ->numeric()
                                 ->maxLength(191),
                         ])->columnSpanFull()->columns(3),
                         Toggle::make('disable_spin')
-                            ->label('Disable Spin')
+                            ->label(__('Disable spin'))
                         ,
                     ])->columns(2)
             ])

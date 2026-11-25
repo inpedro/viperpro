@@ -29,16 +29,16 @@ class StatsUserDetailOverview extends BaseWidget
         $totalAfiliados = AffiliateHistory::where('inviter', $this->record->id)->sum('commission_paid');
 
         return [
-            Stat::make('Total de Ganhos', Helper::amountFormatDecimal(Helper::formatNumber($totalGanhos)))
-                ->description('Total de Ganhos na plataforma')
+            Stat::make(__('Total winnings'), Helper::amountFormatDecimal(Helper::formatNumber($totalGanhos)))
+                ->description(__('Total platform earnings'))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success'),
-            Stat::make('Total de Perdas', Helper::amountFormatDecimal(Helper::formatNumber($totalPerdas)))
-                ->description('Total de Perdas na plataforma')
+            Stat::make(__('Total losses'), Helper::amountFormatDecimal(Helper::formatNumber($totalPerdas)))
+                ->description(__('Total platform losses'))
                 ->descriptionIcon('heroicon-m-arrow-trending-down')
                 ->color('danger'),
-            Stat::make('Ganhos como Afiliado', Helper::amountFormatDecimal(Helper::formatNumber($totalAfiliados)))
-                ->description('Total de Ganhos como afiliado')
+            Stat::make(__('Affiliate earnings'), Helper::amountFormatDecimal(Helper::formatNumber($totalAfiliados)))
+                ->description(__('Total affiliate earnings'))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success'),
         ];

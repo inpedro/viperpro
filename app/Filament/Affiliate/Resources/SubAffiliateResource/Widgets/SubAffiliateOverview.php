@@ -20,8 +20,8 @@ class SubAffiliateOverview extends BaseWidget
         $rendaAff = AffiliateHistory::where('inviter', auth()->id())->sum('commission_paid');
 
         return [
-            Stat::make('Renda', \Helper::amountFormatDecimal($rendaAff)),
-            Stat::make('Link de Convite', 'convite')
+            Stat::make(__('Income'), \Helper::amountFormatDecimal($rendaAff)),
+            Stat::make(__('Invitation link'), 'convite')
                 ->view('filament.components.convite'),
         ];
     }

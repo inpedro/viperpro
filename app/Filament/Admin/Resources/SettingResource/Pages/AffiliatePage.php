@@ -30,7 +30,7 @@ class AffiliatePage extends Page  implements HasForms
      */
     public function getTitle(): string | Htmlable
     {
-        return __('Pagamentos');
+        return __('Affiliates');
     }
 
     public Setting $record;
@@ -66,8 +66,8 @@ class AffiliatePage extends Page  implements HasForms
         try {
             if(env('APP_DEMO')) {
                 Notification::make()
-                    ->title('Atenção')
-                    ->body('Você não pode realizar está alteração na versão demo')
+                    ->title(__('Attention'))
+                    ->body(__('You cannot make this change in the demo version'))
                     ->danger()
                     ->send();
                 return;
@@ -79,8 +79,8 @@ class AffiliatePage extends Page  implements HasForms
                 Cache::put(\App\Core\Tenancy\Tenancy::key('setting'), $setting);
 
                 Notification::make()
-                    ->title('Dados alterados')
-                    ->body('Dados alterados com sucesso!')
+                    ->title(__('Data updated'))
+                    ->body(__('Data updated successfully.'))
                     ->success()
                     ->send();
 
@@ -101,19 +101,19 @@ class AffiliatePage extends Page  implements HasForms
     {
         return $form
             ->schema([
-                Section::make('Ajuste de Afiliados')
-                    ->description('Porcentagem de Sub-Afiliados')
+                Section::make(__('Affiliate settings'))
+                    ->description(__('Sub-affiliate percentages'))
                     ->schema([
                         TextInput::make('perc_sub_lv1')
-                            ->label('% Sub afiliado LV1')
+                            ->label(__('Sub-affiliate level 1 (%)'))
                             ->numeric()
                             ->maxLength(191),
                         TextInput::make('perc_sub_lv2')
-                            ->label('% Sub afiliado LV2')
+                            ->label(__('Sub-affiliate level 2 (%)'))
                             ->numeric()
                             ->maxLength(191),
                         TextInput::make('perc_sub_lv3')
-                            ->label('% Sub afiliado LV3')
+                            ->label(__('Sub-affiliate level 3 (%)'))
                             ->numeric()
                             ->maxLength(191),
                     ])->columns(3)

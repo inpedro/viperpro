@@ -67,8 +67,8 @@ class GatewayPage extends Page implements HasForms
         try {
             if(env('APP_DEMO')) {
                 Notification::make()
-                    ->title('Atenção')
-                    ->body('Você não pode realizar está alteração na versão demo')
+                    ->title(__('Attention'))
+                    ->body(__('You cannot make this change in the demo version'))
                     ->danger()
                     ->send();
                 return;
@@ -80,8 +80,8 @@ class GatewayPage extends Page implements HasForms
                 Cache::put(\App\Core\Tenancy\Tenancy::key('setting'), $setting);
 
                 Notification::make()
-                    ->title('Dados alterados')
-                    ->body('Dados alterados com sucesso!')
+                    ->title(__('Data updated'))
+                    ->body(__('Data updated successfully.'))
                     ->success()
                     ->send();
 
@@ -102,11 +102,11 @@ class GatewayPage extends Page implements HasForms
     {
         return $form
             ->schema([
-                Section::make('Gateways')
-                    ->description('Ativa ou desative seus gateway de Pagamento')
+                Section::make(__('Gateways'))
+                    ->description(__('Enable or disable your payment gateways'))
                     ->schema([
                         Select::make('default_gateway')
-                            ->label('Gateway Padrão para Saque')
+                            ->label(__('Default withdrawal gateway'))
                             ->options([
                                 'digitopay' => 'Digitopay',
                                 'sharkpay' => 'Sharkpay',
@@ -116,15 +116,15 @@ class GatewayPage extends Page implements HasForms
                         Toggle::make('digitopay_is_enable')
                             ->label('DigitoPay'),
                         Toggle::make('sharkpay_is_enable')
-                            ->label('SharkPay Ativo'),
+                            ->label(__('SharkPay enabled')),
                         Toggle::make('suitpay_is_enable')
-                            ->label('SuitPay Ativo'),
+                            ->label(__('SuitPay enabled')),
                         Toggle::make('stripe_is_enable')
-                            ->label('Stripe Ativo'),
+                            ->label(__('Stripe enabled')),
                         Toggle::make('mercadopago_is_enable')
-                            ->label('Mercado Pago Ativo'),
+                            ->label(__('Mercado Pago enabled')),
 //                        Toggle::make('bspay_is_enable')
-//                            ->label('BSPay Ativo'),
+//                            ->label(__('BSPay enabled')),
                     ])->columns(2)
             ])
             ->statePath('data') ;

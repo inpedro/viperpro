@@ -17,17 +17,29 @@ use Livewire\WithFileUploads;
 
 class AdvancedPage extends Page implements HasForms
 {
+    public static function getNavigationLabel(): string
+    {
+        return __('Advanced options');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Advanced options');
+    }
+
+    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return __('Advanced options');
+    }
+
     use InteractsWithForms, WorldSlotTrait, WithFileUploads, EvergameTrait;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static string $view = 'filament.pages.advanced-page';
 
-    protected static ?string $navigationLabel = 'Opções Avançada';
 
-    protected static ?string $modelLabel = 'Opções Avançada';
 
-    protected static ?string $title = 'Opções Avançada';
 
     protected static ?string $slug = 'advanced-options';
 
@@ -59,8 +71,8 @@ class AdvancedPage extends Page implements HasForms
     {
         self::getProviderWorldslot($type);
         Notification::make()
-            ->title('Sucesso')
-            ->body('Provedores Carregados com sucesso')
+            ->title(__('Success'))
+            ->body(__('Providers loaded successfully'))
             ->success()
             ->send();
     }
@@ -73,8 +85,8 @@ class AdvancedPage extends Page implements HasForms
     {
         self::getGamesWorldslot();
         Notification::make()
-            ->title('Sucesso')
-            ->body('Jogos Carregados com sucesso')
+            ->title(__('Success'))
+            ->body(__('Games loaded successfully'))
             ->success()
             ->send();
     }
@@ -90,8 +102,8 @@ class AdvancedPage extends Page implements HasForms
     {
         self::getProviderEvergame();
         Notification::make()
-            ->title('Sucesso')
-            ->body('Provedores Carregados com sucesso')
+            ->title(__('Success'))
+            ->body(__('Providers loaded successfully'))
             ->success()
             ->send();
     }
@@ -104,8 +116,8 @@ class AdvancedPage extends Page implements HasForms
     {
         self::getGamesEvergame();
         Notification::make()
-            ->title('Sucesso')
-            ->body('Jogos Carregados com sucesso')
+            ->title(__('Success'))
+            ->body(__('Games loaded successfully'))
             ->success()
             ->send();
     }
@@ -136,8 +148,8 @@ class AdvancedPage extends Page implements HasForms
     {
         return $form
             ->schema([
-                Section::make('Updates')
-                    ->description('Archive uploads are disabled for security. Deploy updates through your release pipeline.')
+                Section::make(__('Updates'))
+                    ->description(__('Archive uploads are disabled for security. Deploy updates through your release pipeline.'))
                     ->schema([
                         \Filament\Forms\Components\Placeholder::make('update_disabled')
                             ->content('Uploading ZIP archives that are extracted over the application is no longer supported.'),
@@ -157,8 +169,8 @@ class AdvancedPage extends Page implements HasForms
         // release pipeline (git + composer + migrations). A signed, verified addon installer is planned
         // in Phase 3 (see docs/REFACTORING_PLAN.md).
         Notification::make()
-            ->title("Disabled")
-            ->body("Uploading update archives is disabled. Deploy updates through your release pipeline.")
+            ->title(__('Disabled'))
+            ->body(__('Uploading update archives is disabled. Deploy updates through your release pipeline.'))
             ->danger()
             ->send();
     }
@@ -170,8 +182,8 @@ class AdvancedPage extends Page implements HasForms
     {
         if(env('APP_DEMO')) {
             Notification::make()
-                ->title('Atenção')
-                ->body('Você não pode realizar está alteração na versão demo')
+                ->title(__('Attention'))
+                ->body(__('You cannot make this change in the demo version'))
                 ->danger()
                 ->send();
             return;
@@ -186,8 +198,8 @@ class AdvancedPage extends Page implements HasForms
         // Obter a saída do comando, se necessário
         $this->output = Artisan::output();
         Notification::make()
-            ->title('Sucesso')
-            ->body('Migrações carregadas com sucesso')
+            ->title(__('Success'))
+            ->body(__('Migrations loaded successfully'))
             ->success()
             ->send();
     }
@@ -199,8 +211,8 @@ class AdvancedPage extends Page implements HasForms
     {
         if(env('APP_DEMO')) {
             Notification::make()
-                ->title('Atenção')
-                ->body('Você não pode realizar está alteração na versão demo')
+                ->title(__('Attention'))
+                ->body(__('You cannot make this change in the demo version'))
                 ->danger()
                 ->send();
             return;
@@ -215,8 +227,8 @@ class AdvancedPage extends Page implements HasForms
         // Obter a saída do comando, se necessário
         $this->output = Artisan::output();
         Notification::make()
-            ->title('Sucesso')
-            ->body('Migrações carregadas com sucesso')
+            ->title(__('Success'))
+            ->body(__('Migrations loaded successfully'))
             ->success()
             ->send();
     }

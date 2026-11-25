@@ -70,7 +70,12 @@ Stored values stay locale-neutral: integer minor units and the storage timezone.
 Brazil-specific integrations (the PIX gateways) are optional addons, as of Phase 3.
 
 ## Not done yet (tracked)
-* **Filament admin labels:** about 290 Portuguese literals. Localized with the admin redesign (Phase 8). `lang:check` skips `app/Filament` until then.
+* **Admin panels (admin, affiliate, platform):**
+  * About 470 strings are translated in all four languages: labels, sections, navigation, notifications and options.
+  * The panels follow the staff member's browser language among the casino's enabled languages (`AdminPanelSmokeTest::test_the_admin_panel_is_localized`).
+  * `lang:check --strict` now scans `app/Filament` and `app/Livewire` too.
+  * Brand names and technical identifiers (API keys, Client ID, RTP, …) are deliberately left as they are.
+  * Amounts in admin tables use the casino's currency instead of a hardcoded BRL/`R$`.
 * **Vue literals:** 10 components still contain Portuguese text outside `$t()`. Handled in the frontend redesign (Phase 6), which will also consume `/api/settings/registration` and the locale-aware formatters.
 * **Withdrawal method types** (`pix` / `bank`) and PIX key validation are still part of the core withdrawal API. They move behind gateway capabilities with the Phase 7 adapters.
 * **Albanian review** by a native speaker is required before production use.

@@ -18,11 +18,15 @@ use Spatie\Permission\Models\Role;
 
 class TenantResource extends Resource
 {
+    public static function getNavigationLabel(): string
+    {
+        return __('Casinos');
+    }
+
     protected static ?string $model = Tenant::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
 
-    protected static ?string $navigationLabel = 'Casinos';
 
     public static function canAccess(): bool
     {
@@ -32,13 +36,13 @@ class TenantResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Forms\Components\Section::make('Casino')->schema([
+            Forms\Components\Section::make(__('Casino'))->schema([
                 Forms\Components\TextInput::make('name')->required()->maxLength(120),
                 Forms\Components\TextInput::make('slug')->required()->maxLength(60)->alphaDash()->unique(ignoreRecord: true),
-                Forms\Components\Select::make('status')->options([Tenant::ACTIVE => 'Active', Tenant::SUSPENDED => 'Suspended'])->required()->default(Tenant::ACTIVE),
+                Forms\Components\Select::make('status')->options([Tenant::ACTIVE => __('Active'), Tenant::SUSPENDED => __('Suspended')])->required()->default(Tenant::ACTIVE),
                 Forms\Components\TextInput::make('plan')->maxLength(60),
             ])->columns(2),
-            Forms\Components\Section::make('Domains')->schema([
+            Forms\Components\Section::make(__('Domains'))->schema([
                 Forms\Components\Repeater::make('domains')->relationship()->schema([
                     Forms\Components\TextInput::make('domain')->required()->maxLength(191)
                         ->regex('/^(?=.{1,191}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i')
@@ -72,7 +76,7 @@ class TenantResource extends Resource
                         Audit::record('tenant.status_changed', 'tenant', $t->id, ['status' => $t->status]);
                     }),
                 Tables\Actions\Action::make('create_admin')
-                    ->label('Create admin')
+                    ->label(__('Create admin'))
                     ->icon('heroicon-o-user-plus')
                     ->form([
                         Forms\Components\TextInput::make('name')->required(),
@@ -101,8 +105,8 @@ class TenantResource extends Resource
         });
 
         $user
-            ? Notification::make()->title('Administrator created')->success()->send()
-            : Notification::make()->title('A user with this e-mail already exists in this casino')->danger()->send();
+            ? Notification::make()->title(__('Administrator created'))->success()->send()
+            : Notification::make()->title(__('A user with this e-mail already exists in this casino'))->danger()->send();
 
         if ($user) {
             Audit::record('tenant.admin_created', 'tenant', $tenant->id, ['user_id' => $user->id]);

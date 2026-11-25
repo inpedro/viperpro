@@ -62,10 +62,10 @@ class DashboardAdmin extends \Filament\Pages\Dashboard
     {
         return [
             FilterAction::make()
-                ->label('Filtro')
+                ->label(__('Filter'))
                 ->form([
-                    DatePicker::make('startDate')->label('Data Incial'),
-                    DatePicker::make('endDate')->label('Data Final'),
+                    DatePicker::make('startDate')->label(__('Start date')),
+                    DatePicker::make('endDate')->label(__('End date')),
                 ]),
         ];
     }

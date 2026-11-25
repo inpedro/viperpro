@@ -16,6 +16,11 @@ use Filament\Support\Exceptions\Halt;
 
 class ChangePasswordUser extends Page implements HasForms
 {
+    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return __('Change password');
+    }
+
     use HasPageSidebar, InteractsWithForms;
 
     public User $record;
@@ -26,7 +31,6 @@ class ChangePasswordUser extends Page implements HasForms
 
     protected static string $view = 'filament.resources.user-resource.pages.change-password-user';
 
-    protected static ?string $title = 'Alterar Senha';
 
     /**
      * @return void
@@ -52,8 +56,8 @@ class ChangePasswordUser extends Page implements HasForms
         try {
             if(env('APP_DEMO')) {
                 Notification::make()
-                    ->title('Atenção')
-                    ->body('Você não pode realizar está alteração na versão demo')
+                    ->title(__('Attention'))
+                    ->body(__('You cannot make this change in the demo version'))
                     ->danger()
                     ->send();
                 return;
@@ -63,8 +67,8 @@ class ChangePasswordUser extends Page implements HasForms
 
             $user->update(['password' => $this->data['password']]);
             Notification::make()
-                ->title('Senha Alterada')
-                ->body('A senha foi alterada com sucesso!')
+                ->title(__('Password changed'))
+                ->body(__('The password was changed successfully.'))
                 ->success()
                 ->send();
         } catch (Halt $exception) {
@@ -78,18 +82,18 @@ class ChangePasswordUser extends Page implements HasForms
     public function getFormSchema(): array
     {
         return [
-            Section::make('Mude sua senha')
-                ->description('Formulário para alterar a nova senha')
+            Section::make(__('Change your password'))
+                ->description(__('Set a new password'))
                 ->schema([
                    TextInput::make('password')
-                        ->label('Senha')
-                        ->placeholder('Digite a senha')
+                        ->label(__('Password'))
+                        ->placeholder(__('Enter the password'))
                         ->password()
                         ->required()
                         ->maxLength(191),
                     TextInput::make('confirm_password')
-                        ->label('Confirme Senha')
-                        ->placeholder('Confirme sua senha')
+                        ->label(__('Confirm password'))
+                        ->placeholder(__('Confirm your password'))
                         ->password()
                         ->confirmed()
                         ->maxLength(191),

@@ -23,13 +23,21 @@ use Filament\Pages\Page;
  */
 class AddonManagerPage extends Page implements HasForms
 {
+    public static function getNavigationLabel(): string
+    {
+        return __('Addons');
+    }
+
+    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return __('Addons');
+    }
+
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-puzzle-piece';
 
-    protected static ?string $navigationLabel = 'Addons';
 
-    protected static ?string $title = 'Addons';
 
     protected static ?string $slug = 'addons';
 
@@ -120,7 +128,7 @@ class AddonManagerPage extends Page implements HasForms
             };
             Notification::make()->title(ucfirst($action).": {$id}")->success()->send();
         } catch (AddonException $e) {
-            Notification::make()->title('Addon action failed')->body($e->getMessage())->danger()->send();
+            Notification::make()->title(__('Addon action failed'))->body($e->getMessage())->danger()->send();
         }
     }
 
@@ -155,10 +163,10 @@ class AddonManagerPage extends Page implements HasForms
         $errors = app(AddonManager::class)->configure($this->configuring, $this->form->getState());
 
         if ($errors === []) {
-            Notification::make()->title('Configuration saved')->success()->send();
+            Notification::make()->title(__('Configuration saved'))->success()->send();
             $this->closeConfig();
         } else {
-            Notification::make()->title('Configuration not saved')->body(implode(' ', $errors))->danger()->send();
+            Notification::make()->title(__('Configuration not saved'))->body(implode(' ', $errors))->danger()->send();
         }
     }
 
@@ -174,14 +182,14 @@ class AddonManagerPage extends Page implements HasForms
                     'select'  => Select::make($key)->options(array_combine($field['options'] ?? [], $field['options'] ?? [])),
                     'text'    => Textarea::make($key),
                     'integer' => TextInput::make($key)->numeric(),
-                    'url'     => TextInput::make($key)->url()->helperText('Must start with https://'),
+                    'url'     => TextInput::make($key)->url()->helperText(__('Must start with https://')),
                     default   => TextInput::make($key),
                 };
 
                 $component = $component->label($field['label']);
 
                 if ($field['secret'] ?? false) {
-                    $component = $component->password()->revealable(false)->helperText('Stored encrypted. Leave blank to keep the current value.');
+                    $component = $component->password()->revealable(false)->helperText(__('Stored encrypted. Leave blank to keep the current value.'));
                 } elseif ($field['required'] ?? false) {
                     $component = $component->required();
                 }

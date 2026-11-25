@@ -199,7 +199,7 @@ No new migrations. Full detail in `docs/INTEGRATIONS.md`.
 | Demo-agent accounts labelled "Demo account (play money)" | done |
 | Reconciliation dashboard (UI on top of `wallet:reconcile`) | **open** (CLI exists) |
 | CRM / player segmentation / marketing suppression | **open** |
-| Filament admin labels still Portuguese (~290) | **open** |
+| Admin panels localized (en/sq/es/pt_BR, ~470 strings); hardcoded BRL/`R$` in admin tables replaced with the casino currency | done |
 | Wallet/profile/VIP/promotions/auth modals on the design system | **open** (carried from Phase 6) |
 
 **Breaking changes**

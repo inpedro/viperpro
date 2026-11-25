@@ -14,16 +14,28 @@ use Filament\Pages\Page;
 
 class DigitoPayPaymentPage extends Page
 {
+    public static function getNavigationLabel(): string
+    {
+        return __('DigitoPay payments');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('DigitoPay payments');
+    }
+
+    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return __('DigitoPay payments');
+    }
+
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 
     protected static string $view = 'filament.pages.digitopay-payment-page';
 
-    protected static ?string $navigationLabel = 'DigitoPay Pagamentos';
 
-    protected static ?string $modelLabel = 'DigitoPay Pagamentos';
 
-    protected static ?string $title = 'DigitoPay Pagamentos';
 
     protected static ?string $slug = 'digitopay-pagamentos';
 
@@ -65,11 +77,11 @@ class DigitoPayPaymentPage extends Page
     {
         return $form
             ->schema([
-                Section::make('Detalhes de Pagamento')
+                Section::make(__('Payment details'))
                     ->schema([
                         Select::make('user_id')
-                            ->label('Usuários')
-                            ->placeholder('Selecione um usuário')
+                            ->label(__('Users'))
+                            ->placeholder(__('Select a user'))
                             ->relationship(name: 'user', titleAttribute: 'name')
                             ->options(
                                 fn($get) => User::query()
@@ -80,26 +92,26 @@ class DigitoPayPaymentPage extends Page
                             ->live()
                             ->required(),
                         TextInput::make('pix_key')
-                            ->label('Chave Pix')
-                            ->placeholder('Digite a chave Pix')
+                            ->label(__('Pix key'))
+                            ->placeholder(__('Enter the Pix key'))
                             ->required(),
                         Select::make('pix_type')
-                            ->label('Tipo de Chave')
-                            ->placeholder('Selecione o tipo de chave')
+                            ->label(__('Key type'))
+                            ->placeholder(__('Select the key type'))
                             ->options([
-                                'document' => 'Documento',
-                                'phoneNumber' => 'Telefone',
-                                'randomKey' => 'Chave aleatória',
-                                'paymentCode' => 'Código de pagamento',
+                                'document' => __('Document'),
+                                'phoneNumber' => __('Phone'),
+                                'randomKey' => __('Random key'),
+                                'paymentCode' => __('Payment code'),
                             ]),
                         TextInput::make('amount')
-                            ->label('Valor')
-                            ->placeholder('Digite um valor')
+                            ->label(__('Amount'))
+                            ->placeholder(__('Enter an amount'))
                             ->required()
                             ->numeric(),
                         Textarea::make('observation')
-                            ->label('Observação')
-                            ->placeholder('Deixe uma observação caso tenha')
+                            ->label(__('Note'))
+                            ->placeholder(__('Leave a note if needed'))
                             ->rows(5)
                             ->cols(10)
                             ->columnSpanFull()
@@ -115,7 +127,7 @@ class DigitoPayPaymentPage extends Page
     {
         $gateway = self::gateway();
         if (! $gateway) {
-            Notification::make()->title('Gateway unavailable')->danger()->send();
+            Notification::make()->title(__('Gateway unavailable'))->danger()->send();
             return;
         }
 
@@ -128,7 +140,7 @@ class DigitoPayPaymentPage extends Page
         ];
 
         if ($data['pix_key'] === '' || $data['amount'] === '' || \App\Core\Money\Amount::toMinor($data['amount']) <= 0) {
-            Notification::make()->title('Invalid payout')->body('Key and a positive amount are required.')->danger()->send();
+            Notification::make()->title(__('Invalid payout'))->body(__('A key and a positive amount are required.'))->danger()->send();
             return;
         }
 
@@ -138,8 +150,8 @@ class DigitoPayPaymentPage extends Page
         ]);
 
         $ok
-            ? Notification::make()->title('Payout requested')->success()->send()
-            : Notification::make()->title('Payout failed')->body('The gateway rejected the payout.')->danger()->send();
+            ? Notification::make()->title(__('Payout requested'))->success()->send()
+            : Notification::make()->title(__('Payout failed'))->body(__('The gateway rejected the payout.'))->danger()->send();
     }
 
     /**

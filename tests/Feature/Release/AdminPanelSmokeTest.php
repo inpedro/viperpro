@@ -36,6 +36,25 @@ class AdminPanelSmokeTest extends SecurityTestCase
         $this->assertPanelRenders('platform', $root, 'http://platform.test');
     }
 
+    public function test_the_admin_panel_is_localized(): void
+    {
+        Role::findOrCreate('admin', 'web');
+        $admin = $this->makeUser();
+        $admin->assignRole('admin');
+        $this->withCookie(config('session.cookie'), str_repeat('d', 40));
+        $this->actingAs($admin)->get('/admin/mfa');
+        DB::table('admin_sessions')->update(['mfa_verified' => true]);
+        DB::table('settings')->update(['enabled_locales' => json_encode(['en', 'sq', 'es', 'pt_BR'])]);
+        \Illuminate\Support\Facades\Cache::flush();
+
+        $this->actingAs($admin)->withHeader('Accept-Language', 'sq')->get('/admin/users')
+            ->assertOk()->assertSee('Përdoruesit')->assertDontSee('Usuários');
+        $this->actingAs($admin)->withHeader('Accept-Language', 'en')->get('/admin/users')
+            ->assertOk()->assertSee('Users')->assertDontSee('Usuários');
+        $this->actingAs($admin)->withHeader('Accept-Language', 'pt-BR')->get('/admin/users')
+            ->assertOk()->assertSee('Usuários');
+    }
+
     private function assertPanelRenders(string $panel, User $user, string $base): void
     {
         $this->withCookie(config('session.cookie'), str_repeat('b', 40));

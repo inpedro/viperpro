@@ -47,53 +47,53 @@ class SettingResource extends Resource
     public static function sidebar(Model $record): FilamentPageSidebar
     {
         return FilamentPageSidebar::make()
-            ->setTitle('Definições')
-            ->setDescription('Ajustes da plataforma')
+            ->setTitle(__('Settings'))
+            ->setDescription(__('Platform settings'))
             ->setNavigationItems([
-                PageNavigationItem::make('Padrão')
+                PageNavigationItem::make(__('General'))
                     ->translateLabel()
                     ->url(static::getUrl('index'))->icon('heroicon-o-cog-6-tooth')
                     ->isActiveWhen(function () {
                         return request()->routeIs(static::getRouteBaseName() . '.index');
                     }),
 
-                PageNavigationItem::make('Bônus Vip')
+                PageNavigationItem::make(__('VIP bonus'))
                     ->translateLabel()
                     ->url(static::getUrl('bonus', ['record' => $record->id]))->icon('heroicon-o-currency-dollar')
                     ->isActiveWhen(function () {
                         return request()->routeIs(static::getRouteBaseName() . '.bonus');
                     }),
-                 PageNavigationItem::make('Rollover')
+                 PageNavigationItem::make(__('Rollover'))
                      ->translateLabel()
                      ->url(static::getUrl('rollover', ['record' => $record->id]))->icon('heroicon-o-currency-dollar')
                      ->isActiveWhen(function () {
                          return request()->routeIs(static::getRouteBaseName() . '.rollover');
                      }),
-                PageNavigationItem::make('Taxas')
+                PageNavigationItem::make(__('Fees'))
                     ->translateLabel()
                     ->url(static::getUrl('fee', ['record' => $record->id]))->icon('heroicon-o-chart-pie')
                     ->isActiveWhen(function () {
                         return request()->routeIs(static::getRouteBaseName() . '.fee');
                     }),
-                PageNavigationItem::make('Limites')
+                PageNavigationItem::make(__('Limits'))
                     ->translateLabel()
                     ->url(static::getUrl('limit', ['record' => $record->id]))->icon('heroicon-o-adjustments-vertical')
                     ->isActiveWhen(function () {
                         return request()->routeIs(static::getRouteBaseName() . '.limit');
                     }),
-                PageNavigationItem::make('Pagamentos')
+                PageNavigationItem::make(__('Payments'))
                     ->translateLabel()
                     ->url(static::getUrl('payment', ['record' => $record->id]))->icon('heroicon-o-banknotes')
                     ->isActiveWhen(function () {
                         return request()->routeIs(static::getRouteBaseName() . '.payment');
                     }),
-                PageNavigationItem::make('Gateways')
+                PageNavigationItem::make(__('Gateways'))
                     ->translateLabel()
                     ->url(static::getUrl('gateway', ['record' => $record->id]))->icon('heroicon-o-currency-dollar')
                     ->isActiveWhen(function () {
                         return request()->routeIs(static::getRouteBaseName() . '.gateway');
                     }),
-                PageNavigationItem::make('Afiliados')
+                PageNavigationItem::make(__('Affiliates'))
                     ->translateLabel()
                     ->url(static::getUrl('affiliate', ['record' => $record->id]))->icon('heroicon-o-user-group')
                     ->isActiveWhen(function () {

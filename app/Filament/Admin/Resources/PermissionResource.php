@@ -124,7 +124,7 @@ class PermissionResource extends Resource
             ])
             ->filters([
                 Filter::make('models')
-                    ->label('Models')
+                    ->label(__('Models'))
                     ->form(fn () => array_map(
                         fn (string $model) => Checkbox::make($model),
                         collect(glob(app_path('Models/*.php')))->map(fn ($f) => basename($f, '.php'))->sort()->values()->all(),

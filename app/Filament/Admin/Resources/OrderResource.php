@@ -13,13 +13,21 @@ use Filament\Tables\Table;
 
 class OrderResource extends Resource
 {
+    public static function getNavigationLabel(): string
+    {
+        return __('Game history');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Game history');
+    }
+
     protected static ?string $model = Order::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationLabel = 'Histórico de Partidas';
 
-    protected static ?string $modelLabel = 'Histórico de Partidas';
 
     protected static ?string $slug = 'historico-de-partidas';
 
@@ -76,7 +84,7 @@ class OrderResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('Usuário')
+                    ->label(__('User'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('session_id')
@@ -86,30 +94,30 @@ class OrderResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('game')
-                    ->label('Jogo')
+                    ->label(__('Game'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('game_uuid')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('type')
-                    ->label('Tipo')
+                    ->label(__('Type'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('type_money')
-                    ->label('Pagamento')
+                    ->label(__('Payment'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->label('Valor')
-                    ->money('BRL')
+                    ->label(__('Amount'))
+                    ->money(fn () => \App\Core\Localization\Formatter::tenantCurrency())
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('providers')
-                    ->label('Provedor')
+                    ->label(__('Provider'))
                     ->searchable(),
                 Tables\Columns\IconColumn::make('refunded')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->boolean(),
                 Tables\Columns\IconColumn::make('status')
-                    ->label('Status')
+                    ->label(__('Status'))
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->boolean(),
                 Tables\Columns\TextColumn::make('round_id')

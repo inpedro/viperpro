@@ -37,7 +37,6 @@ _Phase 9. "Verified here" means it was checked in this repository's test suite o
 - [ ] Rollover/wagering rules: the existing behaviour was preserved, including known defects (`LEDGER.md`). The operator must define the intended rules.
 
 ## Known functional gaps
-* About 290 Filament admin labels are still Portuguese.
 * The wallet, profile, VIP, promotions and auth modals are not yet rebuilt on the design system.
 * No reconciliation dashboard (CLI only), no CRM or segmentation.
 * Domain events and unification of `role_id` with Spatie roles.

@@ -10,11 +10,15 @@ use Filament\Tables\Table;
 
 class AuditLogResource extends Resource
 {
+    public static function getNavigationLabel(): string
+    {
+        return __('Audit log');
+    }
+
     protected static ?string $model = AuditLog::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
 
-    protected static ?string $navigationLabel = 'Audit log';
 
     public static function canAccess(): bool
     {
@@ -29,8 +33,8 @@ class AuditLogResource extends Resource
             ->defaultSort('id', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('created_at')->dateTime()->sortable(),
-                Tables\Columns\TextColumn::make('tenant_id')->label('Tenant')->placeholder('platform'),
-                Tables\Columns\TextColumn::make('actor_id')->label('Actor'),
+                Tables\Columns\TextColumn::make('tenant_id')->label(__('Casino'))->placeholder('platform'),
+                Tables\Columns\TextColumn::make('actor_id')->label(__('Actor')),
                 Tables\Columns\TextColumn::make('action')->searchable()->badge(),
                 Tables\Columns\TextColumn::make('subject_type'),
                 Tables\Columns\TextColumn::make('subject_id')->searchable(),
@@ -38,7 +42,7 @@ class AuditLogResource extends Resource
                 Tables\Columns\TextColumn::make('meta')->formatStateUsing(fn ($state) => json_encode($state))->limit(80),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('tenant_id')->label('Tenant')
+                Tables\Filters\SelectFilter::make('tenant_id')->label(__('Casino'))
                     ->options(fn () => \App\Core\Tenancy\Models\Tenant::pluck('name', 'id')->all()),
             ]);
     }

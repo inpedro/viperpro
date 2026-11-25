@@ -13,6 +13,18 @@ use NumberFormatter;
  */
 final class Formatter
 {
+    /** ISO code of the current casino's default currency (admin tables without a per-row currency). */
+    public static function tenantCurrency(): string
+    {
+        return strtoupper((string) (\App\Helpers\Core::getSetting()?->currency_code ?: config('tenancy.default_currency', 'EUR')));
+    }
+
+    /** The current casino's currency symbol, for input affixes. */
+    public static function tenantCurrencySymbol(): string
+    {
+        return (string) (\App\Helpers\Core::getSetting()?->prefix ?: self::tenantCurrency());
+    }
+
     public static function money(Money $money, ?string $locale = null): string
     {
         $fmt = new NumberFormatter(self::intl($locale), NumberFormatter::CURRENCY);

@@ -67,12 +67,12 @@ class LangCheck extends Command
         $keys = [];
         $finder = (new Finder())->files()->in([app_path(), resource_path('views'), resource_path('js'), base_path('addons')])
             ->name(['*.php', '*.vue', '*.js'])->notPath('node_modules')
-            // The Filament admin still uses Portuguese literals as keys; it is localized with the admin redesign (Phase 8).
-            ->notPath('Filament');
+            ;
 
         foreach ($finder as $file) {
             $src = $file->getContents();
-            preg_match_all('/(?<![\w>$])(?:trans|__|@lang)\(\s*([\'"])((?:(?!\1).|\\\\\1)+)\1/u', $src, $m);
+            // Escaped quotes first, so "affiliate\'s" is read as one key.
+            preg_match_all('/(?<![\w>$])(?:trans|__|@lang)\(\s*([\'"])((?:\\\\.|(?!\1).)+)\1/u', $src, $m);
             $found = $m[2];
             if (in_array($file->getExtension(), ['vue', 'js'], true)) {
                 preg_match_all('/\$t\(\s*([\'"])((?:(?!\1).)+)\1/u', $src, $m2);
@@ -81,7 +81,8 @@ class LangCheck extends Command
             foreach ($found as $key) {
                 $key = stripslashes($key);
                 // Group keys (auth.failed, validation.required) live in PHP files, not JSON.
-                if (! preg_match('/^[a-z0-9_-]+(::[a-z0-9_-]+)?\.[A-Za-z0-9_.-]+$/', $key) && ! str_contains($key, '$')) {
+                // Package keys (filament-panels::pages/dashboard.title) are the package's own.
+                if (! preg_match('/^[a-z0-9_-]+(::[a-z0-9_\/-]+)?\.[A-Za-z0-9_.-]+$/', $key) && ! str_contains($key, '$') && ! str_contains($key, '::')) {
                     $keys[$key] = true;
                 }
             }

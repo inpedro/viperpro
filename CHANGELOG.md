@@ -26,6 +26,9 @@ The original Viper Pro rebuilt into a secure, modular, multi-tenant, internation
 ### Localization (Phase 5)
 * English (default), Albanian, Spanish, Brazilian Portuguese; ICU formatting; configurable phone and document fields; Brazil-specific defaults removed.
 
+### Admin localization
+* The admin, affiliate and platform panels are translated into English, Albanian, Spanish and Brazilian Portuguese. Admin amounts use each casino's currency.
+
 ### Frontend (Phase 6)
 * Design system, four themes (Obsidian, Royal, Minimal, Neon), new lobby, normalized lobby API. Fabricated winners, feeds and statistics removed.
 

@@ -16,13 +16,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class SubAffiliateResource extends Resource
 {
+    public static function getNavigationLabel(): string
+    {
+        return __('Sub-affiliates');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Sub-affiliates');
+    }
+
     protected static ?string $model = SubAffiliate::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationLabel = 'Sub. Afiliados';
 
-    protected static ?string $modelLabel = 'Sub. Afiliados';
 
     /**
      * @dev @victormsalatiel

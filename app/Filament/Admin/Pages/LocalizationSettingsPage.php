@@ -79,7 +79,7 @@ class LocalizationSettingsPage extends Page implements HasForms
                 Select::make('phone_field')->label(__('Phone number'))->options($modes)->required(),
                 Select::make('document_field')->label(__('National ID'))->options($modes)->required(),
                 Select::make('document_type')->label(__('ID type'))->options([
-                    'cpf' => 'CPF (Brazil, checksum validated)', 'national_id' => __('National ID'), 'passport' => __('Passport'),
+                    'cpf' => __('CPF (Brazil, checksum validated)'), 'national_id' => __('National ID'), 'passport' => __('Passport'),
                 ])->placeholder(__('Free text')),
             ])->columns(3),
         ])->statePath('data');

@@ -29,16 +29,16 @@ class AffiliateWidgets extends BaseWidget
         // \Log::info('comissaoTotal: '.$comissaoTotal);
 
         return [
-            Stat::make('Saldo Disponível', \Helper::amountFormatDecimal($mycomission))
-                ->description('Saldo Disponível para saque')
+            Stat::make(__('Available balance'), \Helper::amountFormatDecimal($mycomission))
+                ->description(__('Balance available for withdrawal'))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success'),
-            Stat::make('Saldo dos indicados', \Helper::amountFormatDecimal($comissaoTotal))
-                ->description('Saldo geral dos indicados.')
+            Stat::make(__('Referred users\' balance'), \Helper::amountFormatDecimal($comissaoTotal))
+                ->description(__('Total balance of referred users.'))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success'),
-            Stat::make('Cadastros', $usersTotal)
-                ->description('Usuários cadastrados com meu link')
+            Stat::make(__('Registrations'), $usersTotal)
+                ->description(__('Users registered with my link'))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success'),
         ];

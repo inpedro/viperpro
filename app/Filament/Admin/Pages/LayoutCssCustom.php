@@ -17,17 +17,29 @@ use Illuminate\Support\Facades\Cache;
 
 class LayoutCssCustom extends Page implements HasForms
 {
+    public static function getNavigationLabel(): string
+    {
+        return __('Layout customisation');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Layout customisation');
+    }
+
+    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return __('Layout customisation');
+    }
+
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static string $view = 'filament.pages.layout-css-custom';
 
-    protected static ?string $navigationLabel = 'Customização Layout';
 
-    protected static ?string $modelLabel = 'Customização Layout';
 
-    protected static ?string $title = 'Customização Layout';
 
     protected static ?string $slug = 'custom-layout';
 
@@ -71,181 +83,181 @@ class LayoutCssCustom extends Page implements HasForms
         return $form
             ->schema([
                 Section::make()
-                    ->label('Background')
+                    ->label(__('Background'))
                     ->schema([
                         ColorPicker::make('background_base')
-                            ->label('Background Principal')
+                            ->label(__('Main background'))
                             ->required(),
                         ColorPicker::make('background_base_dark')
-                            ->label('Background Principal (Dark)')
+                            ->label(__('Main background (dark)'))
                             ->required(),
                         ColorPicker::make('carousel_banners')
-                            ->label('Carousel Banners')
+                            ->label(__('Carousel banners'))
                             ->required(),
                         ColorPicker::make('carousel_banners_dark')
-                            ->label('Carousel Banners (Dark)')
+                            ->label(__('Carousel banners (dark)'))
                             ->required(),
                     ])->columns(4)
                 ,
-                Section::make('Sidebar & Navbar & Footer')
-                    ->description('Personalize a aparência do seu site, conferindo-lhe uma identidade única.')
+                Section::make(__('Sidebar, top bar and footer'))
+                    ->description(__('Customise the look of your site.'))
                     ->collapsible()
                     ->collapsed(true)
                     ->schema([
                         ColorPicker::make('sidebar_color')
-                            ->label('Sidebar')
+                            ->label(__('Sidebar'))
                             ->required(),
 
                         ColorPicker::make('sidebar_color_dark')
-                            ->label('Sidebar (Dark)')
+                            ->label(__('Sidebar (dark)'))
                             ->required(),
 
                         ColorPicker::make('navtop_color')
-                            ->label('Navtop')
+                            ->label(__('Top bar'))
                             ->required(),
 
                         ColorPicker::make('navtop_color_dark')
-                            ->label('Navtop (Dark)')
+                            ->label(__('Top bar (dark)'))
                             ->required(),
 
                         ColorPicker::make('side_menu')
-                            ->label('Side Menu Box')
+                            ->label(__('Side menu box'))
                             ->required(),
 
                         ColorPicker::make('side_menu_dark')
-                            ->label('Side Menu Box (Dark)')
+                            ->label(__('Side menu box (dark)'))
                             ->required(),
 
                         ColorPicker::make('footer_color')
-                            ->label('Footer Color')
+                            ->label(__('Footer colour'))
                             ->required(),
 
                         ColorPicker::make('footer_color_dark')
-                            ->label('Footer Color (Dark)')
+                            ->label(__('Footer colour (dark)'))
                             ->required(),
                     ])->columns(4)
                 ,
-                Section::make('Customização')
-                    ->description('Personalize a aparência do seu site, conferindo-lhe uma identidade única.')
+                Section::make(__('Customisation'))
+                    ->description(__('Customise the look of your site.'))
                     ->collapsible()
                     ->collapsed(true)
                     ->schema([
                         ColorPicker::make('primary_color')
-                            ->label('Primary Color')
+                            ->label(__('Primary colour'))
                             ->required(),
                         ColorPicker::make('primary_opacity_color')
-                            ->label('Primary Opacity Color')
+                            ->label(__('Primary colour (translucent)'))
                             ->required(),
 
                         ColorPicker::make('input_primary')
-                            ->label('Input Primary')
+                            ->label(__('Input primary'))
                             ->required(),
                         ColorPicker::make('input_primary_dark')
-                            ->label('Input Primary (Dark)')
+                            ->label(__('Input primary (dark)'))
                             ->required(),
 
                         ColorPicker::make('card_color')
-                            ->label('Card Primary')
+                            ->label(__('Card primary'))
                             ->required(),
                         ColorPicker::make('card_color_dark')
-                            ->label('Card Primary (Dark)')
+                            ->label(__('Card primary (dark)'))
                             ->required(),
 
                         ColorPicker::make('secundary_color')
-                            ->label('Secundary Color')
+                            ->label(__('Secondary colour'))
                             ->required(),
                         ColorPicker::make('gray_dark_color')
-                            ->label('Gray Dark Color')
+                            ->label(__('Dark grey'))
                             ->required(),
                         ColorPicker::make('gray_light_color')
-                            ->label('Gray Light Color')
+                            ->label(__('Light grey'))
                             ->required(),
                         ColorPicker::make('gray_medium_color')
-                            ->label('Gray Medium Color')
+                            ->label(__('Medium grey'))
                             ->required(),
                         ColorPicker::make('gray_over_color')
-                            ->label('Gray Over Color')
+                            ->label(__('Hover grey'))
                             ->required(),
                         ColorPicker::make('title_color')
-                            ->label('Title Color')
+                            ->label(__('Title colour'))
                             ->required(),
                         ColorPicker::make('text_color')
-                            ->label('Text Color')
+                            ->label(__('Text colour'))
                             ->required(),
                         ColorPicker::make('sub_text_color')
-                            ->label('Sub Text Color')
+                            ->label(__('Secondary text colour'))
                             ->required(),
                         ColorPicker::make('placeholder_color')
-                            ->label('Placeholder Color')
+                            ->label(__('Placeholder colour'))
                             ->required(),
                         ColorPicker::make('background_color')
-                            ->label('Background Color')
+                            ->label(__('Background colour'))
                             ->required(),
                         TextInput::make('border_radius')
-                            ->label('Border Radius')
+                            ->label(__('Border radius'))
                             ->required(),
                     ])->columns(4)
                 ,
-                Section::make('Customização no Código HTML BASE')
-                    ->description('Customize seu css, js, ou adicione conteúdo no corpo da sua página')
+                Section::make(__('Base HTML customisation'))
+                    ->description(__('Customise your CSS and JS, or add content to your page body'))
                     ->collapsible()
                     ->collapsed(true)
                      ->schema([
                          CodeField::make('custom_css')
-                             ->label('Customização do CSS')
+                             ->label(__('CSS customisation'))
                              ->setLanguage(CodeField::CSS)
                              ->withLineNumbers()
                              ->minHeight(400),
                          CodeField::make('custom_js')
-                             ->label('Customização do JS')
+                             ->label(__('JavaScript customisation'))
                              ->setLanguage(CodeField::JS)
                              ->withLineNumbers()
                              ->minHeight(400),
                          CodeField::make('custom_header')
-                             ->label('Customização do Header')
+                             ->label(__('Header customisation'))
                              ->setLanguage(CodeField::HTML)
                              ->withLineNumbers()
                              ->minHeight(400),
                          CodeField::make('custom_body')
-                             ->label('Customização do Body')
+                             ->label(__('Body customisation'))
                              ->setLanguage(CodeField::HTML)
                              ->withLineNumbers()
                              ->minHeight(400),
                      ])
                 ,
-                Section::make('Links Sociais')
-                    ->description('Customize link das suas redes sociais')
+                Section::make(__('Social links'))
+                    ->description(__('Set your social media links'))
                     ->collapsible()
                     ->collapsed(true)
                     ->schema([
                         TextInput::make('instagram')
                             ->label('Instagram')
-                            ->placeholder('Digite a URL do seu Instagram')
+                            ->placeholder(__('Your Instagram URL'))
                             ->url()
                             ->maxLength(191),
                         TextInput::make('facebook')
                             ->label('Facebook')
-                            ->placeholder('Digite a URL do seu Facebook')
+                            ->placeholder(__('Your Facebook URL'))
                             ->url()
                             ->maxLength(191),
                         TextInput::make('telegram')
                             ->label('Telegram')
-                            ->placeholder('Digite a URL do seu Telegram')
+                            ->placeholder(__('Your Telegram URL'))
                             ->url()
                             ->maxLength(191),
                         TextInput::make('twitter')
                             ->label('Twitter')
-                            ->placeholder('Digite a URL do seu Twitter')
+                            ->placeholder(__('Your Twitter URL'))
                             ->url()
                             ->maxLength(191),
                         TextInput::make('whastapp')
-                            ->label('Whastapp')
-                            ->placeholder('Digite a URL do seu Whastapp')
+                            ->label(__('WhatsApp'))
+                            ->placeholder(__('Your WhatsApp URL'))
                             ->url()
                             ->maxLength(191),
                         TextInput::make('youtube')
-                            ->label('Youtube')
-                            ->placeholder('Digite a URL do seu Youtube')
+                            ->label(__('YouTube'))
+                            ->placeholder(__('Your YouTube URL'))
                             ->url()
                             ->maxLength(191),
                     ])->columns(2)
@@ -262,8 +274,8 @@ class LayoutCssCustom extends Page implements HasForms
         try {
             if(env('APP_DEMO')) {
                 Notification::make()
-                    ->title('Atenção')
-                    ->body('Você não pode realizar está alteração na versão demo')
+                    ->title(__('Attention'))
+                    ->body(__('You cannot make this change in the demo version'))
                     ->danger()
                     ->send();
                 return;
@@ -277,8 +289,8 @@ class LayoutCssCustom extends Page implements HasForms
                     Cache::put(\App\Core\Tenancy\Tenancy::key('custom'), $custom);
 
                     Notification::make()
-                        ->title('Dados alterados')
-                        ->body('Dados alterados com sucesso!')
+                        ->title(__('Data updated'))
+                        ->body(__('Data updated successfully.'))
                         ->success()
                         ->send();
                 }
@@ -287,8 +299,8 @@ class LayoutCssCustom extends Page implements HasForms
 
         } catch (Halt $exception) {
             Notification::make()
-                ->title('Erro ao alterar dados!')
-                ->body('Erro ao alterar dados!')
+                ->title(__('Could not update the data.'))
+                ->body(__('Could not update the data.'))
                 ->danger()
                 ->send();
         }

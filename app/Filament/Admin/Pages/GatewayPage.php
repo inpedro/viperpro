@@ -54,90 +54,90 @@ class GatewayPage extends Page
         return $form
             ->schema([
                 Section::make('DigitoPay')
-                    ->description('Ajustes de credenciais para a DigitoPay')
+                    ->description(__('DigitoPay credentials'))
                     ->schema([
                         TextInput::make('digitopay_uri')
                             ->label('Client URI')
-                            ->placeholder('Digite a url da api')
-                            ->helperText('Official DigitoPay API base URL (HTTPS). Its host must also be listed in DIGITOPAY_ALLOWED_HOSTS.')
+                            ->placeholder(__('API URL'))
+                            ->helperText(__('Official DigitoPay API base URL (HTTPS). Its host must also be listed in DIGITOPAY_ALLOWED_HOSTS.'))
                             ->maxLength(191),
                         TextInput::make('digitopay_cliente_id')
                             ->label('Client ID')
-                            ->placeholder('Digite o client ID')
+                            ->placeholder(__('Client ID'))
                             ->maxLength(191),
                         TextInput::make('digitopay_cliente_secret')
                             ->label('Client Secret')
-                            ->placeholder('Digite o client secret')
+                            ->placeholder(__('Client secret'))
                             ->maxLength(191),
                     ])->columns(3),
                 Section::make('Mercado Pago')
-                    ->description('Chaves do Mercado Pago API')
+                    ->description(__('Mercado Pago API keys'))
                     ->schema([
                         TextInput::make('mp_client_id')
                             ->label('Mercado Pago Client ID')
-                            ->placeholder('Digite Mercado Pago Client ID')
+                            ->placeholder(__('Enter the Mercado Pago client ID'))
                             ->maxLength(191),
                         TextInput::make('mp_client_secret')
-                            ->label('Mercado Pago Cliene Secret')
-                            ->placeholder('Digite Mercado Pago Cliene Secret')
+                            ->label(__('Mercado Pago client secret'))
+                            ->placeholder(__('Enter the Mercado Pago client secret'))
                             ->maxLength(191),
                         TextInput::make('mp_public_key')
                             ->label('Mercado Pago Public Key')
-                            ->placeholder('Digite Mercado Pago Public Key')
+                            ->placeholder(__('Enter the Mercado Pago public key'))
                             ->maxLength(191),
                         TextInput::make('mp_access_token')
                             ->label('Mercado Pago Access Token')
-                            ->placeholder('Digite Mercado Pago Access Token')
+                            ->placeholder(__('Enter the Mercado Pago access token'))
                             ->maxLength(191),
                     ])->columns(2),
                 Section::make('SharkPay')
-                    ->description('Chaves da SharkPay')
+                    ->description(__('SharkPay keys'))
                     ->schema([
                         TextInput::make('public_key')
-                            ->label('Chave Publica')
-                            ->placeholder('Digite a chave publica')
+                            ->label(__('Public key'))
+                            ->placeholder(__('Enter the public key'))
                             ->maxLength(191),
                         TextInput::make('private_key')
-                            ->label('Chave Privada')
-                            ->placeholder('Digite a chave privada')
+                            ->label(__('Private key'))
+                            ->placeholder(__('Enter the private key'))
                             ->maxLength(191),
                     ])->columns(2),
                 Section::make('Stripe')
-                    ->description('Ajustes de credenciais para a Stripe')
+                    ->description(__('Stripe credentials'))
                     ->schema([
                         TextInput::make('stripe_public_key')
-                            ->label('Chave Publica')
-                            ->placeholder('Digite a chave publica')
+                            ->label(__('Public key'))
+                            ->placeholder(__('Enter the public key'))
                             ->maxLength(191)
                             ->columnSpanFull(),
                         TextInput::make('stripe_secret_key')
-                            ->label('Chave Privada')
-                            ->placeholder('Digite a chave privada')
+                            ->label(__('Private key'))
+                            ->placeholder(__('Enter the private key'))
                             ->maxLength(191)
                             ->columnSpanFull(),
                         TextInput::make('stripe_webhook_key')
-                            ->label('Chave Webhook')
-                            ->placeholder('Digite a chave do webhook')
+                            ->label(__('Webhook key'))
+                            ->placeholder(__('Enter the webhook key'))
                             ->maxLength(191)
                             ->columnSpanFull(),
                     ]),
 
                 Section::make('Suitpay')
-                    ->description('Ajustes de credenciais para a Suitpay')
+                    ->description(__('SuitPay credentials'))
                     ->schema([
                         TextInput::make('suitpay_uri')
                             ->label('Client URI')
-                            ->placeholder('Digite a url da api')
+                            ->placeholder(__('API URL'))
                             ->maxLength(191)
                             ->columnSpanFull(),
                         TextInput::make('suitpay_cliente_id')
                             ->label('Client ID')
-                            ->placeholder('Digite o client ID')
+                            ->placeholder(__('Client ID'))
                             ->maxLength(191)
                             ->columnSpanFull(),
                         TextInput::make('suitpay_cliente_secret')
                             ->label('Client Secret')
-                            ->placeholder('Digite o client secret')
+                            ->placeholder(__('Client secret'))
                             ->maxLength(191)
                             ->columnSpanFull(),
                     ]),
@@ -154,8 +154,8 @@ class GatewayPage extends Page
         try {
             if(env('APP_DEMO')) {
                 Notification::make()
-                    ->title('Atenção')
-                    ->body('Você não pode realizar está alteração na versão demo')
+                    ->title(__('Attention'))
+                    ->body(__('You cannot make this change in the demo version'))
                     ->danger()
                     ->send();
                 return;
@@ -166,16 +166,16 @@ class GatewayPage extends Page
                 if($setting->update($this->data)) {
 
                     Notification::make()
-                        ->title('Chaves Alteradas')
-                        ->body('Suas chaves foram alteradas com sucesso!')
+                        ->title(__('Keys updated'))
+                        ->body(__('Your keys were updated successfully.'))
                         ->success()
                         ->send();
                 }
             }else{
                 if(Gateway::create($this->data)) {
                     Notification::make()
-                        ->title('Chaves Criadas')
-                        ->body('Suas chaves foram criadas com sucesso!')
+                        ->title(__('Keys created'))
+                        ->body(__('Your keys were created successfully.'))
                         ->success()
                         ->send();
                 }
@@ -184,8 +184,8 @@ class GatewayPage extends Page
 
         } catch (Halt $exception) {
             Notification::make()
-                ->title('Erro ao alterar dados!')
-                ->body('Erro ao alterar dados!')
+                ->title(__('Could not update the data.'))
+                ->body(__('Could not update the data.'))
                 ->danger()
                 ->send();
         }
