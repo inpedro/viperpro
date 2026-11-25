@@ -53,6 +53,7 @@ API (`App\Http\Controllers\Api\Lobby\LobbyController`):
 * **Remaining Portuguese UI strings and hardcoded `R$` amounts:** the strings are translated, and amounts are formatted with `Intl.NumberFormat` (`resources/js/Services/money.js`) in the casino's currency.
 
 ## Not done yet (tracked)
-* **Not yet rebuilt with the design system:** wallet, deposit and withdraw flows, profile, VIP, promotions and the auth modals. They're themed through the legacy variable mapping. The redesign of these screens continues alongside Phase 8 (player account, responsible-gaming tools).
+* **Rebuilt with the design system:** lobby, wallet page (`docs/screenshots/wallet-*.png`), responsible-gaming page, legal pages.
+* **Not yet rebuilt:** deposit and withdraw flows, profile, VIP, promotions and the auth modals. They're themed through the legacy variable mapping.
 * **Legal pages** (`/terms/*`) are still Portuguese template text. Legal terms must come from each operator for its jurisdiction and will be tenant-managed content (Phase 8).
 * **Sports pages** depend on the third-party Firebase feed. They need a licensed odds/data provider (Phase 7).
