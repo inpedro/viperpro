@@ -4,42 +4,32 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Filament\Facades\Filament;
-use Filament\Models\Contracts\FilamentUser;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Auth\Middleware\Authenticate as Middleware;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
-class RedirectIfNotFilamentAdmin extends Middleware
+/**
+ * Guards non-Filament routes that perform administrative actions.
+ *
+ * Previously this extended Authenticate and *returned* a redirect from authenticate(),
+ * a return value Laravel discards, so any logged-in user passed. It also allowed the
+ * 'afiliado' role and skipped the check entirely when APP_ENV=local.
+ */
+class RedirectIfNotFilamentAdmin
 {
-
-    /**
-     * @param  array<string>  $guards
-     */
-    protected function authenticate($request, array $guards)
+    public function handle(Request $request, Closure $next): Response
     {
-        $auth = Filament::auth();
+        $user = Filament::auth()->user();
 
-        if (!$auth->check()) {
-            $this->unauthenticated($request, $guards);
-
-            return;
+        if (! $user) {
+            return $request->expectsJson()
+                ? response()->json(['error' => 'unauthenticated'], 401)
+                : redirect()->guest(Filament::getPanel('admin')->getLoginUrl());
         }
 
-        $this->auth->shouldUse(Filament::getAuthGuard());
-
-        /** @var Model $user */
-        $user = $auth->user();
-
-        $panel = Filament::getCurrentPanel();
-
-        if ($user instanceof FilamentUser) {
-            if (!$user->canAccessPanel($panel) && config('app.env') !== 'local') {
-                return redirect(route('user.home'));
-            }
+        if (! method_exists($user, 'hasRole') || ! $user->hasRole('admin')) {
+            abort(403);
         }
-    }
 
-    protected function redirectTo($request): ?string
-    {
-        return Filament::getLoginUrl();
+        return $next($request);
     }
 }

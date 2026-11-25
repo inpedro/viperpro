@@ -23,8 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('gateways', function (Blueprint $table) {
-            $table->dropColumn('public_key');
-            $table->dropColumn('private_key');
+            $table->dropColumn(['public_key', 'private_key']);
         });
     }
 };

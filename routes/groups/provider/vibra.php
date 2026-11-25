@@ -7,6 +7,6 @@ Route::prefix('vibra')
     ->group(function ()
     {
 
-        Route::get('webhooks/{parameters?}', [GameController::class, 'webhookVibraMethod']);
+        Route::get('webhooks/{parameters?}', [GameController::class, 'webhookVibraMethod'])->middleware('provider.callback:vibra');
     });
 

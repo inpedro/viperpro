@@ -17,23 +17,34 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Support\Facades\Cache;
-use Jackiedo\DotenvEditor\Facades\DotenvEditor;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 
 class Settings extends Page implements HasForms
 {
+    public static function getNavigationLabel(): string
+    {
+        return __('Settings');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Settings');
+    }
+
+    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return __('Settings');
+    }
+
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
 
     protected static string $view = 'filament.pages.settings';
 
-    protected static ?string $navigationLabel = 'Configurações';
 
-    protected static ?string $modelLabel = 'Configurações';
 
-    protected static ?string $title = 'Configurações';
 
     protected static ?string $slug = 'configuracoes';
 
@@ -68,92 +79,92 @@ class Settings extends Page implements HasForms
     {
         return $form
             ->schema([
-                Section::make('Detalhes do Site')
+                Section::make(__('Site details'))
                     ->schema([
                         TextInput::make('software_name')
-                            ->label('Nome')
+                            ->label(__('Name'))
                             ->required()
                             ->maxLength(191),
                         TextInput::make('software_description')
-                            ->label('Descrição')
+                            ->label(__('Description'))
                             ->maxLength(191),
                     ])->columns(2),
 
                 Section::make('Logos')
                     ->schema([
                         FileUpload::make('software_favicon')
-                            ->label('Favicon')
-                            ->placeholder('Carregue um favicon')
+                            ->label(__('Favicon'))
+                            ->placeholder(__('Upload a favicon'))
                             ->image(),
                         FileUpload::make('software_logo_white')
-                            ->label('Logo Branca')
-                            ->placeholder('Carregue uma logo branca')
+                            ->label(__('White logo'))
+                            ->placeholder(__('Upload a white logo'))
                             ->image(),
                         FileUpload::make('software_logo_black')
-                            ->label('Logo Escura')
-                            ->placeholder('Carregue uma logo escura')
+                            ->label(__('Dark logo'))
+                            ->placeholder(__('Upload a dark logo'))
                             ->image(),
                     ])->columns(3),
 
-                Section::make('Background')
+                Section::make(__('Background'))
                     ->schema([
                         FileUpload::make('software_background')
-                            ->label('Background')
-                            ->placeholder('Carregue um background')
+                            ->label(__('Background'))
+                            ->placeholder(__('Upload a background'))
                             ->image()
                         ->columnSpanFull(),
                     ]),
 
-                Section::make('Depositos e Saques')
+                Section::make(__('Deposits and withdrawals'))
                     ->schema([
                         TextInput::make('min_deposit')
-                            ->label('Min Deposito')
+                            ->label(__('Min deposit'))
                             ->numeric()
                             ->maxLength(191),
                         TextInput::make('max_deposit')
-                            ->label('Max Deposito')
+                            ->label(__('Max deposit'))
                             ->numeric()
                             ->maxLength(191),
                         TextInput::make('min_withdrawal')
-                            ->label('Min Saque')
+                            ->label(__('Min withdrawal'))
                             ->numeric()
                             ->maxLength(191),
                         TextInput::make('max_withdrawal')
-                            ->label('Max Saque')
+                            ->label(__('Max withdrawal'))
                             ->numeric()
                             ->maxLength(191),
                         TextInput::make('rollover')
-                            ->label('Rollover')
+                            ->label(__('Rollover'))
                             ->numeric()
                             ->maxLength(191),
                     ])->columns(5),
 
-                Section::make('Futebol')
-                    ->description('Configurações de Futebol')
+                Section::make(__('Football'))
+                    ->description(__('Football settings'))
                     ->schema([
                         TextInput::make('soccer_percentage')
-                            ->label('Futebol Comissão (%)')
+                            ->label(__('Football commission (%)'))
                             ->numeric()
                             ->suffix('%')
                             ->maxLength(191),
 
                         Toggle::make('turn_on_football')
                             ->inline(false)
-                            ->label('Ativar Futebol'),
+                            ->label(__('Enable football')),
                     ])->columns(2),
 
-                Section::make('Taxas')
-                    ->description('Configurações de Ganhos da Plataforma')
+                Section::make(__('Fees'))
+                    ->description(__('Platform revenue settings'))
                     ->schema([
                         TextInput::make('revshare_percentage')
-                            ->label('RevShare (%)')
+                            ->label(__('Revenue share (%)'))
                             ->numeric()
                             ->suffix('%')
                             ->maxLength(191),
                         Toggle::make('revshare_reverse')
                             ->inline(false)
-                            ->label('Ativar RevShare Negativo')
-                            ->helperText('Esta opção possibilita que o afiliado acumule saldos negativos decorrentes das perdas geradas pelos seus indicados.')
+                            ->label(__('Enable negative revenue share'))
+                            ->helperText(__('When enabled, players\' winnings are deducted from their affiliate\'s commission and the balance can go negative.'))
                         ,
                         TextInput::make('ngr_percent')
                             ->label('NGR (%)')
@@ -161,31 +172,31 @@ class Settings extends Page implements HasForms
                             ->suffix('%')
                             ->maxLength(191),
                     ])->columns(3),
-                Section::make('Dados Gerais')
+                Section::make(__('General information'))
                     ->schema([
                         TextInput::make('initial_bonus')
-                            ->label('Bônus Inicial (%)')
+                            ->label(__('Initial bonus (%)'))
                             ->numeric()
                             ->suffix('%')
                             ->maxLength(191),
                         TextInput::make('currency_code')
-                            ->label('Moeda')
+                            ->label(__('Currency'))
                             ->maxLength(191),
                         Select::make('decimal_format')->options([
-                            'dot' => 'Dot',
+                            'dot' => __('Dot'),
                         ]),
                         Select::make('currency_position')->options([
-                            'left' => 'Left',
-                            'right' => 'Right',
+                            'left' => __('Left'),
+                            'right' => __('Right'),
                         ]),
                         Toggle::make('disable_spin')
-                            ->label('Disable Spin')
+                            ->label(__('Disable spin'))
                         ,
                         Toggle::make('suitpay_is_enable')
-                            ->label('SuitPay Ativo')
+                            ->label(__('SuitPay enabled'))
                         ,
                         Toggle::make('stripe_is_enable')
-                            ->label('Stripe Ativo')
+                            ->label(__('Stripe enabled'))
                         ,
                     ])->columns(4),
             ])
@@ -250,8 +261,8 @@ class Settings extends Page implements HasForms
         try {
             if(env('APP_DEMO')) {
                 Notification::make()
-                    ->title('Atenção')
-                    ->body('Você não pode realizar está alteração na versão demo')
+                    ->title(__('Attention'))
+                    ->body(__('You cannot make this change in the demo version'))
                     ->danger()
                     ->send();
                 return;
@@ -291,21 +302,15 @@ class Settings extends Page implements HasForms
                     }
                 }
 
-                $envs = DotenvEditor::load(base_path('.env'));
 
-                $envs->setKeys([
-                    'APP_NAME' => $this->data['software_name'],
-                ]);
-
-                $envs->save();
 
                 if($setting->update($this->data)) {
 
-                    Cache::put('setting', $setting);
+                    Cache::put(\App\Core\Tenancy\Tenancy::key('setting'), $setting);
 
                     Notification::make()
-                        ->title('Dados alterados')
-                        ->body('Dados alterados com sucesso!')
+                        ->title(__('Data updated'))
+                        ->body(__('Data updated successfully.'))
                         ->success()
                         ->send();
 
@@ -317,8 +322,8 @@ class Settings extends Page implements HasForms
 
         } catch (Halt $exception) {
             Notification::make()
-                ->title('Erro ao alterar dados!')
-                ->body('Erro ao alterar dados!')
+                ->title(__('Could not update the data.'))
+                ->body(__('Could not update the data.'))
                 ->danger()
                 ->send();
         }

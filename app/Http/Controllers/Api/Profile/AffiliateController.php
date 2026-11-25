@@ -48,7 +48,7 @@ class AffiliateController extends Controller
                 ],
             );
 
-            if(auth('api')->user()->update(['inviter_code' => $code, 'affiliate_revenue_share' => $setting->revshare_percentage])) {
+            if(auth('api')->user()->forceFill(['inviter_code' => $code, 'affiliate_revenue_share' => $setting->revshare_percentage])->save()) {
                 return response()->json(['status' => true, 'message' => trans('Successfully generated code')]);
             }
 
@@ -120,7 +120,7 @@ class AffiliateController extends Controller
                 ->count();
 
             if ($withdrawalCount >= $withdrawalLimit) {
-                return response()->json(['message' => 'Você atingiu o limite de saques para este período'], 400);
+                return response()->json(['message' => trans('You have reached the withdrawal limit for this period')], 400);
             }
         }
 
@@ -153,24 +153,21 @@ class AffiliateController extends Controller
         }
 
 
-        // Verificando se o usuário tem saldo suficiente para o saque
-        $comission = auth('api')->user()->wallet->refer_rewards;
+        // Balance check + debit + record creation are atomic (prevents double-spend races).
+        $wallet = auth('api')->user()->wallet;
+        $withdrawal = \App\Core\Payments\WithdrawalService::request(
+            \App\Core\Payments\WithdrawalService::TYPE_AFFILIATE,
+            (int) auth('api')->id(),
+            (string) $request->amount,
+            [
+                'pix_key'  => $request->pix_key,
+                'pix_type' => $request->pix_type,
+                'currency' => $wallet->currency ?? null,
+                'symbol'   => $wallet->symbol ?? null,
+            ]
+        );
 
-        if (floatval($comission) >= floatval($request->amount) && floatval($request->amount) > 0) {
-            // Criando o registro de saque
-            AffiliateWithdraw::create([
-                'user_id'   => auth('api')->id(),
-                'amount'    => $request->amount,
-                'pix_key'   => $request->pix_key,
-                'pix_type'  => $request->pix_type,
-                'currency'  => 'BRL',
-                'symbol'    => 'R$',
-            ]);
-
-            // Decrementando o saldo do usuário
-            auth('api')->user()->wallet->decrement('refer_rewards', $request->amount);
-
-            // Retornando mensagem de sucesso
+        if ($withdrawal) {
             return response()->json(['message' => trans('Commission withdrawal successfully carried out')], 200);
         }
 

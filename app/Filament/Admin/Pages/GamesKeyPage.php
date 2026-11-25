@@ -14,13 +14,17 @@ use Filament\Support\Exceptions\Halt;
 
 class GamesKeyPage extends Page implements HasForms
 {
+    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return __('Game provider keys');
+    }
+
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static string $view = 'filament.pages.games-key-page';
 
-    protected static ?string $title = 'Chaves dos Jogos';
 
     // protected static ?string $slug = 'chaves-dos-jogos';
 
@@ -60,135 +64,135 @@ class GamesKeyPage extends Page implements HasForms
         return $form
             ->schema([
                 Section::make('Shark Connect API')
-                    ->description('Ajustes de credenciais para a Shark Connect')
+                    ->description(__('Shark Connect credentials'))
                     ->schema([
                         TextInput::make('venix_agent_code')
                             ->label('Agent Code')
-                            ->placeholder('Digite aqui o Agent Code')
+                            ->placeholder(__('Agent code'))
                             ->maxLength(191),
                         TextInput::make('venix_agent_token')
                             ->label('Agent Token')
-                            ->placeholder('Digite aqui o Agent Token')
+                            ->placeholder(__('Agent token'))
                             ->maxLength(191),
                         TextInput::make('venix_agent_secret')
                             ->label('Agent Secret')
-                            ->placeholder('Digite aqui a Agente Secret')
+                            ->placeholder(__('Agent secret'))
                             ->maxLength(191),
                     ])
                     ->columns(3),
                 Section::make('PlayIGaming Aggregator API')
-                    ->description('Ajustes de credenciais para a PlayIGaming Aggregator Telegram: @playgamingB')
+                    ->description(__('PlayIGaming Aggregator credentials'))
                     ->schema([
                         TextInput::make('pig_agent_code')
                             ->label('Agent Code')
-                            ->placeholder('Digite aqui o Agent Code')
+                            ->placeholder(__('Agent code'))
                             ->maxLength(191),
                         TextInput::make('pig_agent_token')
                             ->label('Agent Token')
-                            ->placeholder('Digite aqui o Agent Token')
+                            ->placeholder(__('Agent token'))
                             ->maxLength(191),
                         TextInput::make('pig_agent_secret')
                             ->label('Agent Secret')
-                            ->placeholder('Digite aqui a Agente Secret')
+                            ->placeholder(__('Agent secret'))
                             ->maxLength(191),
                     ])
                     ->columns(3),
                 Section::make('Play iGaming API')
-                    ->description('Compre direto com o representante Oficial Telegram: @playgamingB')
+                    ->description(__('Contact the provider through its official channels'))
                     ->schema([
                         TextInput::make('play_gaming_hall')
-                            ->label('Hall')
-                            ->placeholder('Digite aqui sua Hall')
+                            ->label(__('Hall'))
+                            ->placeholder(__('Hall'))
                             ->maxLength(191),
                         TextInput::make('play_gaming_key')
-                            ->label('Key')
-                            ->placeholder('Digite aqui a sua Key')
+                            ->label(__('Key'))
+                            ->placeholder(__('Key'))
                             ->maxLength(191),
                         TextInput::make('play_gaming_login')
-                            ->label('Login')
-                            ->placeholder('Digite aqui o Login')
+                            ->label(__('Login'))
+                            ->placeholder(__('Login'))
                             ->maxLength(191),
                     ])
                     ->columns(3),
 
                 Section::make('EverGame API')
-                    ->description('Ajustes de credenciais para a EverGame')
+                    ->description(__('EverGame credentials'))
                     ->schema([
                         TextInput::make('evergame_agent_code')
                             ->label('Agent Code')
-                            ->placeholder('Digite aqui o Agent Code')
+                            ->placeholder(__('Agent code'))
                             ->maxLength(191),
                         TextInput::make('evergame_agent_token')
                             ->label('Agent Token')
-                            ->placeholder('Digite aqui o Agent Token')
+                            ->placeholder(__('Agent token'))
                             ->maxLength(191),
                         TextInput::make('evergame_api_endpoint')
                             ->label('Api Endpoint')
-                            ->placeholder('Digite aqui a API Endpoint')
+                            ->placeholder(__('API endpoint'))
                             ->maxLength(191)
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
 
                 Section::make('Games2Api')
-                    ->description('Ajustes de credenciais para a Games2Api')
+                    ->description(__('Games2Api credentials'))
                     ->schema([
                         TextInput::make('games2_agent_code')
                             ->label('Agent Code')
-                            ->placeholder('Digite aqui o Agent Code')
+                            ->placeholder(__('Agent code'))
                             ->maxLength(191),
                         TextInput::make('games2_agent_token')
                             ->label('Agent Token')
-                            ->placeholder('Digite aqui o Agent Token')
+                            ->placeholder(__('Agent token'))
                             ->maxLength(191),
                         TextInput::make('games2_agent_secret_key')
                             ->label('Agent Secret Key')
-                            ->placeholder('Digite aqui o Agent Secret Key')
+                            ->placeholder(__('Agent secret key'))
                             ->maxLength(191),
                         TextInput::make('games2_api_endpoint')
                             ->label('Api Endpoint')
-                            ->placeholder('Digite aqui a API Endpoint')
+                            ->placeholder(__('API endpoint'))
                             ->maxLength(191)
                             ->columnSpanFull(),
                     ])
                     ->columns(3),
 
                 Section::make('World Slot API')
-                    ->description('Ajustes de credenciais para a World Slot')
+                    ->description(__('World Slot credentials'))
                     ->schema([
                         TextInput::make('worldslot_agent_code')
                             ->label('Agent Code')
-                            ->placeholder('Digite aqui o Agent Code')
+                            ->placeholder(__('Agent code'))
                             ->maxLength(191),
                         TextInput::make('worldslot_agent_token')
                             ->label('Agent Token')
-                            ->placeholder('Digite aqui o Agent Token')
+                            ->placeholder(__('Agent token'))
                             ->maxLength(191),
                         TextInput::make('worldslot_agent_secret_key')
                             ->label('Agent Secret Key')
-                            ->placeholder('Digite aqui o Agent Secret Key')
+                            ->placeholder(__('Agent secret key'))
                             ->maxLength(191),
                         TextInput::make('worldslot_api_endpoint')
                             ->label('Api Endpoint')
-                            ->placeholder('Digite aqui a API Endpoint')
+                            ->placeholder(__('API endpoint'))
                             ->maxLength(191)
                             ->columnSpanFull(),
                     ])
                     ->columns(3),
 
                 Section::make('Slotegrator API')
-                    ->description('Ajustes de credenciais para a Slotegrator')
+                    ->description(__('Slotegrator credentials'))
                     ->schema([
                         TextInput::make('merchant_url')
                             ->label('Merchant URL')
-                            ->placeholder('Digite aqui a URL da API')
+                            ->placeholder(__('API URL'))
                             ->maxLength(191),
                         TextInput::make('merchant_id')
                             ->label('Merchant ID')
-                            ->placeholder('Digite aqui a Merchant ID')
+                            ->placeholder(__('Merchant ID'))
                             ->maxLength(191),
                         TextInput::make('merchant_key')
-                            ->placeholder('Digite aqui a Merchant Key')
+                            ->placeholder(__('Merchant key'))
                             ->label('Merchant Key')
                             ->maxLength(191),
                     ])
@@ -197,55 +201,55 @@ class GamesKeyPage extends Page implements HasForms
 
 
                 Section::make('Salsa API')
-                    ->description('Ajustes de credenciais para a Salsa. Site do provedor: https://salsatechnology.com/')
+                    ->description(__('Salsa credentials'))
                     ->schema([
                         TextInput::make('salsa_base_uri')
                             ->label('Salsa URI')
-                            ->placeholder('Digite aqui a Base URL Salsa')
+                            ->placeholder(__('Salsa base URL'))
                             ->maxLength(191),
                         TextInput::make('salsa_pn')
                             ->label('Salsa PN')
-                            ->placeholder('Digite aqui o PN')
+                            ->placeholder(__('PN'))
                             ->maxLength(191),
                         TextInput::make('salsa_key')
                             ->label('Salsa Key')
-                            ->placeholder('Digite aqui o Salsa Key')
+                            ->placeholder(__('Salsa key'))
                             ->maxLength(191),
                     ])
                     ->columns(3),
 
                 Section::make('Vibra Gaming API')
-                    ->description('Ajustes de credenciais para a Vibra Gaming Casino. Site do provedor: https://vibragaming.com/')
+                    ->description(__('Vibra Gaming credentials'))
                     ->schema([
                         TextInput::make('vibra_site_id')
                             ->label('Vibra Site ID')
-                            ->placeholder('Digite aqui o Vibra Site ID')
+                            ->placeholder(__('Vibra site ID'))
                             ->maxLength(191),
                         TextInput::make('vibra_game_mode')
                             ->label('Vibra Game Mode')
-                            ->placeholder('Digite o Vibra Game Mode')
+                            ->placeholder(__('Vibra game mode'))
                             ->maxLength(191),
                     ])
                     ->columns(2),
 
                 Section::make('Fivers API')
-                    ->description('Ajustes de credenciais para a Fivers')
+                    ->description(__('Fivers credentials'))
                     ->schema([
                         TextInput::make('agent_code')
                             ->label('Agent Code')
-                            ->placeholder('Digite aqui o Agent Code')
+                            ->placeholder(__('Agent code'))
                             ->maxLength(191),
                         TextInput::make('agent_token')
                             ->label('Agent Token')
-                            ->placeholder('Digite aqui o Agent Token')
+                            ->placeholder(__('Agent token'))
                             ->maxLength(191),
                         TextInput::make('agent_secret_key')
                             ->label('Agent Secret Key')
-                            ->placeholder('Digite aqui o Agent Secret Key')
+                            ->placeholder(__('Agent secret key'))
                             ->maxLength(191),
                         TextInput::make('api_endpoint')
                             ->label('Api Endpoint')
-                            ->placeholder('Digite aqui a API Endpoint')
+                            ->placeholder(__('API endpoint'))
                             ->maxLength(191)
                             ->columnSpanFull(),
                     ])
@@ -264,8 +268,8 @@ class GamesKeyPage extends Page implements HasForms
         try {
             if(env('APP_DEMO')) {
                 Notification::make()
-                    ->title('Atenção')
-                    ->body('Você não pode realizar está alteração na versão demo')
+                    ->title(__('Attention'))
+                    ->body(__('You cannot make this change in the demo version'))
                     ->danger()
                     ->send();
                 return;
@@ -275,16 +279,16 @@ class GamesKeyPage extends Page implements HasForms
             if(!empty($setting)) {
                 if($setting->update($this->data)) {
                     Notification::make()
-                        ->title('Chaves Alteradas')
-                        ->body('Suas chaves foram alteradas com sucesso!')
+                        ->title(__('Keys updated'))
+                        ->body(__('Your keys were updated successfully.'))
                         ->success()
                         ->send();
                 }
             }else{
                 if(GamesKey::create($this->data)) {
                     Notification::make()
-                        ->title('Chaves Criadas')
-                        ->body('Suas chaves foram criadas com sucesso!')
+                        ->title(__('Keys created'))
+                        ->body(__('Your keys were created successfully.'))
                         ->success()
                         ->send();
                 }
@@ -293,8 +297,8 @@ class GamesKeyPage extends Page implements HasForms
 
         } catch (Halt $exception) {
             Notification::make()
-                ->title('Erro ao alterar dados!')
-                ->body('Erro ao alterar dados!')
+                ->title(__('Could not update the data.'))
+                ->body(__('Could not update the data.'))
                 ->danger()
                 ->send();
         }

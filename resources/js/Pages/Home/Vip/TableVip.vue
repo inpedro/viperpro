@@ -5,13 +5,13 @@
                 <tr>
                     <th scope="col" class="px-6 py-3">*</th>
                     <th scope="col" class="px-6 py-3">
-                        Nível
+                        {{ $t('Level') }}
                     </th>
                     <th scope="col" class="px-6 py-3">
-                        Aposta necessária
+                        {{ $t('Required wager') }}
                     </th>
                     <th scope="col" class="px-6 py-3">
-                        Bônus
+                        {{ $t('Bonus') }}
                     </th>
                     <th scope="col" class="px-6 py-3">
 

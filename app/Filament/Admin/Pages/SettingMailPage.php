@@ -10,7 +10,6 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Exceptions\Halt;
-use Jackiedo\DotenvEditor\Facades\DotenvEditor;
 
 class SettingMailPage extends Page
 {
@@ -55,39 +54,39 @@ class SettingMailPage extends Page
         return $form
             ->schema([
                 Section::make('SMTP')
-                    ->description('Ajustes de credenciais para a SMTP')
+                    ->description(__('SMTP credentials'))
                     ->schema([
                         TextInput::make('software_smtp_type')
-                            ->label('Mailer')
-                            ->placeholder('Digite o mailer (smtp)')
+                            ->label(__('Mailer'))
+                            ->placeholder(__('Mailer (smtp)'))
                             ->maxLength(191),
                         TextInput::make('software_smtp_mail_host')
-                            ->label('Host')
-                            ->placeholder('Digite seu mail host')
+                            ->label(__('Host'))
+                            ->placeholder(__('Mail host'))
                             ->maxLength(191),
                         TextInput::make('software_smtp_mail_port')
-                            ->label('Porta')
-                            ->placeholder('Digite a porta')
+                            ->label(__('Port'))
+                            ->placeholder(__('Port'))
                             ->maxLength(191),
                         TextInput::make('software_smtp_mail_username')
-                            ->label('Usuário')
-                            ->placeholder('Digite o usuário')
+                            ->label(__('User'))
+                            ->placeholder(__('Username'))
                             ->maxLength(191),
                         TextInput::make('software_smtp_mail_password')
-                            ->label('Senha')
-                            ->placeholder('Digite a senha')
+                            ->label(__('Password'))
+                            ->placeholder(__('Enter the password'))
                             ->maxLength(191),
                         TextInput::make('software_smtp_mail_encryption')
-                            ->label('Encryption')
-                            ->placeholder('Digite a criptografia')
+                            ->label(__('Encryption'))
+                            ->placeholder(__('Encryption (tls or ssl)'))
                             ->maxLength(191),
                         TextInput::make('software_smtp_mail_from_address')
-                            ->label('E-mail Cabeçalho')
-                            ->placeholder('Digite o endereço de E-mail de Cabeçalho')
+                            ->label(__('Sender e-mail'))
+                            ->placeholder(__('Sender e-mail address'))
                             ->maxLength(191),
                         TextInput::make('software_smtp_mail_from_name')
-                            ->label('Nome Cabeçalho')
-                            ->placeholder('Digite o nome de Cabeçalho')
+                            ->label(__('Sender name'))
+                            ->placeholder(__('Sender name'))
                             ->maxLength(191)
                     ])->columns(4),
             ])
@@ -103,8 +102,8 @@ class SettingMailPage extends Page
         try {
             if(env('APP_DEMO')) {
                 Notification::make()
-                    ->title('Atenção')
-                    ->body('Você não pode realizar está alteração na versão demo')
+                    ->title(__('Attention'))
+                    ->body(__('You cannot make this change in the demo version'))
                     ->danger()
                     ->send();
                 return;
@@ -112,35 +111,19 @@ class SettingMailPage extends Page
 
             $setting = SettingMail::first();
             if(!empty($setting)) {
-                if(!empty($this->data['software_smtp_type'])) {
-                    $envs = DotenvEditor::load(base_path('.env'));
-
-                    $envs->setKeys([
-                        'MAIL_MAILER' => $this->data['software_smtp_type'],
-                        'MAIL_HOST' => $this->data['software_smtp_mail_host'],
-                        'MAIL_PORT' => $this->data['software_smtp_mail_port'],
-                        'MAIL_USERNAME' => $this->data['software_smtp_mail_username'],
-                        'MAIL_PASSWORD' => $this->data['software_smtp_mail_password'],
-                        'MAIL_ENCRYPTION' => $this->data['software_smtp_mail_encryption'],
-                        'MAIL_FROM_ADDRESS' => $this->data['software_smtp_mail_from_address'],
-                        'MAIL_FROM_NAME' => $this->data['software_smtp_mail_from_name'],
-                    ]);
-
-                    $envs->save();
-                }
 
                 if($setting->update($this->data)) {
                     Notification::make()
-                        ->title('Chaves Alteradas')
-                        ->body('Suas chaves foram alteradas com sucesso!')
+                        ->title(__('Keys updated'))
+                        ->body(__('Your keys were updated successfully.'))
                         ->success()
                         ->send();
                 }
             }else{
                 if(SettingMail::create($this->data)) {
                     Notification::make()
-                        ->title('Chaves Criadas')
-                        ->body('Suas chaves foram criadas com sucesso!')
+                        ->title(__('Keys created'))
+                        ->body(__('Your keys were created successfully.'))
                         ->success()
                         ->send();
                 }
@@ -149,8 +132,8 @@ class SettingMailPage extends Page
 
         } catch (Halt $exception) {
             Notification::make()
-                ->title('Erro ao alterar dados!')
-                ->body('Erro ao alterar dados!')
+                ->title(__('Could not update the data.'))
+                ->body(__('Could not update the data.'))
                 ->danger()
                 ->send();
         }

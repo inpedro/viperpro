@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Deposit extends Model
 {
+    use \App\Core\Tenancy\BelongsToTenant;
+
     use HasFactory;
 
     /**

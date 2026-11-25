@@ -14,13 +14,21 @@ use Filament\Tables\Table;
 
 class VipResource extends Resource
 {
+    public static function getNavigationLabel(): string
+    {
+        return __('VIP');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('VIP');
+    }
+
     protected static ?string $model = Vip::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-trophy';
 
-    protected static ?string $navigationLabel = 'Vip';
 
-    protected static ?string $modelLabel = 'Vip';
 
     protected static ?string $slug = 'vip';
 
@@ -37,39 +45,39 @@ class VipResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Vip')
-                    ->description('Cadastre sua lista vip de bonus')
+                Forms\Components\Section::make(__('VIP'))
+                    ->description(__('Set up your VIP bonus levels'))
                     ->schema([
                         FileUpload::make('bet_symbol')
-                            ->label('Símbolo')
-                            ->placeholder('Carregue um Símbolo')
+                            ->label(__('Symbol'))
+                            ->placeholder(__('Upload a symbol'))
                             ->image()
                             ->columnSpanFull(),
                         Forms\Components\TextInput::make('bet_level')
-                            ->label('Level')
+                            ->label(__('Level'))
                             ->required()
                             //->readOnly(fn (string $context): bool => $context === 'create')
-                            ->placeholder('Mantenha a lista numérica na ordem')
+                            ->placeholder(__('Keep the numbered list in order'))
 //                            ->default(function() {
 //                                $ultimoRegistro = Vip::latest()->first();
 //                                return $ultimoRegistro ? $ultimoRegistro->id + 1 : 1;
 //                            })
                         ,
                         Forms\Components\TextInput::make('bet_required')
-                            ->label('Aposta necessária')
+                            ->label(__('Required wager'))
                             ->required()
-                            ->placeholder('Digite aposta necessária para ganhar o prêmio')
+                            ->placeholder(__('Wager required to win the prize'))
                             ->numeric(),
                         Forms\Components\Select::make('bet_period')
-                            ->label('Período')
+                            ->label(__('Period'))
                             ->options([
-                                'weekly' => 'Semanal',
-                                'monthly' => 'Mensal',
-                                'yearly' => 'Anual',
+                                'weekly' => __('Weekly'),
+                                'monthly' => __('Monthly'),
+                                'yearly' => __('Yearly'),
                             ]),
                         Forms\Components\TextInput::make('bet_bonus')
-                            ->label('Bônus')
-                            ->placeholder('Digite o total de bônus')
+                            ->label(__('Bonus'))
+                            ->placeholder(__('Total bonus'))
                             ->required()
                             ->numeric(),
                     ])->columns(2)
@@ -81,24 +89,24 @@ class VipResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('bet_symbol')
-                    ->label('Imagem'),
+                    ->label(__('Image')),
                 Tables\Columns\TextColumn::make('bet_level')
-                    ->label('Level')
+                    ->label(__('Level'))
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('bet_required')
-                    ->label('Aposta necessária')
+                    ->label(__('Required wager'))
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('bet_period')
-                    ->label('Período')
+                    ->label(__('Period'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('bet_bonus')
-                    ->label('Bônus')
+                    ->label(__('Bonus'))
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Data')
+                    ->label(__('Date'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

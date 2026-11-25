@@ -12,8 +12,12 @@ use Filament\Resources\Pages\Page;
 
 class DetailUser extends Page
 {
+    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return __('Details');
+    }
 
-    protected static ?string $title = 'Detalhes';
+
 
     protected static string $resource = UserResource::class;
 

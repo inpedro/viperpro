@@ -27,12 +27,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('custom_layouts', function (Blueprint $table) {
-            $table->dropColumn('instagram');
-            $table->dropColumn('facebook');
-            $table->dropColumn('telegram');
-            $table->dropColumn('twitter');
-            $table->dropColumn('whastapp');
-            $table->dropColumn('youtube');
+            $table->dropColumn(['instagram', 'facebook', 'telegram', 'twitter', 'whastapp', 'youtube']);
         });
     }
 };

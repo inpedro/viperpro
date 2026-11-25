@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class CustomLayout extends Model
 {
+    use \App\Core\Tenancy\BelongsToTenant;
+
     use HasFactory;
 
     /**
@@ -23,6 +25,7 @@ class CustomLayout extends Model
      * @var array
      */
     protected $fillable = [
+        'theme', 'theme_overrides',
         'font_family_default',
         'primary_color',
         'primary_opacity_color',
@@ -76,4 +79,10 @@ class CustomLayout extends Model
         'youtube',
     ];
 
+    /** The current casino's layout row, created with defaults if it is missing. */
+    public static function current(): self
+    {
+        return static::query()->first()
+            ?? static::create(['custom_header' => '', 'custom_body' => '', 'theme' => (string) config('themes.default', 'obsidian')]);
+    }
 }

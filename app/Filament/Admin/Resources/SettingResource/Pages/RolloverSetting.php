@@ -67,8 +67,8 @@ class RolloverSetting extends Page implements HasForms
         try {
             if(env('APP_DEMO')) {
                 Notification::make()
-                    ->title('Atenção')
-                    ->body('Você não pode realizar está alteração na versão demo')
+                    ->title(__('Attention'))
+                    ->body(__('You cannot make this change in the demo version'))
                     ->danger()
                     ->send();
                 return;
@@ -77,11 +77,11 @@ class RolloverSetting extends Page implements HasForms
             $setting = Setting::find($this->record->id);
 
             if($setting->update($this->data)) {
-                Cache::put('setting', $setting);
+                Cache::put(\App\Core\Tenancy\Tenancy::key('setting'), $setting);
 
                 Notification::make()
-                    ->title('Dados alterados')
-                    ->body('Dados alterados com sucesso!')
+                    ->title(__('Data updated'))
+                    ->body(__('Data updated successfully.'))
                     ->success()
                     ->send();
 
@@ -102,35 +102,35 @@ class RolloverSetting extends Page implements HasForms
     {
         return $form
             ->schema([
-                Section::make('Ajuste de Bônus')
-                    ->description('Formulário ajustar o Bônus plataforma')
+                Section::make(__('Bonus settings'))
+                    ->description(__('Platform bonus'))
                     ->schema([
                         TextInput::make('rollover_deposit')
-                            ->label('Rollover Deposito')
+                            ->label(__('Deposit rollover'))
                             ->numeric()
                             ->default(1)
                             ->suffix('x')
-                            ->helperText('Coloque a quantidade de multiplicação do Deposito')
+                            ->helperText(__('Deposit wagering multiplier'))
                             ->maxLength(191),
                         Group::make()->schema([
                             TextInput::make('rollover')
-                                ->label('Rollover Bônus')
+                                ->label(__('Bonus rollover'))
                                 ->numeric()
                                 ->default(1)
                                 ->suffix('x')
-                                ->helperText('Coloque a quantidade de multiplicação do Bônus')
+                                ->helperText(__('Bonus wagering multiplier'))
                                 ->maxLength(191),
                             TextInput::make('rollover_protection')
-                                ->label('Proteção de Rollover para Bônus')
+                                ->label(__('Bonus rollover protection'))
                                 ->numeric()
                                 ->default(1)
                                 ->suffix('x')
-                                ->helperText('Defina a quantidade de transações minimas para zerar o Rollover')
+                                ->helperText(__('Minimum number of transactions to clear the rollover'))
                                 ->maxLength(191),
                         ])->columns(2),
                         Toggle::make('disable_rollover')
-                            ->label('Desativar Rollover')
-                            ->helperText('Se tiver desmarcado é porque está ativo o Rollover de Bônus e Deposito')
+                            ->label(__('Disable rollover'))
+                            ->helperText(__('When unchecked, bonus and deposit rollover are active'))
                     ])->columns(2)
             ])
             ->statePath('data') ;

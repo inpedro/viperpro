@@ -24,8 +24,8 @@ class UsersRelationManager extends RelationManager
         return $form
             ->schema([
                 Forms\Components\Select::make('user_id')
-                    ->label('Usuários')
-                    ->placeholder('Selecione um usuário')
+                    ->label(__('Users'))
+                    ->placeholder(__('Select a user'))
                     ->relationship(name: 'user', titleAttribute: 'name')
                     ->options(
                         fn($get) => User::query()
@@ -37,8 +37,8 @@ class UsersRelationManager extends RelationManager
                     ->columnSpanFull(),
 
                 Forms\Components\Select::make('mission_id')
-                    ->label('Missão')
-                    ->placeholder('Selecione um usuário')
+                    ->label(__('Mission'))
+                    ->placeholder(__('Select a user'))
                     ->relationship(name: 'mission', titleAttribute: 'challenge_name')
                     ->options(
                         fn($get) => Mission::query()
@@ -62,11 +62,11 @@ class UsersRelationManager extends RelationManager
             ->recordTitleAttribute('user.name')
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('Nome'),
+                    ->label(__('Name')),
                 Tables\Columns\TextColumn::make('mission.challenge_name')
-                    ->label('Missão'),
+                    ->label(__('Mission')),
                 Tables\Columns\ToggleColumn::make('status')
-                    ->label('Status'),
+                    ->label(__('Status')),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),

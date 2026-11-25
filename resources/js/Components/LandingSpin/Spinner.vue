@@ -8,6 +8,7 @@
         ></ComponentLastWinners>
 </template>
 <script>
+import { formatCompactMoney } from '@/Services/money.js';
     import ComponentLastWinners from '@/Components/LandingSpin/LastWinners.vue';
     import * as PIXI from 'pixi.js';
     import { Howl, Howler } from 'howler';
@@ -285,7 +286,7 @@
                         fontWeight: '900'
                     };
                     const topText = new PIXI.Text('GIRE E GANHE', textOptions);
-                    const topTextAmount = new PIXI.Text('R$100 mil', {
+                    const topTextAmount = new PIXI.Text(formatCompactMoney(100000, useSettingStore().setting?.currency_code), {
                         ...textOptions,
                         dropShadow: true,
                         dropShadowAlpha: 0.8,

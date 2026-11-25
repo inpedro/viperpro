@@ -15,6 +15,7 @@
     </div>
 
     <CookiesComponent v-once />
+    <VpRealityCheck />
 
     <!-- Mission  -->
     <div id="modalMissionEl" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
@@ -38,8 +39,8 @@
                 <div class="p-4 md:p-5 space-y-4 top-custom">
                     <div class="flex justify-between">
                         <div class="">
-                            <p>Recompensas acumuladas:</p>
-                            <h4 class="text-2xl font-extrabold italic">R$ 0,00</h4>
+                            <p>{{ $t('Accumulated rewards') }}:</p>
+                            <h4 class="text-2xl font-extrabold italic">{{ formatZero() }}</h4>
                         </div>
                         <div class="">
                             <h2 class="text-2xl text-gray-400">{{ $t(getDayOfWeek()) }}</h2>
@@ -98,6 +99,9 @@
 </template>
 
 <script>
+import VpRealityCheck from "@/Components/DS/VpRealityCheck.vue";
+import { useSettingStore } from "@/Stores/SettingStore.js";
+import { formatMoney } from '@/Services/money.js';
 import { initFlowbite, Tabs, Modal } from 'flowbite';
 import { onMounted } from "vue";
 
@@ -115,7 +119,7 @@ import {searchGameStore} from "@/Stores/SearchGameStore.js";
 
 export default {
     props: [],
-    components: {
+    components: { VpRealityCheck,
         MissionWeekly,
         MissionDaily,
         CookiesComponent,
@@ -210,6 +214,9 @@ export default {
         this.tabsMission = new Tabs(tabsElement, tabElements, optionsTab, instanceTabOptions);
     },
     methods: {
+        formatZero() {
+            return formatMoney(0, useSettingStore().setting?.currency_code);
+        },
         toggleMissionModal: function() {
             this.modalMission.toggle();
         },

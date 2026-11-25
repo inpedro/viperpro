@@ -24,9 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('settings', function (Blueprint $table) {
-            $table->dropColumn('perc_sub_lv1');
-            $table->dropColumn('perc_sub_lv2');
-            $table->dropColumn('perc_sub_lv3');
+            $table->dropColumn(['perc_sub_lv1', 'perc_sub_lv2', 'perc_sub_lv3']);
         });
     }
 };

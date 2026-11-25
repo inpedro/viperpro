@@ -10,11 +10,5 @@ Route::prefix('mercadopago')
     {
         Route::post('callback', [MercadoPagoController::class, 'callbackMethod']);
         Route::post('payment/{id}', [MercadoPagoController::class, 'callbackMethodPayment']);
-
-        Route::middleware(['admin.filament'])
-            ->group(function ()
-            {
-                Route::get('withdrawal/{id}/{action}', [MercadoPagoController::class, 'withdrawalFromModal'])->name('mercadopago.withdrawal');
-                Route::get('cancelwithdrawal/{id}/{action}', [MercadoPagoController::class, 'cancelWithdrawalFromModal'])->name('mercadopago.cancelwithdrawal');
-            });
+        // Withdrawal approve/cancel moved to authenticated Filament actions (POST + CSRF). See WithdrawalService.
     });

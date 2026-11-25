@@ -8,6 +8,6 @@ Route::prefix('kagaming')
     ->group(function ()
     {
 
-        Route::get('webhooks', [GameController::class, 'webhookKaGamingMethod']);
+        Route::get('webhooks', [GameController::class, 'webhookKaGamingMethod'])->middleware('provider.callback:kagaming');
     });
 

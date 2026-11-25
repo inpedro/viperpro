@@ -31,27 +31,27 @@ class GgrTableWidget extends BaseWidget
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('Usuário'),
+                    ->label(__('User')),
                 Tables\Columns\TextColumn::make('provider')
-                    ->label('Provedor')
+                    ->label(__('Provider'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('game')
-                    ->label('Jogo')
+                    ->label(__('Game'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('balance_bet')
-                    ->money('BRL')
-                    ->label('Saldo Aposta'),
+                    ->money(fn () => \App\Core\Localization\Formatter::tenantCurrency())
+                    ->label(__('Bet balance')),
                 Tables\Columns\TextColumn::make('balance_win')
-                    ->money('BRL')
-                    ->label('Saldo Vitoria'),
+                    ->money(fn () => \App\Core\Localization\Formatter::tenantCurrency())
+                    ->label(__('Winnings balance')),
                 Tables\Columns\TextColumn::make('dateHumanReadable')
-                    ->label('Data')
+                    ->label(__('Date'))
             ])
             ->filters([
                 Filter::make('created_at')
                     ->form([
-                        DatePicker::make('created_from')->label('Data Inicial'),
-                        DatePicker::make('created_until')->label('Data Final'),
+                        DatePicker::make('created_from')->label(__('Start date')),
+                        DatePicker::make('created_until')->label(__('End date')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query

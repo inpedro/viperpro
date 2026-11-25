@@ -19,13 +19,21 @@ use Filament\Tables\Table;
 
 class MissionResource extends Resource
 {
+    public static function getNavigationLabel(): string
+    {
+        return __('Missions');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Missions');
+    }
+
     protected static ?string $model = Mission::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
 
-    protected static ?string $navigationLabel = 'Missões';
 
-    protected static ?string $modelLabel = 'Missões';
 
     protected static ?string $slug = 'centro-missoes';
 
@@ -50,65 +58,65 @@ class MissionResource extends Resource
                 ->schema([
                     Forms\Components\TextInput::make('challenge_name')
                         ->required()
-                        ->label('Nome da Missão')
-                        ->placeholder('Digite o nome da missão')
+                        ->label(__('Mission name'))
+                        ->placeholder(__('Mission name'))
                         ->columnSpanFull()
                         ->maxLength(191),
                     RichEditor::make('challenge_description')
-                        ->label('Descrição')
+                        ->label(__('Description'))
                         ->columnSpanFull()
                         ->required()
-                        ->placeholder('Digite a descrição da missão'),
+                        ->placeholder(__('Mission description')),
 
                     RichEditor::make('challenge_rules')
-                        ->label('Regras')
+                        ->label(__('Rules'))
                         ->columnSpanFull()
                         ->required()
-                        ->placeholder('Digite as regras da missão'),
+                        ->placeholder(__('Mission rules')),
                     Select::make('challenge_type')
                         ->default('game')
-                        ->label('Tipo da Missão')
+                        ->label(__('Mission type'))
                         ->required()
                         ->options([
-                            'game' => 'Jogo',
-                            'wallet' => 'Carteira',
-                            'deposit' => 'Deposito',
-                            'affiliate' => 'Afiliado',
+                            'game' => __('Game'),
+                            'wallet' => __('Wallet'),
+                            'deposit' => __('Deposit'),
+                            'affiliate' => __('Affiliate'),
                         ]),
                     Forms\Components\TextInput::make('challenge_link')
-                        ->label('Link da Missão')
+                        ->label(__('Mission link'))
                         ->maxLength(191),
                     Forms\Components\DateTimePicker::make('challenge_start_date')
-                        ->label('Data inicial da Missão')
+                        ->label(__('Mission start date'))
                         ->required(),
                     Forms\Components\DateTimePicker::make('challenge_end_date')
-                        ->label('Data final da Missão')
+                        ->label(__('Mission end date'))
                         ->required(),
                     Forms\Components\TextInput::make('challenge_bonus')
-                        ->label('Valor do Bônus')
+                        ->label(__('Bonus amount'))
                         ->required()
                         ->numeric()
                         ->default(0.00),
                     Forms\Components\TextInput::make('challenge_total')
-                        ->label('Total de Missões')
+                        ->label(__('Total missions'))
                         ->required()
                         ->numeric()
                         ->default(1),
                     Select::make('challenge_currency')
-                        ->label('Moeda Padrão')
+                        ->label(__('Default currency'))
                         ->required()
                         ->options(Currency::all()->pluck('code', 'id'))
                         ->reactive()
                         ->default(Wallet::where('active', 1)->first()->currency)
                         ->searchable(),
                     Select::make('challenge_provider')
-                        ->label('Provedor')
+                        ->label(__('Provider'))
                         ->options(Provider::all()->pluck('name', 'id'))
                         ->reactive()
                         ->searchable(),
                     Forms\Components\TextInput::make('challenge_gameid')
                         ->label('Game ID')
-                        ->placeholder('Digite o id do jogo, você consegue o id na listagem dos jogos')
+                        ->placeholder(__('Game ID (shown in the game list)'))
                         ->columnSpanFull()
                         ->maxLength(191),
                 ])->columns(2)
@@ -120,32 +128,32 @@ class MissionResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('challenge_name')
-                    ->label('Nome')
+                    ->label(__('Name'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('challenge_type')
-                    ->label('Tipo')
+                    ->label(__('Type'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('challenge_link')
-                    ->label('Link')
+                    ->label(__('Link'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('challenge_start_date')
-                    ->label('Data Inicial')
+                    ->label(__('Start date'))
                     ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('challenge_end_date')
-                    ->label('Data Final')
+                    ->label(__('End date'))
                     ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('challenge_bonus')
-                    ->label('Valor do Prêmio')
+                    ->label(__('Prize amount'))
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('challenge_total')
-                    ->label('Total')
+                    ->label(__('Total'))
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('challenge_currency')
-                    ->label('Moeda')
+                    ->label(__('Currency'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

@@ -136,24 +136,20 @@ trait PrivateGamesTrait
             shuffle($winResults);
             shuffle($bonusResults);
 
-            if ($user->is_demo_agent) {
-                $winResults = array_merge($winResults, $demoWinResults);
-                $loseLength = 10;
-                $winLength  = 90;
-            } else {
-                $chanceVitoria = intval($game->rtp);
-                $chanceDerrota = 100 - intval($game->rtp);
+            // Removed: "demo agent" accounts used to receive a 90% win rate plus extra scripted wins,
+            // which is used to stage misleading streams. Every account now gets the same odds.
+            // NOTE: these in-house games are not a certified RNG; see docs/SECURITY_AUDIT.md.
+            $chanceVitoria = intval($game->rtp);
+            $chanceDerrota = 100 - intval($game->rtp);
 
-                $winLength  = $chanceVitoria;
-                $loseLength = $chanceDerrota;
-            }
+            $winLength  = $chanceVitoria;
+            $loseLength = $chanceDerrota;
 
             $winResults = array_slice($winResults, 0, $winLength);
             $loseResults = array_slice($loseResults, 0, $loseLength);
 
             $possibleResults = array_merge($winResults, $loseResults);
-            shuffle($possibleResults);
-            $result = $possibleResults[0];
+            $result = $possibleResults[random_int(0, count($possibleResults) - 1)]; // CSPRNG pick
 
             $changeBonus = Helper::DiscountBalance($wallet, $bet);
             if($changeBonus != 'no_balance') {

@@ -38,30 +38,30 @@ class IndicationsTableWidget extends BaseWidget
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('Usuário')
+                    ->label(__('User'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('losses')
-                    ->formatStateUsing(fn (AffiliateHistory $record): string => 'Qtd: '.$record->losses.' - Total: R$'.$record->losses_amount)
-                    ->label('Perdas')
+                    ->formatStateUsing(fn (AffiliateHistory $record): string => __('Losses: :count, total: :amount', ['count' => $record->losses, 'amount' => \App\Core\Localization\Formatter::tenantCurrencySymbol().' '.$record->losses_amount]))
+                    ->label(__('Losses'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('commission_type')
-                    ->label('Tipo de Comissão')
+                    ->label(__('Commission type'))
                     ->badge()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('commission_paid')
-                    ->label('Comissão')
-                    ->money('BRL')
+                    ->label(__('Commission'))
+                    ->money(fn () => \App\Core\Localization\Formatter::tenantCurrency())
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Data')
+                    ->label(__('Date'))
                     ->dateTime()
                     ->sortable(),
             ])
             ->filters([
                 Filter::make('created_at')
                     ->form([
-                        DatePicker::make('created_from')->label('Data Inicial'),
-                        DatePicker::make('created_until')->label('Data Final'),
+                        DatePicker::make('created_from')->label(__('Start date')),
+                        DatePicker::make('created_until')->label(__('End date')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query

@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Mission extends Model
 {
+    use \App\Core\Tenancy\BelongsToTenant;
+
     use HasFactory;
 
     /**
@@ -34,8 +36,6 @@ class Mission extends Model
         'challenge_end_date',
         'challenge_bonus',
         'challenge_total',
-        'influencer_winLength',
-        'influencer_loseLength',
         'challenge_currency',
         'challenge_provider', /// caso seja um provedor especifico
         'challenge_gameid', /// caso seja um jogo especifico

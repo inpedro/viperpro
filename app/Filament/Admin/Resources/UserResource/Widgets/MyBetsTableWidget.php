@@ -37,34 +37,34 @@ class MyBetsTableWidget extends BaseWidget
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('game')
-                    ->label('Jogo')
+                    ->label(__('Game'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('type')
-                    ->label('Tipo')
+                    ->label(__('Type'))
                     ->badge()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('type_money')
-                    ->label('Tipo de Transação')
+                    ->label(__('Transaction type'))
                     ->badge()
                     ->color('success')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->label('Preço')
-                    ->money('BRL')
+                    ->label(__('Price'))
+                    ->money(fn () => \App\Core\Localization\Formatter::tenantCurrency())
                     ->searchable(),
                 Tables\Columns\TextColumn::make('providers')
-                    ->label('Provedor')
+                    ->label(__('Provider'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Data')
+                    ->label(__('Date'))
                     ->dateTime()
                     ->sortable(),
             ])
             ->filters([
                 Filter::make('created_at')
                     ->form([
-                        DatePicker::make('created_from')->label('Data Inicial'),
-                        DatePicker::make('created_until')->label('Data Final'),
+                        DatePicker::make('created_from')->label(__('Start date')),
+                        DatePicker::make('created_until')->label(__('End date')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query

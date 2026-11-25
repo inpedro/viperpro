@@ -21,15 +21,27 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserResource extends Resource
 {
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Administration');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Users');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Users');
+    }
+
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
-    protected static ?string $navigationGroup = 'Administração';
 
-    protected static ?string $navigationLabel = 'Usuários';
 
-    protected static ?string $modelLabel = 'Usuários';
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -111,28 +123,28 @@ class UserResource extends Resource
                 Forms\Components\Section::make()
                     ->schema([
                         Forms\Components\TextInput::make('name')
-                            ->label('Nome')
-                            ->placeholder('Digite o nome')
+                            ->label(__('Name'))
+                            ->placeholder(__('Name'))
                             ->required()
                             ->maxLength(191),
                         Forms\Components\TextInput::make('email')
-                            ->label('E-mail')
-                            ->placeholder('Digite o e-mail')
+                            ->label(__('E-mail'))
+                            ->placeholder(__('E-mail'))
                             ->email()
                             ->required()
                             ->unique(ignorable: fn ($record) => $record)
                             ->maxLength(191),
                         Forms\Components\TextInput::make('cpf')
-                            ->label('CPF')
-                            ->placeholder('Digite o CPF')
+                            ->label(__('Tax ID (CPF)'))
+                            ->placeholder(__('Tax ID (CPF)'))
                             ->maxLength(191),
                         Forms\Components\TextInput::make('phone')
-                            ->label('Telefone')
-                            ->placeholder('Digite o Telefone')
+                            ->label(__('Phone'))
+                            ->placeholder(__('Phone'))
                             ->maxLength(191),
                         Forms\Components\Select::make('inviter')
-                            ->label('Afiliado')
-                            ->placeholder('Selecione um afiliado')
+                            ->label(__('Affiliate'))
+                            ->placeholder(__('Select an affiliate'))
                             ->relationship(name: 'affiliate', titleAttribute: 'name')
                             ->options(
                                 fn($get) => User::query()->pluck('name', 'id')
@@ -141,17 +153,14 @@ class UserResource extends Resource
                             ->preload()
                             ->live(),
                         Forms\Components\DateTimePicker::make('email_verified_at')
-                            ->label('Verificação E-mail'),
+                            ->label(__('E-mail verified')),
                     ])->columns(3),
                 Forms\Components\Section::make()
                     ->schema([
                         Forms\Components\TextInput::make('affiliate_revenue_share')
-                            ->label('Revenue Share (%)')
+                            ->label(__('Revenue share (%)'))
                             ->required()
                             ->default(2)
-                            ->numeric(),
-                        Forms\Components\TextInput::make('affiliate_revenue_share_fake')
-                            ->label('Revenue Share Fake (%)')
                             ->numeric(),
                         Forms\Components\TextInput::make('affiliate_cpa')
                             ->label('CPA')
@@ -159,7 +168,7 @@ class UserResource extends Resource
                             ->required()
                             ->numeric(),
                         Forms\Components\TextInput::make('affiliate_baseline')
-                            ->label('Baseline')
+                            ->label(__('Baseline'))
                             ->default(40)
                             ->required()
                             ->numeric(),
@@ -167,15 +176,16 @@ class UserResource extends Resource
                 Forms\Components\Section::make()
                     ->schema([
                         Forms\Components\Toggle::make('banned')
-                            ->label('Banido')
+                            ->label(__('Banned'))
                             ->columnSpanFull()
                         ,
                         Forms\Components\Toggle::make('is_demo_agent')
-                            ->label('Influencer')
+                            ->label(__('Demo account (play money)'))
+                            ->helperText(__('Plays only with the demo balance, with the same odds as everyone else. Wins are not real money and are never shown in public feeds. Anyone streaming with a demo account must disclose it.'))
                             ->columnSpanFull()
                         ,
                         Forms\Components\Toggle::make('status')
-                            ->label('Status')
+                            ->label(__('Status'))
                             ->default(true)
                             ->columnSpanFull()
                         ,
@@ -183,15 +193,15 @@ class UserResource extends Resource
                 Forms\Components\Section::make()
                     ->schema([
                         TextInput::make('password')
-                            ->label('Senha')
-                            ->placeholder('Digite a senha')
+                            ->label(__('Password'))
+                            ->placeholder(__('Enter the password'))
                             ->password()
                             ->confirmed()
                             ->required(fn (string $operation): bool => $operation === 'create')
                             ->maxLength(191),
                         TextInput::make('password_confirmation')
-                            ->label('Confirme Senha')
-                            ->placeholder('Confirme sua senha')
+                            ->label(__('Confirm password'))
+                            ->placeholder(__('Confirm your password'))
                             ->required(fn (string $operation): bool => $operation === 'create')
                             ->password()
                             ->maxLength(191),
@@ -210,21 +220,25 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
+                Tables\Columns\IconColumn::make('is_demo_agent')
+                    ->label(__('Demo'))
+                    ->boolean()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('wallet.total_balance')
-                    ->label('Saldo')
-                    ->money('BRL'),
+                    ->label(__('Balance'))
+                    ->money(fn () => \App\Core\Localization\Formatter::tenantCurrency()),
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Data')
+                    ->label(__('Date'))
                     ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Atualização')
+                    ->label(__('Update'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -232,8 +246,8 @@ class UserResource extends Resource
             ->filters([
                 Filter::make('created_at')
                     ->form([
-                        DatePicker::make('created_from')->label('Criado a partir de'),
-                        DatePicker::make('created_until')->label('Criado até'),
+                        DatePicker::make('created_from')->label(__('Created from')),
+                        DatePicker::make('created_until')->label(__('Created until')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -262,7 +276,7 @@ class UserResource extends Resource
             ])
             ->actions([
                 Tables\Actions\Action::make('details')
-                    ->label('Detalhes')
+                    ->label(__('Details'))
                     ->icon('heroicon-o-chart-bar')
                     ->color('gray')
                     ->action(function(User $user) {

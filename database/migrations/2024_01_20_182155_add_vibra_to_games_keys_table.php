@@ -23,8 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('games_keys', function (Blueprint $table) {
-            $table->dropColumn('vibra_site_id');
-            $table->dropColumn('vibra_game_mode');
+            $table->dropColumn(['vibra_site_id', 'vibra_game_mode']);
         });
     }
 };

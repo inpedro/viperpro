@@ -52,16 +52,16 @@ class WalletOverview extends BaseWidget
 
 
         return [
-            Stat::make('Depositos', \Helper::amountFormatDecimal($sumDepositMonth))
-                ->description('Total de Depositos')
+            Stat::make(__('Deposits'), \Helper::amountFormatDecimal($sumDepositMonth))
+                ->description(__('Total deposits'))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success'),
-            Stat::make('Saques', \Helper::amountFormatDecimal($sumWithdrawalMonth))
-                ->description('Total de saques')
+            Stat::make(__('Withdrawals'), \Helper::amountFormatDecimal($sumWithdrawalMonth))
+                ->description(__('Total withdrawals'))
                 ->descriptionIcon('heroicon-m-arrow-trending-down')
                 ->color('danger'),
             Stat::make('Revshare', \Helper::amountFormatDecimal($revshare))
-                ->description('Ganhos da Plataforma')
+                ->description(__('Platform earnings'))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success'),
         ];

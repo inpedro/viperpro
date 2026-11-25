@@ -42,16 +42,16 @@ class ListUsers extends ListRecords
             ->toArray();
 
         return [
-            'all' => Tab::make('Todos Usuários')
+            'all' => Tab::make(__('All users'))
                                 ->modifyQueryUsing(function($query) {
                                     return $query;
                                 }),
 
-            'admins' => Tab::make('Todos Administradores')
+            'admins' => Tab::make(__('All administrators'))
                 ->modifyQueryUsing(function($query) use ($admins) {
                     return $query->whereIn('id', $admins);
                 }),
-            'affiliates' => Tab::make('Todos Afiliados')
+            'affiliates' => Tab::make(__('All affiliates'))
                 ->modifyQueryUsing(function($query) use ($afiliados) {
                     return $query->whereIn('id', $afiliados);
                 }),

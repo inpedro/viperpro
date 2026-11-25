@@ -27,11 +27,11 @@ class ListGames extends ListRecords
         return [
             CreateAction::make()
                 ->icon('heroicon-o-plus')
-                ->label('Novo Jogo')
+                ->label(__('New game'))
             ,
 
 //            Action::make('loadingGame2Api')
-//                ->label('Provedor Games2Api')
+//                ->label(__('Games2Api provider'))
 //                ->icon('heroicon-o-puzzle-piece')
 //                ->color('info')
 //                ->requiresConfirmation()
@@ -39,14 +39,14 @@ class ListGames extends ListRecords
 //            ,
 
 //           Action::make('loadingGame2Api')
-//                ->label('Jogos Games2Api')
+//                ->label(__('Games2Api games'))
 //                ->icon('heroicon-o-puzzle-piece')
 //                ->color('success')
 //                ->requiresConfirmation()
 //                ->action(fn () => self::LoadingGames2Api()),
 
 //            Action::make('loadingGame')
-//                ->label('Carregar World Slot')
+//                ->label(__('Load World Slot'))
 //                ->icon('heroicon-o-puzzle-piece')
 //                ->color('success')
 //                ->requiresConfirmation()

@@ -33,16 +33,16 @@ class AdminWidgets extends BaseWidget
         }
 
         return [
-            Stat::make('Comissão CPA', \Helper::amountFormatDecimal($comissaoCPAs))
-                ->description('Comissão Cpa')
+            Stat::make(__('CPA commission'), \Helper::amountFormatDecimal($comissaoCPAs))
+                ->description(__('CPA commission'))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success'),
-            Stat::make('Comissão Revshare', \Helper::amountFormatDecimal($comissaoRevshare))
-                ->description('Comissão revshare')
+            Stat::make(__('Revenue share commission'), \Helper::amountFormatDecimal($comissaoRevshare))
+                ->description(__('Revenue share commission'))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success'),
-            Stat::make('Perdas', \Helper::amountFormatDecimal($lossesRev))
-                ->description('Perdas dos indicados')
+            Stat::make(__('Losses'), \Helper::amountFormatDecimal($lossesRev))
+                ->description(__('Referred users\' losses'))
                 ->descriptionIcon('heroicon-m-arrow-trending-down')
                 ->color('danger'),
         ];

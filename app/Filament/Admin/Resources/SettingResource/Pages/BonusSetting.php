@@ -41,7 +41,7 @@ class BonusSetting extends Page implements HasForms
      */
     public function getTitle(): string | Htmlable
     {
-        return __('Bônus Vip');
+        return __('VIP bonus');
     }
 
     public Setting $record;
@@ -66,8 +66,8 @@ class BonusSetting extends Page implements HasForms
         try {
             if(env('APP_DEMO')) {
                 Notification::make()
-                    ->title('Atenção')
-                    ->body('Você não pode realizar está alteração na versão demo')
+                    ->title(__('Attention'))
+                    ->body(__('You cannot make this change in the demo version'))
                     ->danger()
                     ->send();
                 return;
@@ -76,11 +76,11 @@ class BonusSetting extends Page implements HasForms
             $setting = Setting::find($this->record->id);
 
             if($setting->update($this->data)) {
-                Cache::put('setting', $setting);
+                Cache::put(\App\Core\Tenancy\Tenancy::key('setting'), $setting);
 
                 Notification::make()
-                    ->title('Dados alterados')
-                    ->body('Dados alterados com sucesso!')
+                    ->title(__('Data updated'))
+                    ->body(__('Data updated successfully.'))
                     ->success()
                     ->send();
 
@@ -101,18 +101,18 @@ class BonusSetting extends Page implements HasForms
     {
         return $form
             ->schema([
-                Section::make('Ajuste de Bônus')
-                    ->description('Formulário ajustar o Bônus plataforma')
+                Section::make(__('Bonus settings'))
+                    ->description(__('Platform bonus'))
                     ->schema([
                         TextInput::make('bonus_vip')
-                            ->label('Bônus Vip')
-                            ->placeholder('Defina o Bônus vip, quanto de bônus ganha a cada 1 real/dolar depositado.')
+                            ->label(__('VIP bonus'))
+                            ->placeholder(__('VIP bonus earned per 1 unit of currency deposited.'))
                             ->numeric()
-                            ->helperText('Este é o valor de bônus associado a cada depósito de 1 real. Por exemplo, quando o usuário realiza um depósito de 1 real, ele recebe a quantia correspondente em Bônus VIP.')
+                            ->helperText(__('VIP bonus credited for each unit of currency deposited.'))
                             ->maxLength(191),
                         Toggle::make('activate_vip_bonus')
                             ->inline(false)
-                            ->label('Ativar/Desativar Bônus Vip'),
+                            ->label(__('Enable/disable VIP bonus')),
                     ])->columns(2)
             ])
             ->statePath('data') ;

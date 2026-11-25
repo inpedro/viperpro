@@ -15,16 +15,28 @@ use Filament\Tables\Table;
 
 class WithdrawalResource extends Resource
 {
+    public static function getNavigationLabel(): string
+    {
+        return __('Withdrawals');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Withdrawals');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Administration');
+    }
+
 
     protected static ?string $model = Withdrawal::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-up-tray';
 
-    protected static ?string $navigationLabel = 'Saques';
 
-    protected static ?string $modelLabel = 'Saques';
 
-    protected static ?string $navigationGroup = 'Administração';
 
     protected static ?string $slug = 'todos-saques';
 
@@ -71,11 +83,11 @@ class WithdrawalResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Cadastro de Saques')
+                Forms\Components\Section::make(__('Register withdrawal'))
                     ->schema([
                         Forms\Components\Select::make('user_id')
-                            ->label('Usuários')
-                            ->placeholder('Selecione um usuário')
+                            ->label(__('Users'))
+                            ->placeholder(__('Select a user'))
                             ->relationship(name: 'user', titleAttribute: 'name')
                             ->options(
                                 fn($get) => User::query()
@@ -86,16 +98,16 @@ class WithdrawalResource extends Resource
                             ->live()
                             ->required(),
                         Forms\Components\TextInput::make('amount')
-                            ->label('Valor')
+                            ->label(__('Amount'))
                             ->required()
                             ->default(0.00),
                         Forms\Components\TextInput::make('type')
-                            ->label('Tipo')
+                            ->label(__('Type'))
                             ->required()
                             ->maxLength(191),
                         Forms\Components\FileUpload::make('proof')
-                            ->label('Comprovante')
-                            ->placeholder('Carregue a imagem do comprovante')
+                            ->label(__('Receipt'))
+                            ->placeholder(__('Upload the receipt image'))
                             ->image()
                             ->columnSpanFull()
                             ->required(),
@@ -115,29 +127,29 @@ class WithdrawalResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('Nome')
+                    ->label(__('Name'))
                     ->searchable(['users.name', 'users.last_name'])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->label('Valor')
+                    ->label(__('Amount'))
                     ->formatStateUsing(fn (Withdrawal $record): string => $record->symbol . ' ' . $record->amount)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('pix_type')
-                    ->label('Tipo')
+                    ->label(__('Type'))
                     ->formatStateUsing(fn (string $state): string => \Helper::formatPixType($state))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('pix_key')
-                    ->label('Chave Pix'),
+                    ->label(__('Pix key')),
                 Tables\Columns\TextColumn::make('bank_info')
-                    ->label('Informações Bancaria'),
+                    ->label(__('Bank details')),
                 Tables\Columns\TextColumn::make('proof')
-                    ->label('Comprovante')
+                    ->label(__('Receipt'))
                     ->html()
                     ->formatStateUsing(fn (string $state): string => '<a href="'.url('storage/'.$state).'" target="_blank">Baixar</a>'),
                 Tables\Columns\IconColumn::make('status')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Data')
+                    ->label(__('Date'))
                     ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
@@ -150,58 +162,24 @@ class WithdrawalResource extends Resource
             ])
             ->actions([
                 Action::make('deny_payment')
-                    ->label('Cancelar')
+                    ->label(__('Cancel'))
                     ->icon('heroicon-o-banknotes')
                     ->color('danger')
-                    ->visible(fn (Withdrawal $withdrawal): bool => !$withdrawal->status)
-                    ->action(function(Withdrawal $withdrawal) {
-                        \Filament\Notifications\Notification::make()
-                            ->title('Cancelar Saque')
-                            ->success()
-                            ->persistent()
-                            ->body('Você está cancelando saque de '. \Helper::amountFormatDecimal($withdrawal->amount))
-                            ->actions([
-                                \Filament\Notifications\Actions\Action::make('view')
-                                    ->label('Confirmar')
-                                    ->button()
-                                    ->url(route(\Helper::GetDefaultGateway().'.cancelwithdrawal', ['id' => $withdrawal->id, 'action' => 'user']))
-                                    ->close(),
-                                \Filament\Notifications\Actions\Action::make('undo')
-                                    ->color('gray')
-                                    ->label('Cancelar')
-                                    ->action(function(Withdrawal $withdrawal) {
-
-                                    })
-                                    ->close(),
-                            ])
-                            ->send();
+                    ->visible(fn (Withdrawal $withdrawal): bool => (int) $withdrawal->status === \App\Core\Payments\WithdrawalService::PENDING)
+                    ->requiresConfirmation()
+                    ->modalDescription(fn (Withdrawal $withdrawal) => 'Cancel this withdrawal of '.\Helper::amountFormatDecimal($withdrawal->amount).' and return the funds to the player?')
+                    ->action(function (Withdrawal $withdrawal) {
+                        \App\Filament\Admin\Support\WithdrawalActions::cancel($withdrawal->id, 'user');
                     }),
                 Action::make('approve_payment')
-                    ->label('Fazer pagamento')
+                    ->label(__('Pay out'))
                     ->icon('heroicon-o-banknotes')
                     ->color('success')
-                    ->visible(fn (Withdrawal $withdrawal): bool => !$withdrawal->status)
-                    ->action(function(Withdrawal $withdrawal) {
-                        \Filament\Notifications\Notification::make()
-                            ->title('Saque')
-                            ->success()
-                            ->persistent()
-                            ->body('Você está solicitando um saque de '. \Helper::amountFormatDecimal($withdrawal->amount))
-                            ->actions([
-                                \Filament\Notifications\Actions\Action::make('view')
-                                    ->label('Confirmar')
-                                    ->button()
-                                    ->url(route(\Helper::GetDefaultGateway().'.withdrawal', ['id' => $withdrawal->id, 'action' => 'user']))
-                                    ->close(),
-                                \Filament\Notifications\Actions\Action::make('undo')
-                                    ->color('gray')
-                                    ->label('Cancelar')
-                                    ->action(function(Withdrawal $withdrawal) {
-
-                                    })
-                                    ->close(),
-                            ])
-                            ->send();
+                    ->visible(fn (Withdrawal $withdrawal): bool => (int) $withdrawal->status === \App\Core\Payments\WithdrawalService::PENDING)
+                    ->requiresConfirmation()
+                    ->modalDescription(fn (Withdrawal $withdrawal) => 'Send a payout of '.\Helper::amountFormatDecimal($withdrawal->amount).' through the default gateway?')
+                    ->action(function (Withdrawal $withdrawal) {
+                        \App\Filament\Admin\Support\WithdrawalActions::approve($withdrawal->id, 'user');
                     }),
                 Tables\Actions\EditAction::make(),
             ])

@@ -14,13 +14,21 @@ use Filament\Tables\Table;
 
 class ProviderResource extends Resource
 {
+    public static function getNavigationLabel(): string
+    {
+        return __('All providers');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('All providers');
+    }
+
     protected static ?string $model = Provider::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationLabel = 'Todos os Provedores';
 
-    protected static ?string $modelLabel = 'Todos os Provedores';
 
     /**
      * @dev @victormsalatiel
@@ -38,16 +46,16 @@ class ProviderResource extends Resource
                 Forms\Components\Section::make('')
                 ->schema([
                     Forms\Components\TextInput::make('code')
-                        ->label('Código')
-                        ->placeholder('Digite o Código')
+                        ->label(__('Code'))
+                        ->placeholder(__('Code'))
                         ->maxLength(50),
                     Forms\Components\TextInput::make('name')
-                        ->placeholder('Digite o Nome')
-                        ->label('Nome')
+                        ->placeholder(__('Name'))
+                        ->label(__('Name'))
                         ->maxLength(50),
                     Forms\Components\Select::make('distribution')
-                        ->label('Distribuição')
-                        ->placeholder('Selecione a distribuição')
+                        ->label(__('Distribution'))
+                        ->placeholder(__('Select the distribution'))
                         ->required()
                         ->options(\Helper::getDistribution()),
                     Forms\Components\TextInput::make('rtp')
@@ -55,11 +63,11 @@ class ProviderResource extends Resource
                         ->numeric()
                         ->default(90),
                     Forms\Components\TextInput::make('views')
-                        ->label('Visualizações')
+                        ->label(__('Views'))
                         ->numeric()
                         ->default(1),
                     Forms\Components\Toggle::make('status')
-                        ->label('Status')
+                        ->label(__('Status'))
                         ->inline(false)
                         ->required(),
                 ])->columns(2)
@@ -71,13 +79,13 @@ class ProviderResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('code')
-                    ->label('Código')
+                    ->label(__('Code'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Nome')
+                    ->label(__('Name'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('distribution')
-                    ->label('Distribuição')
+                    ->label(__('Distribution'))
                     ->searchable(),
                 Tables\Columns\IconColumn::make('status')
                     ->boolean(),
@@ -87,7 +95,7 @@ class ProviderResource extends Resource
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('views')
-                    ->label('Visualizações')
+                    ->label(__('Views'))
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
@@ -101,7 +109,7 @@ class ProviderResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('distribution')
-                    ->label('Distribuição')
+                    ->label(__('Distribution'))
                     ->options(Helper::getDistribution())
                     ->attribute('distribution')
                 ,

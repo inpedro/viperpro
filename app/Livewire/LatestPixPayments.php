@@ -26,14 +26,14 @@ class LatestPixPayments extends BaseWidget
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('payment_id')
-                    ->label('Pagamento ID'),
+                    ->label(__('Payment ID')),
                 Tables\Columns\TextColumn::make('pix_key')
-                    ->label('Chave Pix'),
+                    ->label(__('Pix key')),
                 Tables\Columns\TextColumn::make('pix_type')
-                    ->label('Tipo de Chave'),
+                    ->label(__('Key type')),
                 Tables\Columns\TextColumn::make('amount')
-                    ->money('BRL')
-                    ->label('Valor'),
+                    ->money(fn () => \App\Core\Localization\Formatter::tenantCurrency())
+                    ->label(__('Amount')),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -41,7 +41,7 @@ class LatestPixPayments extends BaseWidget
                         'pago' => 'success',
                     }),
                 Tables\Columns\TextColumn::make('dateHumanReadable')
-                    ->label('Data')
+                    ->label(__('Date'))
             ]);
     }
 

@@ -40,8 +40,8 @@ class CreateCategory extends CreateRecord
     {
         return Notification::make()
             ->success()
-            ->title('Categoria criada')
-            ->body('Categoria criada com sucesso.');
+            ->title(__('Category created'))
+            ->body(__('Category created successfully.'));
     }
 
     protected function beforeFill(): void

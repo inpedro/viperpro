@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class SettingMail extends Model
 {
+    use \App\Core\Tenancy\BelongsToTenant;
+
     use HasFactory;
 
     /**
@@ -35,15 +37,18 @@ class SettingMail extends Model
         'software_smtp_mail_from_name',
     ];
 
-    protected $hidden = array('updated_at');
+    protected $hidden = array('updated_at', 'software_smtp_mail_password');
 
     /**
-     * Get the user's first name.
+     * SMTP password, encrypted at rest with APP_KEY (migration 2026_11_30_000001 encrypted
+     * existing rows). Masked in demo mode.
      */
     protected function softwareSmtpMailPassword(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => env('APP_DEMO') ? '*********************' : $value,
+            get: fn (?string $value) => env('APP_DEMO') ? '*********************'
+                : ($value === null || $value === '' ? $value : \Illuminate\Support\Facades\Crypt::decryptString($value)),
+            set: fn (?string $value) => $value === null || $value === '' ? $value : \Illuminate\Support\Facades\Crypt::encryptString($value),
         );
     }
 }

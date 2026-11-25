@@ -26,11 +26,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('wallets', function (Blueprint $table) {
-            $table->dropColumn('total_bet');
-            $table->dropColumn('total_won');
-            $table->dropColumn('total_lose');
-            $table->dropColumn('last_won');
-            $table->dropColumn('last_lose');
+            $table->dropColumn(['total_bet', 'total_won', 'total_lose', 'last_won', 'last_lose']);
         });
     }
 };

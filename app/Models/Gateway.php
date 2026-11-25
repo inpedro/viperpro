@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Gateway extends Model
 {
+    use \App\Core\Tenancy\BelongsToTenant;
+
     use HasFactory;
 
     /**
@@ -34,10 +36,6 @@ class Gateway extends Model
         'stripe_public_key',
         'stripe_secret_key',
         'stripe_webhook_key',
-
-        'bspay_uri',
-        'bspay_cliente_id',
-        'bspay_cliente_secret',
 
         // Sharkpay
         'public_key',

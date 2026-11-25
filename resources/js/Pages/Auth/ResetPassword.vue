@@ -75,6 +75,7 @@
 
 
 <script>
+import { trans } from 'laravel-vue-i18n';
 
 import {useToast} from "vue-toastification";
 import {useAuthStore} from "@/Stores/Auth.js";
@@ -142,7 +143,7 @@ export default {
 
             await HttpApi.post('auth/reset-password/' + _this.token, _this.form)
                 .then(async response =>  {
-                    _toast.success('Senha restaurada com sucesso!');
+                    _toast.success(trans('Your password has been changed!'));
                     _this.isLoading = false;
                     window.location.href = "/login";
                 })

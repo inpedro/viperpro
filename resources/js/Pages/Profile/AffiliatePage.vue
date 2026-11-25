@@ -51,7 +51,7 @@
                                 {{ $t('Create another code') }}
                             </button> -->
                             <button type="button" class="ui-button-yellow">
-                                <a href="/affiliate/login" target="_blank">Painel Avançado</a>
+                                <a href="/affiliate/login" target="_blank">{{ $t('Advanced panel') }}</a>
                                 <!-- {{ $t('Share on social media') }} -->
                             </button>
                         </div>
@@ -118,7 +118,7 @@
                             </div>
 
                             <div class="body flex flex-col justify-center items-center py-8">
-                                <h1 class="text-yellow-400 font-bold text-4xl">{{ userData.affiliate_revenue_share_fake ? userData.affiliate_revenue_share_fake : userData.affiliate_revenue_share }}%</h1>
+                                <h1 class="text-yellow-400 font-bold text-4xl">{{ userData.affiliate_revenue_share }}%</h1>
                             </div>
                         </div>
                         <div class="p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 w-full mb-3">
@@ -144,9 +144,9 @@
                             <img :src="`/assets/images/indique.png`" alt="" class="mr-3">
                         </div>
                         <div class="flex flex-col justify-center  p-4">
-                            <h1 class="text-2xl font-bold mb-3">Painel Avançado</h1>
-                            <p class="text-gray-500">Nossa plataforma dispõe de um painel de afiliados avançado, permitindo que você visualize detalhes sobre ganhos e perdas. Além disso, oferece a capacidade de adicionar subafiliados.</p>
-                            <a href="/affiliate/login" class="mt-4 text-green-500 font-bold">Clique aqui para acessar</a>
+                            <h1 class="text-2xl font-bold mb-3">{{ $t('Advanced panel') }}</h1>
+                            <p class="text-gray-500">{{ $t('The affiliate panel shows your earnings and losses in detail and lets you add sub-affiliates.') }}</p>
+                            <a href="/affiliate/login" class="mt-4 text-green-500 font-bold">{{ $t('Open the affiliate panel') }}</a>
                         </div>
                     </div>
                 </div>
@@ -197,7 +197,7 @@
 
                     <!-- Modal header -->
                     <div class="flex justify-between p-4 dark:bg-gray-600 rounded-t-lg">
-                        <h1>Regras de recompensas por comissão</h1>
+                        <h1>{{ $t('Commission reward rules') }}</h1>
                         <button class="" @click.prevent="toggleCommissionRewards">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
@@ -208,7 +208,7 @@
                         <div class="flex items-center text-center w-full justify-center">
                             <div class="l"></div>
                             <div class="text-white px-3">
-                                Taxas de comissões
+                                {{ $t('Commission rates') }}
                             </div>
                             <div class="r"></div>
                         </div>
@@ -237,28 +237,17 @@
                         </div>
 
                         <div class="mt-5 ml-4">
+                            <!-- The previous "rules" were invented copy (another brand's wallet, checks the code does not
+                                 perform). Only statements that match the platform's behaviour are shown; the operator's
+                                 actual programme terms live on the referral terms page. -->
                             <ul class="list-outside list-disc">
-                                <li class="mb-3">
-                                    Em qualquer ambiente público (por exemplo, universidades, escolas, bibliotecas e espaços de escritório), apenas uma comissão pode ser paga para cada usuário,
-                                    endereço IP, dispositivo eletrônico, residência, número de telefone, método de cobrança, endereço de e-mail e computador e IP endereço compartilhado com outras pessoas.
-                                </li>
-                                <li class="mb-3">
-                                    Nossa decisão de fazer uma aposta será baseada inteiramente em nosso critério depois que um depósito for feito e uma aposta for feita com sucesso.
-                                </li>
-                                <li class="mb-3">
-                                    As comissões podem ser retiradas em nossa carteira CREDK interna do painel a qualquer momento. (Veja a extração de sua comissão no painel e visualize o saldo na carteira).
-                                </li>
-                                <li class="mb-3">
-                                    Apoiamos a maioria das moedas no mercado.
-                                </li>
-                                <li class="mb-3">
-                                    O sistema calcula a comissão a cada 24 horas.
-                                </li>
+                                <li class="mb-3">{{ $t('Commissions are credited to your affiliate balance and can be withdrawn from this page.') }}</li>
+                                <li class="mb-3">{{ $t('Commission rates and conditions are set by the casino and described in the referral terms.') }}</li>
                             </ul>
                         </div>
 
                         <div class="mt-5 w-full border dark:border-gray-500 p-4 rounded">
-                            Se você tiver alguma dúvida sobre nossas regras, por favor <a href="" class="text-green-500 font-bold"> Contate-nos </a>
+                            <RouterLink :to="{ name: 'termsConditionsReference' }" class="text-green-500 font-bold">{{ $t('Terms and Conditions of Reference') }}</RouterLink>
                         </div>
 
                     </div>
@@ -274,7 +263,7 @@
 
                     <!-- Modal header -->
                     <div class="flex justify-between p-4 dark:bg-gray-600 rounded-t-lg">
-                        <h1>Regras de recompensas por comissão</h1>
+                        <h1>{{ $t('Commission reward rules') }}</h1>
                         <button class="" @click.prevent="opemModalWithdrawal">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
@@ -284,14 +273,14 @@
                     <div class="flex flex-col  w-full justify-center p-4">
                         <form action="" @submit.prevent="makeWithdrawal">
                             <div class="dark:text-gray-400 mb-3">
-                                <label for="">Valor do Saque</label>
-                                <input v-model="withdrawalForm.amount" type="number" class="input" placeholder="Valor do saque" required>
-                                <span v-if="wallet" class="text-sm italic">Saldo: {{ state.currencyFormat(parseFloat(wallet?.refer_rewards), wallet?.currency) }}</span>
+                                <label for="">{{ $t('Withdrawal amount') }}</label>
+                                <input v-model="withdrawalForm.amount" type="number" class="input" :placeholder="$t('Withdrawal amount')" required>
+                                <span v-if="wallet" class="text-sm italic">{{ $t('Balance') }}: {{ state.currencyFormat(parseFloat(wallet?.refer_rewards), wallet?.currency) }}</span>
                             </div>
 
                             <div class="dark:text-gray-400 mb-3">
                                 <label for="">Chave Pix</label>
-                                <input v-model="withdrawalForm.pix_key" type="text" class="input" placeholder="Digite a sua Chave pix" required>
+                                <input v-model="withdrawalForm.pix_key" type="text" class="input" :placeholder="$t('Enter your PIX key')" required>
                             </div>
 
                             <div class="dark:text-gray-400 mb-3">
@@ -301,7 +290,7 @@
                                     <option value="document">CPF/CNPJ</option>
                                     <option value="email">E-mail</option>
                                     <option value="phoneNumber">Telefone</option>
-                                    <option value="randomKey">Chave Aleatória</option>
+                                    <option value="randomKey">{{ $t('Random key') }}</option>
                                 </select>
                             </div>
 

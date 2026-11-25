@@ -23,8 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('custom_layouts', function (Blueprint $table) {
-            $table->dropColumn('custom_header');
-            $table->dropColumn('custom_body');
+            $table->dropColumn(['custom_header', 'custom_body']);
         });
     }
 };

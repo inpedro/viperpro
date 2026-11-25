@@ -25,48 +25,51 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
  * Auth Route with JWT
  */
 Route::group(['prefix' => 'auth', 'as' => 'auth.'], function () {
-    include_once(__DIR__ . '/groups/api/auth/auth.php');
+    require(__DIR__ . '/groups/api/auth/auth.php');
 });
 
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::prefix('profile')
         ->group(function ()
         {
-            include_once(__DIR__ . '/groups/api/profile/profile.php');
-            include_once(__DIR__ . '/groups/api/profile/affiliates.php');
-            include_once(__DIR__ . '/groups/api/profile/wallet.php');
-            include_once(__DIR__ . '/groups/api/profile/likes.php');
-            include_once(__DIR__ . '/groups/api/profile/favorites.php');
-            include_once(__DIR__ . '/groups/api/profile/recents.php');
-            include_once(__DIR__ . '/groups/api/profile/vip.php');
+            require(__DIR__ . '/groups/api/profile/profile.php');
+            require(__DIR__ . '/groups/api/profile/affiliates.php');
+            require(__DIR__ . '/groups/api/profile/wallet.php');
+            require(__DIR__ . '/groups/api/profile/likes.php');
+            require(__DIR__ . '/groups/api/profile/favorites.php');
+            require(__DIR__ . '/groups/api/profile/recents.php');
+            require(__DIR__ . '/groups/api/profile/vip.php');
+            require(__DIR__ . '/groups/api/profile/responsible_gaming.php');
         });
 
     Route::prefix('wallet')
         ->group(function ()
         {
-            include_once(__DIR__ . '/groups/api/wallet/deposit.php');
-            include_once(__DIR__ . '/groups/api/wallet/withdraw.php');
+            require(__DIR__ . '/groups/api/wallet/deposit.php');
+            require(__DIR__ . '/groups/api/wallet/withdraw.php');
         });
 
-    include_once(__DIR__ . '/groups/api/missions/mission.php');;
-    include_once(__DIR__ . '/groups/api/missions/missionuser.php');;
+    require(__DIR__ . '/groups/api/missions/mission.php');;
+    require(__DIR__ . '/groups/api/missions/missionuser.php');;
 });
 
 
 Route::prefix('categories')
     ->group(function ()
     {
-        include_once(__DIR__ . '/groups/api/categories/index.php');;
+        require(__DIR__ . '/groups/api/categories/index.php');;
     });
 
-include_once(__DIR__ . '/groups/api/games/index.php');
-include_once(__DIR__ . '/groups/api/gateways/digitopay.php');
-include_once(__DIR__ . '/groups/api/gateways/suitpay.php');
+require(__DIR__ . '/groups/api/games/index.php');
+require(__DIR__ . '/groups/api/lobby/index.php');
+require(__DIR__ . '/groups/api/content/legal.php');
+require(__DIR__ . '/groups/api/gateways/digitopay.php');
+require(__DIR__ . '/groups/api/gateways/suitpay.php');
 
 Route::prefix('search')
     ->group(function ()
     {
-        include_once(__DIR__ . '/groups/api/search/search.php');
+        require(__DIR__ . '/groups/api/search/search.php');
     });
 
 Route::prefix('profile')
@@ -86,16 +89,16 @@ Route::prefix('providers')
 Route::prefix('settings')
     ->group(function ()
     {
-        include_once(__DIR__ . '/groups/api/settings/settings.php');
-        include_once(__DIR__ . '/groups/api/settings/banners.php');
-        include_once(__DIR__ . '/groups/api/settings/currency.php');
-        include_once(__DIR__ . '/groups/api/settings/bonus.php');
+        require(__DIR__ . '/groups/api/settings/settings.php');
+        require(__DIR__ . '/groups/api/settings/banners.php');
+        require(__DIR__ . '/groups/api/settings/currency.php');
+        require(__DIR__ . '/groups/api/settings/bonus.php');
     });
 
 // LANDING SPIN
 Route::prefix('spin')
     ->group(function ()
     {
-        include_once(__DIR__ . '/groups/api/spin/index.php');
+        require(__DIR__ . '/groups/api/spin/index.php');
     })
     ->name('landing.spin.');

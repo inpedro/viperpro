@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ \App\Core\Localization\Locales::htmlLang() }}" dir="{{ \App\Core\Localization\Locales::direction() }}">
 <head>
     <meta charset="utf-8">
 </head>
@@ -10,19 +10,19 @@
             <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto;">
                 <tr>
                     <td style="background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.16);">
-                        <h2 style="margin-bottom: 20px;">Redefinição de Senha</h2>
+                        <h2 style="margin-bottom: 20px;">{{ __('Reset Password') }}</h2>
                         <p>
-                            Você está recebendo este e-mail porque recebemos uma solicitação para redefinir a senha da sua conta. O token é esse abaixo:
+                            {{ __('You are receiving this email because we received a password reset request for your account. Your code is below:') }}
                             <br>
                             <br>
                             <br>
                             <code style="padding: 5px; background-color: #9ca3af46;">{{ $token }}</code>
                             <br>
                             <br>
-                            <a href="{{ $resetLink }}" style="background-color: #007BFF; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Redefinir Senha</a>
+                            <a href="{{ $resetLink }}" style="background-color: #007BFF; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">{{ __('Reset Password') }}</a>
                         </p>
                         <p>
-                            Se você não solicitou uma redefinição de senha, ignore este e-mail.
+                            {{ __('If you did not request a password reset, no further action is required.') }}
                         </p>
                     </td>
                 </tr>

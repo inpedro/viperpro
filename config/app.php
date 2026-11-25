@@ -70,7 +70,7 @@ return [
     |
     */
 
-    'timezone' => 'America/Sao_Paulo',
+    'timezone' => env('APP_TIMEZONE', 'UTC'), // tenants set their own (settings.timezone)
 
     /*
     |--------------------------------------------------------------------------
@@ -83,7 +83,7 @@ return [
     |
     */
 
-    'locale' => 'pt_BR',
+    'locale' => 'en', // platform default; tenants choose theirs (settings.default_locale)
 
     /*
     |--------------------------------------------------------------------------
@@ -168,12 +168,14 @@ return [
         /*
          * Application Service Providers...
          */
+        App\Core\Addons\AddonServiceProvider::class,
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
         App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\Filament\AdminPanelProvider::class,
         App\Providers\Filament\AffiliatePanelProvider::class,
+        App\Providers\Filament\PlatformPanelProvider::class,
         App\Providers\RouteServiceProvider::class,
     ])->toArray(),
 

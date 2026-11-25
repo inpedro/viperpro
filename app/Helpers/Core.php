@@ -37,43 +37,23 @@ class Core
      */
     public static function DiscountBalance(Wallet $wallet, $bet)
     {
-        $changeBonus = 'no_balance';
+        // Delegates to WalletService::debitBet (locked, journaled as game.bet). Same bucket
+        // priority and return values as before: balance | balance_withdrawal | balance_bonus | no_balance.
+        // Provider amounts can carry >2 decimals; the decimal(20,2) column always rounded them to cents.
+        $minor = is_numeric($bet) ? (int) round(((float) $bet) * 100) : null;
 
-        if ($wallet->balance >= $bet) {
-            $wallet->decrement('balance', $bet);
-            return 'balance';
-        } elseif ($wallet->balance_withdrawal >= $bet) {
-            $wallet->decrement('balance_withdrawal', $bet);
-            return 'balance_withdrawal';
-        } elseif ($wallet->total_balance_without_bonus >= $bet) {
-            $balanceBet = 0;
-            $remainingBet = 0;
-
-            if($wallet->balance > 0) {
-                $balanceBet = $wallet->balance;
-                $wallet->decrement('balance', $wallet->balance);
-            }
-
-            if($wallet->balance_withdrawal > 0) {
-                $remainingBet = ($bet - $balanceBet);
-                if($wallet->balance_withdrawal >= $remainingBet) {
-                    $wallet->decrement('balance_withdrawal', $remainingBet);
-                }
-            }
-
-            return 'balance_withdrawal';
+        if ($minor === null || $minor < 0) {
+            return "no_balance"; // a negative "bet" used to be a credit
+        }
+        if ($minor === 0) {
+            return "balance"; // free rounds: nothing to debit (legacy behaviour)
         }
 
-        if(($wallet->balance > 0 || $wallet->balance_withdrawal > 0) && $wallet->total_balance_without_bonus < $bet) {
-            return 'no_balance';
-        }else{
-            if ($wallet->balance_bonus >= $bet) {
-                $wallet->decrement('balance_bonus', $bet); // retira do bônus
-                return 'balance_bonus';
-            }
-        }
+        $ctx = \App\Core\Wallet\LedgerContext::current()["context"];
+        $result = \App\Core\Wallet\WalletService::debitBet($wallet, \App\Core\Money\Amount::fromMinor($minor), null, $ctx);
+        $wallet->refresh();
 
-        return $changeBonus;
+        return $result->ok ? $result->bucket : "no_balance";
     }
 
     /**
@@ -260,7 +240,7 @@ class Core
     public static function getDistribution(): array
     {
         return [
-            'source' => 'Código Fonte',
+            'source' => 'In-house (source)',
             'evergame' => 'Evergame',
             'playigaming' => 'Play IGaming',
             'playgaming' => 'Play Gaming',
@@ -284,13 +264,13 @@ class Core
     {
         switch ($order) {
             case 'balance_bonus':
-                return 'Saldo Bônus';
+                return trans('Bonus balance');
 
             case 'balance':
-                return 'Saldo Depósito';
+                return trans('Deposit balance');
 
             case 'balance_withdrawal':
-                return 'Saldo de Saque';
+                return trans('Withdrawable balance');
 
         }
     }
@@ -302,10 +282,10 @@ class Core
     public static function getTypeOrder($order)
     {
         if($order == 'win') {
-            return 'Vitória';
+            return trans('Win');
         }
 
-        return 'Perda';
+        return trans('Loss');
     }
 
     /**
@@ -329,7 +309,7 @@ class Core
      */
     public static function getGoogleFonts()
     {
-        $response = Http::get('https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyDQCZFgODu0jw7Ez00jgQU04SUsuncY3yQ');
+        $response = Http::get('https://www.googleapis.com/webfonts/v1/webfonts', ['key' => (string) config('services.google_fonts.key')]);
         if($response->successful()) {
 
         }
@@ -462,13 +442,13 @@ class Core
 
         switch ($key) {
             case 'document':
-                return 'Documento';
+                return trans('Document');
             case 'phoneNumber':
-                return 'Telefone';
+                return trans('Phone');
             case 'email':
                 return 'E-mail';
             case 'randomKey':
-                return 'Chave Aleatória';
+                return trans('Random key');
             default:
                 return $key;
         }
@@ -582,7 +562,7 @@ class Core
             return new $fullControllerName();
         } else {
             // Caso a classe não exista, você pode lidar com isso aqui
-            throw new \Exception("Controller não encontrado: $fullControllerName");
+            throw new \Exception("Controller not found: $fullControllerName");
         }
     }
 
@@ -607,12 +587,16 @@ class Core
         /// pagar afiliado
         if($type == 'bet' && !empty($user->inviter)) {
             $affiliate = User::find($user->inviter);
-            self::PayLoss($user, $affiliate, $bet, $changeBonus);
+            \App\Core\Wallet\LedgerContext::run('affiliate.revshare', 'affiliate',
+                fn () => self::PayLoss($user, $affiliate, $bet, $changeBonus),
+                ['reference_type' => 'game_tx', 'reference_id' => $tx]);
         }
 
         if($type == 'win' && !empty($user->inviter)) {
             $affiliate  = User::find($user->inviter);
-            self::PayWin($user, $affiliate, $type, $win, $changeBonus);
+            \App\Core\Wallet\LedgerContext::run('affiliate.revshare_clawback', 'affiliate',
+                fn () => self::PayWin($user, $affiliate, $type, $win, $changeBonus),
+                ['reference_type' => 'game_tx', 'reference_id' => $tx]);
         }
 
         if($type == 'win') {
@@ -636,7 +620,10 @@ class Core
         /// pagando o premio
         if ($user->is_demo_agent == false) {
             /// atualiza os ganhos da vitoria
-            self::payWithRollover($userId, $changeBonus, $win, $bet, $type); /// verifica o rollover
+            // Win credits and rollover conversions; journaled as game.settlement (counter: platform:game).
+            \App\Core\Wallet\LedgerContext::run('game.settlement', 'game',
+                fn () => self::payWithRollover($userId, $changeBonus, $win, $bet, $type),
+                ['reference_type' => 'game_tx', 'reference_id' => $tx]);
             return true;
         }
 
@@ -750,8 +737,9 @@ class Core
 
 
                     if(!empty($affHistoryRevshare)) {
-                        /// verificar qual revshare pagar, o fake ou o padrão
-                        $revshare = $affiliate->affiliate_revenue_share_fake ?? $affiliate->affiliate_revenue_share;
+                        // The affiliate's real rate. A separate "fake" rate used to be shown to the
+                        // affiliate and applied here when players won (deceptive; removed).
+                        $revshare = $affiliate->affiliate_revenue_share;
 
                         $commissionSub = self::porcentagem_xn($revshare, $amount); /// calcula a porcentagem da perda, com o valor ganhado na variavel $amount
 
@@ -903,11 +891,11 @@ class Core
     public static function getCustom()
     {
         $custom = null;
-        if(Cache::has('custom')) {
-            $custom = Cache::get('custom');
+        if(Cache::has(\App\Core\Tenancy\Tenancy::key('custom'))) {
+            $custom = Cache::get(\App\Core\Tenancy\Tenancy::key('custom'));
         }else{
             $custom = CustomLayout::first();
-            Cache::put('custom', $custom);
+            Cache::put(\App\Core\Tenancy\Tenancy::key('custom'), $custom);
         }
 
         return $custom;
@@ -920,36 +908,11 @@ class Core
      */
     public static function getSetting()
     {
-        $setting = null;
-        if(Cache::has('setting')) {
-            $setting = Cache::get('setting');
-        }else{
-            $setting = Setting::select(
-                'software_name',
-                'software_description',
-                'software_logo_white',
-                'software_logo_black',
-                'currency_code',
-                'decimal_format',
-                'currency_position',
-                'prefix',
-                'storage',
-                'min_deposit',
-                'max_deposit',
-                'min_withdrawal',
-                'max_withdrawal',
-                'initial_bonus',
-                'suitpay_is_enable',
-                'stripe_is_enable',
-                'sharkpay_is_enable',
-                'disable_spin',
-                'disable_rollover',
-            )->first();
-
-            Cache::put('setting', $setting);
-        }
-
-        return $setting;
+        // Always the full row. This used to select a column subset while the admin pages cached
+        // the full row under the same key, so affiliate commission inputs (revshare_reverse,
+        // ngr_percent, perc_sub_lv*) were null or set depending on cache state. Public output
+        // goes through Setting::PUBLIC_FIELDS instead.
+        return Cache::remember(\App\Core\Tenancy\Tenancy::key('setting'), 3600, fn () => Setting::query()->first());
     }
 
     /**
@@ -1127,8 +1090,8 @@ class Core
     {
         $extension  = $file->extension();
         $size       = $file->getSize();
-        $path       = Storage::disk('public')->putFile('uploads', $file, 'public');
-        $name       = explode('uploads/', $path);
+        $path       = Storage::disk('public')->putFile(\App\Core\Tenancy\Tenancy::storagePrefix().'/uploads', $file, 'public');
+        $name       = explode('uploads/', $path); // tenants/{id}/uploads/<file>
 
         if($path && isset($name[1])) {
             return [
@@ -1460,20 +1423,8 @@ class Core
      * @param $array
      * @return mixed
      */
-    public static function MakeToken($array){
-        if(is_array($array)){
-            $output =  '{"status": true';
-            $interacao = 0;
-            foreach ($array as $key => $value){
-                $output .=  ',"' .$key . '"' . ': "' . $value . '"';
-            }
-            $output .= "}";
-        }else{
-            $er_txt = self::Decode('QVakfW0DwcOie2aD9kog9oRx81VtX73oY1Vn91o7YVamZVa2eVaxYkwofGadZGadfGope2aB9zJgbVapYXJgX5R6YWJgeGgg9h');
-            $output = str_replace('_', '&nbsp;', $er_txt);
-            exit($output);
-        }
-        return self::Encode($output);
+    public static function MakeToken($array, ?int $ttl = null){
+        return \App\Core\Security\SignedToken::issue((array) $array, $ttl);
     }
 
 
@@ -1483,15 +1434,8 @@ class Core
      * @return mixed|string
      */
     public static function DecToken($token){
-        $json = self::Decode($token);
-        if(is_numeric($json)){
-            return $token;
-        }else if(self::isJson($json)){
-            $json = str_replace("{\"email", "{\"status\":true ,\"email", $json);
-            return json_decode($json, true);
-        }else{
-            return array("status"=>false, "messase"=>"invalid token");
-        }
+        // Signature + expiry verified. Legacy substitution-cipher tokens are no longer accepted.
+        return \App\Core\Security\SignedToken::verify((string) $token);
     }
 
     /**
@@ -1559,13 +1503,13 @@ class Core
      * @return mixed
      */
     public static function WheelPrizes() {
-        $key = 'spin:config:prizes';
+        $key = \App\Core\Tenancy\Tenancy::key('spin:config:prizes');
         $cached = Cache::get($key);
         $config = NULL;
 
         if(!$cached) {
             $c = SpinConfigs::latest()->first();
-            $str = $c->prizes;
+            $str = $c?->prizes ?? '[]';
             Cache::set($key, $str);
             $config = json_decode($str);
         } else {

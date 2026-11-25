@@ -427,7 +427,7 @@ trait EvergameTrait
                                 'distribution' => 'evergame',
                             ];
                             Provider::create($dataProvider);
-                            echo "provedor criado com sucesso \n";
+                            echo "provider created \n";
                         }
                     }
                 }
@@ -492,7 +492,7 @@ trait EvergameTrait
                                     ];
 
                                     Game::create($data);
-                                    echo "jogo salvo com sucesso \n";
+                                    echo "game saved \n";
                                 }
                             }
                         }

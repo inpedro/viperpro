@@ -30,10 +30,10 @@
                 </div>
                 <button @click="$router.push('/profile/affiliate')" data-tooltip-target="tooltip-sport" type="button" class="inline-flex flex-col items-center justify-center px-5 rounded-r-full hover:bg-gray-50 dark:hover:bg-gray-800 group">
                     <i class="fa-solid fa-users mb-1 text-xl"></i>
-                    <span class="text-[12px]">Convidar</span>
+                    <span class="text-[12px]">{{ $t('Refer') }}</span>
                 </button>
                 <div id="tooltip-sport" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                    Convidar
+                    {{ $t('Refer') }}
                     <div class="tooltip-arrow" data-popper-arrow></div>
                 </div>
                 <button @click="$router.push('/profile/wallet')" data-tooltip-target="tooltip-wallet" type="button" class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group">

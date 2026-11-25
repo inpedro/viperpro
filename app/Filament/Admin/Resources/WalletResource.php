@@ -19,15 +19,27 @@ use Illuminate\Database\Eloquent\Model;
 
 class WalletResource extends Resource
 {
+    public static function getNavigationLabel(): string
+    {
+        return __('Wallets');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Wallets');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Administration');
+    }
+
     protected static ?string $model = Wallet::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-wallet';
 
-    protected static ?string $navigationLabel = 'Carteiras';
 
-    protected static ?string $modelLabel = 'Carteiras';
 
-    protected static ?string $navigationGroup = 'Administração';
 
     protected static ?string $slug = 'minha-carteira';
 
@@ -75,12 +87,12 @@ class WalletResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Usuário')
-                    ->description('Selecione um usuário')
+                Forms\Components\Section::make(__('User'))
+                    ->description(__('Select a user'))
                     ->schema([
                         Forms\Components\Select::make('user_id')
-                            ->label('Usuários')
-                            ->placeholder('Selecione um usuário')
+                            ->label(__('Users'))
+                            ->placeholder(__('Select a user'))
                             ->relationship(name: 'user', titleAttribute: 'name')
                             ->options(
                                 fn($get) => User::query()
@@ -102,17 +114,17 @@ class WalletResource extends Resource
                             ->numeric()
                             ->default(0.00),
                         Forms\Components\TextInput::make('refer_rewards')
-                            ->label('Saldo de Afiliado')
+                            ->label(__('Affiliate balance'))
                             ->required()
                             ->numeric()
                             ->default(0.00),
                         Forms\Components\TextInput::make('balance_demo')
-                            ->label('Saldo Influencer')
+                            ->label(__('Demo balance'))
                             ->required()
                             ->numeric()
                             ->default(0.00),
                         Forms\Components\TextInput::make('balance_withdrawal')
-                            ->label('Saldo Saque')
+                            ->label(__('Withdrawable balance'))
                             ->required()
                             ->numeric()
                             ->default(0.00),
@@ -131,27 +143,27 @@ class WalletResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('Usuário')
+                    ->label(__('User'))
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('balance')
-                    ->label('Saldo')
+                    ->label(__('Balance'))
                     ->formatStateUsing(fn (string $state): string => \Helper::amountFormatDecimal($state))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('balance_withdrawal')
-                    ->label('Saldo Saq.')
+                    ->label(__('Withdrawable balance'))
                     ->formatStateUsing(fn (string $state): string => \Helper::amountFormatDecimal($state))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('balance_bonus')
-                    ->label('Bônus')
+                    ->label(__('Bonus'))
                     ->formatStateUsing(fn (string $state): string => \Helper::amountFormatDecimal($state))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('balance_bonus_rollover')
-                    ->label('Saldo B Roll.')
+                    ->label(__('Bonus rollover balance'))
                     ->formatStateUsing(fn (string $state): string => \Helper::amountFormatDecimal($state))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Data')
+                    ->label(__('Date'))
                     ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
@@ -162,8 +174,8 @@ class WalletResource extends Resource
             ->filters([
                 Filter::make('created_at')
                     ->form([
-                        DatePicker::make('created_from')->label('Criado a partir de'),
-                        DatePicker::make('created_until')->label('Criado até'),
+                        DatePicker::make('created_from')->label(__('Created from')),
+                        DatePicker::make('created_until')->label(__('Created until')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query

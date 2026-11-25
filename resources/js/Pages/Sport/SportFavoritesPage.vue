@@ -14,7 +14,7 @@
                 <div class="flex flex-col w-full text-center justify-center items-center ">
                     <div class="mt-5">
                         <p class="text-2xl">
-                            Você precisa fazer o login para ver seus eventos favoritos.
+                            {{ $t('Log in to see your favourite events.') }}
                         </p>
                     </div>
 

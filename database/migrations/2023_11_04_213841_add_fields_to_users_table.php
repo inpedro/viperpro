@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('oauth_id')->nullable();
             $table->string('oauth_type')->nullable();
-            $table->string('avatar')->nullable();
+            // avatar is already created by 2014_10_12_000000_create_users_table (duplicate removed: broke fresh installs)
             $table->string('last_name')->nullable();
             $table->string('cpf', 20)->nullable();
             $table->string('phone', 30)->nullable();
@@ -36,20 +36,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('oauth_id');
-            $table->dropColumn('oauth_type');
-            $table->dropColumn('avatar');
-            $table->dropColumn('last_name');
-            $table->dropColumn('cpf');
-            $table->dropColumn('phone');
-            $table->dropColumn('logged_in');
-            $table->dropColumn('banned');
-            $table->dropColumn('inviter');
-            $table->dropColumn('affiliate_revenue_share');
-            $table->dropColumn('affiliate_cpa');
-            $table->dropColumn('affiliate_baseline');
-            $table->dropColumn('is_agent');
-            $table->dropColumn('status');
+            $table->dropColumn(['oauth_id', 'oauth_type', 'last_name', 'cpf', 'phone', 'logged_in', 'banned', 'inviter', 'inviter_code', 'affiliate_revenue_share', 'affiliate_cpa', 'affiliate_baseline', 'is_demo_agent', 'status']);
         });
     }
 };

@@ -11,6 +11,8 @@ use App\Helpers\Core as Helper;
 
 class Order extends Model
 {
+    use \App\Core\Tenancy\BelongsToTenant;
+
     use HasFactory;
 
     /**
@@ -67,7 +69,7 @@ class Order extends Model
     protected function providers(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => Helper::getDistribution()[$value] ?? 'Sem Provedor',
+            get: fn (?string $value) => Helper::getDistribution()[$value] ?? trans('No provider'),
         );
     }
 

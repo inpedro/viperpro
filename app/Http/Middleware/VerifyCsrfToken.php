@@ -13,6 +13,7 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         'api/*',
+        'payments/webhooks/*', // authenticated by each gateway adapter (signatures / server-side verification)
         'digitopay/*',
         'slotegrator/*',
         'suitpay/*',

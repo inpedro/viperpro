@@ -2,7 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 use App\Filament\Admin\Pages\AdvancedPage;
 use App\Filament\Admin\Pages\DashboardAdmin;
 use App\Filament\Admin\Pages\DigitoPayPaymentPage;
@@ -93,35 +92,35 @@ class AdminPanelProvider extends PanelProvider
 
                             NavigationItem::make('settings')
                                 ->icon('heroicon-o-cog-6-tooth')
-                                ->label(fn (): string => 'Configurações')
+                                ->label(fn (): string => __('Settings'))
                                 ->url(fn (): string => SettingResource::getUrl())
                                 ->isActiveWhen(fn () => request()->routeIs('filament.pages.settings'))
                                 ->visible(fn(): bool => auth()->user()->hasRole('admin')),
 
                             NavigationItem::make('setting-spin')
                                 ->icon('heroicon-o-cog-6-tooth')
-                                ->label(fn (): string => 'Definições do Spin')
+                                ->label(fn (): string => __('Spin settings'))
                                 ->url(fn (): string => SettingSpin::getUrl())
                                 ->isActiveWhen(fn () => request()->routeIs('filament.pages.setting-spin'))
                                 ->visible(fn(): bool => auth()->user()->hasRole('admin')),
 
                             NavigationItem::make('games-key')
                                 ->icon('heroicon-o-cog-6-tooth')
-                                ->label(fn (): string => 'Chaves dos Jogos')
+                                ->label(fn (): string => __('Game provider keys'))
                                 ->url(fn (): string => GamesKeyPage::getUrl())
                                 ->isActiveWhen(fn () => request()->routeIs('filament.pages.games-key-page'))
                                 ->visible(fn(): bool => auth()->user()->hasRole('admin')),
 
                             NavigationItem::make('setting-mail')
                                 ->icon('heroicon-o-cog-6-tooth')
-                                ->label(fn (): string => 'Definições de Email')
+                                ->label(fn (): string => __('E-mail settings'))
                                 ->url(fn (): string => SettingMailPage::getUrl())
                                 ->isActiveWhen(fn () => request()->routeIs('filament.pages.setting-mail-page'))
                                 ->visible(fn(): bool => auth()->user()->hasRole('admin')),
 
                             NavigationItem::make('withdraw_affiliates')
                                 ->icon('heroicon-o-banknotes')
-                                ->label(fn (): string => 'Saques de Afiliados')
+                                ->label(fn (): string => __('Affiliate withdrawals'))
                                 ->url(fn (): string => AffiliateWithdrawResource::getUrl())
                                 ->isActiveWhen(fn () => request()->routeIs('filament.admin.resources.sub-affiliates.index'))
                                 ->visible(fn(): bool => auth()->user()->hasRole('admin')),
@@ -129,15 +128,58 @@ class AdminPanelProvider extends PanelProvider
                         ])
                     ,
                     auth()->user()->hasRole('admin') ?
-                        NavigationGroup::make('Modulos')
+                        NavigationGroup::make(__('Modules'))
                             ->items([
                                 ...MissionResource::getNavigationItems(),
                                 ...VipResource::getNavigationItems(),
+                                NavigationItem::make('analytics')
+                                    ->icon('heroicon-o-chart-bar')
+                                    ->label(fn (): string => __('Analytics'))
+                                    ->url(fn (): string => \App\Filament\Admin\Pages\AnalyticsPage::getUrl())
+                                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.analytics'))
+                                    ->visible(fn (): bool => auth()->user()->hasRole('admin')),
+                                NavigationItem::make('reconciliation')
+                                    ->icon('heroicon-o-scale')
+                                    ->label(fn (): string => __('Reconciliation'))
+                                    ->url(fn (): string => \App\Filament\Admin\Pages\ReconciliationPage::getUrl())
+                                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.reconciliation'))
+                                    ->visible(fn (): bool => auth()->user()->hasRole('admin')),
+                                ...\App\Filament\Admin\Resources\LegalPageResource::getNavigationItems(),
+                                NavigationItem::make('staff-sessions')
+                                    ->icon('heroicon-o-computer-desktop')
+                                    ->label(fn (): string => __('Staff sessions'))
+                                    ->url(fn (): string => \App\Filament\Admin\Pages\AdminSessionsPage::getUrl())
+                                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.staff-sessions'))
+                                    ->visible(fn (): bool => auth()->user()->hasRole('admin')),
+                                NavigationItem::make('integrations')
+                                    ->icon('heroicon-o-signal')
+                                    ->label(fn (): string => __('Integrations'))
+                                    ->url(fn (): string => \App\Filament\Admin\Pages\IntegrationsPage::getUrl())
+                                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.integrations'))
+                                    ->visible(fn (): bool => auth()->user()->hasRole('admin')),
+                                NavigationItem::make('theme')
+                                    ->icon('heroicon-o-swatch')
+                                    ->label(fn (): string => __('Theme'))
+                                    ->url(fn (): string => \App\Filament\Admin\Pages\ThemePage::getUrl())
+                                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.theme'))
+                                    ->visible(fn (): bool => auth()->user()->hasRole('admin')),
+                                NavigationItem::make('localization')
+                                    ->icon('heroicon-o-language')
+                                    ->label(fn (): string => __('Languages & registration'))
+                                    ->url(fn (): string => \App\Filament\Admin\Pages\LocalizationSettingsPage::getUrl())
+                                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.localization'))
+                                    ->visible(fn (): bool => auth()->user()->hasRole('admin')),
+                                NavigationItem::make('addons')
+                                    ->icon('heroicon-o-puzzle-piece')
+                                    ->label(fn (): string => __('Addons'))
+                                    ->url(fn (): string => \App\Filament\Admin\Pages\AddonManagerPage::getUrl())
+                                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.addons'))
+                                    ->visible(fn (): bool => auth()->user()->hasRole('admin')),
                             ])
                         : NavigationGroup::make()
                     ,
                     auth()->user()->hasRole('admin') ?
-                        NavigationGroup::make('Meus Jogos')
+                        NavigationGroup::make(__('My games'))
                             ->items([
                                 ...CategoryResource::getNavigationItems(),
                                 ...ProviderResource::getNavigationItems(),
@@ -147,18 +189,18 @@ class AdminPanelProvider extends PanelProvider
                         : NavigationGroup::make()
                     ,
                     auth()->user()->hasRole('admin') ?
-                        NavigationGroup::make('Pagamentos')
+                        NavigationGroup::make(__('Payments'))
                             ->items([
                                 NavigationItem::make('gateway')
                                     ->icon('heroicon-o-cog-6-tooth')
-                                    ->label(fn (): string => 'Gateway de Pagamentos')
+                                    ->label(fn (): string => __('Payment gateways'))
                                     ->url(fn (): string => GatewayPage::getUrl())
                                     ->isActiveWhen(fn () => request()->routeIs('filament.pages.gateway-page'))
                                     ->visible(fn(): bool => auth()->user()->hasRole('admin')),
 
                                 NavigationItem::make('suitpay-pagamentos')
                                     ->icon('heroicon-o-currency-dollar')
-                                    ->label(fn (): string => 'Histórico de Pagamentos')
+                                    ->label(fn (): string => __('Payment history'))
                                     ->url(fn (): string => DigitoPayPaymentPage::getUrl())
                                     ->isActiveWhen(fn () => request()->routeIs('filament.pages.suit-pay-payment-page'))
                                     ->visible(fn(): bool => auth()->user()->hasRole('admin')),
@@ -166,13 +208,13 @@ class AdminPanelProvider extends PanelProvider
                         : NavigationGroup::make()
                     ,
                     auth()->user()->hasRole('admin') ?
-                        NavigationGroup::make('Customização')
+                        NavigationGroup::make(__('Customisation'))
                             ->items([
                                 ...BannerResource::getNavigationItems(),
 
                                 NavigationItem::make('custom-layout')
                                     ->icon('heroicon-o-paint-brush')
-                                    ->label(fn (): string => 'Customização')
+                                    ->label(fn (): string => __('Customisation'))
                                     ->url(fn (): string => LayoutCssCustom::getUrl())
                                     ->isActiveWhen(fn () => request()->routeIs('filament.pages.layout-css-custom'))
                                     ->visible(fn(): bool => auth()->user()->hasRole('admin'))
@@ -180,7 +222,7 @@ class AdminPanelProvider extends PanelProvider
                         : NavigationGroup::make()
                     ,
                     auth()->user()->hasRole('admin') ?
-                        NavigationGroup::make('Administração')
+                        NavigationGroup::make(__('Administration'))
                             ->items([
                                 ...UserResource::getNavigationItems(),
                                 ...WalletResource::getNavigationItems(),
@@ -219,7 +261,7 @@ class AdminPanelProvider extends PanelProvider
                         ->items([
                             NavigationItem::make('advanced_page')
                                 ->icon('heroicon-o-banknotes')
-                                ->label(fn (): string => 'Opções Avançada')
+                                ->label(fn (): string => __('Advanced options'))
                                 ->url(fn (): string => AdvancedPage::getUrl())
                                 ->isActiveWhen(fn () => request()->routeIs('filament.admin.resources.sub-affiliates.index'))
                                 ->visible(fn(): bool => auth()->user()->hasRole('admin')),
@@ -244,8 +286,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])
-            ->plugin(FilamentSpatieRolesPermissionsPlugin::make())
+                \App\Http\Middleware\AdminSessionGuard::class,
+            ], isPersistent: true)
             ;
     }
 }

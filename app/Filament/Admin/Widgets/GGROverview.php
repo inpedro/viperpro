@@ -18,18 +18,18 @@ class GGROverview extends BaseWidget
         $totalPartidas = GgrGamesWorldSlot::count();
 
         return [
-            Stat::make('Créditos Fivers', ($balance ?? '0'))
-                ->description('Saldo atual na World Slot')
+            Stat::make(__('Fivers credits'), ($balance ?? '0'))
+                ->description(__('Current World Slot balance'))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success')
                 ->chart([7,3,4,5,6,3,5,3]),
-            Stat::make('Créditos Gastos Fivers', \Helper::amountFormatDecimal($creditoGastos))
-                ->description('Créditos gastos por usuários')
+            Stat::make(__('Fivers credits spent'), \Helper::amountFormatDecimal($creditoGastos))
+                ->description(__('Credits spent by users'))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success')
                 ->chart([7,3,4,5,6,3,5,3]),
-            Stat::make('Total de Partidas Fivers', $totalPartidas)
-                ->description('Total de Partidas World Slot')
+            Stat::make(__('Total Fivers games'), $totalPartidas)
+                ->description(__('Total World Slot games'))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success')
                 ->chart([7,3,4,5,6,3,5,3]),

@@ -25,10 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('game_exclusives', function (Blueprint $table) {
-            $table->dropColumn('loseResults');
-            $table->dropColumn('demoWinResults');
-            $table->dropColumn('winResults');
-            $table->dropColumn('iconsJson');
+            $table->dropColumn(['loseResults', 'demoWinResults', 'winResults', 'iconsJson']);
         });
     }
 };

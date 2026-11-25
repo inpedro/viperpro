@@ -1,7 +1,7 @@
 <template>
     <div v-if="!cookieAccepted" class="flex justify-between items-center fixed left-0 md:left-10 bottom-10 z-[999] p-4 dark:bg-gray-900 shadow-lg">
-        <p>Usamos cookies para fornecer a melhor experiência para você.</p>
-        <button @click="acceptCookie" class="ui-button-blue ml-3">Aceitar</button>
+        <p>{{ $t('We use cookies to give you the best experience.') }}</p>
+        <button @click="acceptCookie" class="ui-button-blue ml-3">{{ $t('Accept') }}</button>
     </div>
 </template>
 

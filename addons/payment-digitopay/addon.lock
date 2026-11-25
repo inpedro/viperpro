@@ -1,0 +1,10 @@
+{
+    "id": "payment.digitopay",
+    "version": "1.1.0",
+    "files": {
+        "README.md": "2e9bf3fcae325672649d9f407efa4c484fd5b7143ea0f576bc28d8199eb6afab",
+        "addon.json": "42bb068cce37423cf19a9ca691f9885c31585aabbeedc71767973b1dde5ae16e",
+        "src/DigitoPayGateway.php": "976f9935496cd317ef8aa6eb9b11f3032ed45272e8871c586bdeddb2a321fe3d",
+        "src/DigitoPayTrait.php": "c2f2f13f7e15bf3820ed5a39334650ce20e51fff2a216f3d2f57c4b81f138734"
+    }
+}

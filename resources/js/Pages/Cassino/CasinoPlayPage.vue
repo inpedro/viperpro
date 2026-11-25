@@ -22,7 +22,7 @@
                 <fullscreen v-model="fullscreen" :page-only="pageOnly">
                     <div v-if="showButton && game.game_type === 'live' && game.distribution === 'evergame'" class="game-full fullscreen-wrapper flex items-center justify-center">
                         <button @click.prevent="openModal(gameUrl)" type="button" class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
-                            Clique para começar
+                            {{ $t('Click to start') }}
                         </button>
                     </div>
                     <iframe v-else :src="gameUrl" class="game-full fullscreen-wrapper"></iframe>
@@ -167,7 +167,7 @@
             <!-- End Tabs -->
         </div>
         <div v-if="undermaintenance" class="flex flex-col items-center justify-center text-center py-24">
-            <h1 class="text-2xl mb-4">JOGO EM MANUTENÇÃO</h1>
+            <h1 class="text-2xl mb-4">{{ $t('Game under maintenance') }}</h1>
             <img :src="`/assets/images/work-in-progress.gif`" alt="" width="400">
         </div>
     </GameLayout>

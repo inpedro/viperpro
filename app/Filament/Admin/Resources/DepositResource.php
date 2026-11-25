@@ -18,15 +18,27 @@ use Illuminate\Database\Eloquent\Builder;
 
 class DepositResource extends Resource
 {
+    public static function getNavigationLabel(): string
+    {
+        return __('Deposits');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Deposits');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Administration');
+    }
+
     protected static ?string $model = Deposit::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-down-tray';
 
-    protected static ?string $navigationLabel = 'Depositos';
 
-    protected static ?string $modelLabel = 'Depositos';
 
-    protected static ?string $navigationGroup = 'Administração';
 
     protected static ?string $slug = 'todos-depositos';
 
@@ -65,11 +77,11 @@ class DepositResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Cadastro de Deposito')
+                Forms\Components\Section::make(__('Register deposit'))
                 ->schema([
                     Forms\Components\Select::make('user_id')
-                        ->label('Usuários')
-                        ->placeholder('Selecione um usuário')
+                        ->label(__('Users'))
+                        ->placeholder(__('Select a user'))
                         ->options(
                             fn($get) => User::query()
                                 ->pluck('name', 'id')
@@ -79,16 +91,16 @@ class DepositResource extends Resource
                         ->live()
                         ->required(),
                     Forms\Components\TextInput::make('amount')
-                        ->label('Valor')
+                        ->label(__('Amount'))
                         ->required()
                         ->default(0.00),
                     Forms\Components\TextInput::make('type')
-                        ->label('Tipo')
+                        ->label(__('Type'))
                         ->required()
                         ->maxLength(191),
                     Forms\Components\FileUpload::make('proof')
-                        ->label('Comprovante')
-                        ->placeholder('Carregue a imagem do comprovante')
+                        ->label(__('Receipt'))
+                        ->placeholder(__('Upload the receipt image'))
                         ->image()
                         ->columnSpanFull()
                         ->required(),
@@ -104,19 +116,19 @@ class DepositResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('payment_id')
-                    ->label('ID Pag.')
+                    ->label(__('Payment ID'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('user.name')
                     ->numeric()
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->label('Valor')
+                    ->label(__('Amount'))
                     ->formatStateUsing(fn (Deposit $record): string => $record->symbol . ' ' . $record->amount)
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('type')
-                    ->label('Tipo')
+                    ->label(__('Type'))
                     ->searchable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('proof')
@@ -134,8 +146,8 @@ class DepositResource extends Resource
             ->filters([
                 Filter::make('created_at')
                     ->form([
-                        DatePicker::make('created_from')->label('Criado a partir de'),
-                        DatePicker::make('created_until')->label('Criado até'),
+                        DatePicker::make('created_from')->label(__('Created from')),
+                        DatePicker::make('created_until')->label(__('Created until')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query

@@ -13,13 +13,21 @@ use Filament\Tables\Table;
 
 class CategoryResource extends Resource
 {
+    public static function getNavigationLabel(): string
+    {
+        return __('All categories');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('All categories');
+    }
+
     protected static ?string $model = Category::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationLabel = 'Todas as Categorias';
 
-    protected static ?string $modelLabel = 'Todas as Categorias';
 
     /**
      * @dev @victormsalatiel
@@ -41,16 +49,16 @@ class CategoryResource extends Resource
                 Forms\Components\Section::make()
                 ->schema([
                     Forms\Components\TextInput::make('name')
-                        ->label('Nome')
+                        ->label(__('Name'))
                         ->required()
                         ->unique(ignorable: fn ($record) => $record)
                         ->maxLength(191),
                     Forms\Components\TextInput::make('description')
-                        ->label('Descrição')
+                        ->label(__('Description'))
                         ->required()
                         ->maxLength(191),
                     Forms\Components\FileUpload::make('image')
-                        ->label('Capa')
+                        ->label(__('Cover image'))
                         ->image(),
                     Forms\Components\TextInput::make('slug')
                         ->maxLength(191),
@@ -63,14 +71,14 @@ class CategoryResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Nome')
+                    ->label(__('Name'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('description')
-                    ->label('Descrição')
+                    ->label(__('Description'))
                     ->limit(70)
                     ->searchable(),
                 Tables\Columns\ImageColumn::make('image')
-                    ->label('Imagem'),
+                    ->label(__('Image')),
                 Tables\Columns\TextColumn::make('slug')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')

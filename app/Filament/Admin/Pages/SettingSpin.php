@@ -52,7 +52,7 @@ class SettingSpin extends Page
      */
     public function mount(): void
     {
-        $this->setting = SpinConfigs::first();
+        $this->setting = SpinConfigs::current();
         $this->form->fill($this->setting->toArray());
     }
 
@@ -78,14 +78,14 @@ class SettingSpin extends Page
         try {
             if(env('APP_DEMO')) {
                 Notification::make()
-                    ->title('Atenção')
-                    ->body('Você não pode realizar está alteração na versão demo')
+                    ->title(__('Attention'))
+                    ->body(__('You cannot make this change in the demo version'))
                     ->danger()
                     ->send();
                 return;
             }
 
-            $setting = SpinConfigs::first();
+            $setting = SpinConfigs::current();
             if(!empty($setting)) {
 
                 $updatedData = [];
@@ -96,8 +96,8 @@ class SettingSpin extends Page
 
                 if($setting->update(['prizes' => $updatedData])) {
                     Notification::make()
-                        ->title('Dados alterados')
-                        ->body('Dados alterados com sucesso!')
+                        ->title(__('Data updated'))
+                        ->body(__('Data updated successfully.'))
                         ->success()
                         ->send();
 
@@ -106,8 +106,8 @@ class SettingSpin extends Page
             }
         } catch (Halt $exception) {
             Notification::make()
-                ->title('Erro ao alterar dados!')
-                ->body('Erro ao alterar dados!')
+                ->title(__('Could not update the data.'))
+                ->body(__('Could not update the data.'))
                 ->danger()
                 ->send();
         }
@@ -121,15 +121,15 @@ class SettingSpin extends Page
     {
         return $form
             ->schema([
-                Section::make('Ajustes do Spin')
+                Section::make(__('Spin settings'))
                     ->schema([
                         Repeater::make('prizesArray')
                             ->schema([
                                 TextInput::make('currency')
-                                    ->label('Moeda')
+                                    ->label(__('Currency'))
                                     ->required(),
                                 TextInput::make('value')
-                                    ->label('Valor')
+                                    ->label(__('Amount'))
                                     ->numeric()
                                     ->required(),
                             ])

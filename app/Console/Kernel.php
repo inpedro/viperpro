@@ -12,8 +12,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+        // Financial integrity: projection vs ledger, journal balance. Non-zero exit = alert.
+        $schedule->command('wallet:reconcile --trigger=schedule')->hourly()->withoutOverlapping();
 
+        // Full per-file integrity/signature verification of every addon on disk.
+        $schedule->command('addon:package verify')->hourly()->withoutOverlapping();
 
+        // Integration health per casino (warnings in the log for active-but-unusable gateways).
+        $schedule->command('integrations:status --all')->hourly()->withoutOverlapping();
     }
 
     /**

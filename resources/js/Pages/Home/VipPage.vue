@@ -26,9 +26,9 @@
                                 <img :src="`/assets/images/00.png`" alt="" class="h-16">
                             </div>
                             <div class="flex gap-2">
-                                <p>Para o próximo nível</p>
+                                <p>{{ $t('To the next level') }}</p>
                                 <a href="" class="font-bold text-primary">Vip {{ nextLevel?.bet_level }}</a>
-                                <p>Aposta válida ainda é necessária </p>
+                                <p>{{ $t('Valid bets still required') }}</p>
                                 <a href="" class="font-bold text-primary">{{ nextLevel?.bet_required }}</a>
                             </div>
                             <div class="flex gap-2">
@@ -42,7 +42,7 @@
 
                 <div class="dark:bg-gray-800 rounded-lg mt-5 w-full p-4">
                     <div class="title-vip flex justify-between">
-                        <p class="text-2xl">Lista de níveis VIP</p>
+                        <p class="text-2xl">{{ $t('VIP levels') }}</p>
                         <p class="text-2xl"><i class="fa-sharp fa-light fa-coins mr-2"></i> {{ vipPoints }}</p>
                     </div>
 
@@ -58,7 +58,7 @@
                                     aria-controls="vipdefault-panel"
                                     aria-selected="false"
                                 >
-                                    Bônus de aumento de nível
+                                    {{ $t('Level-up bonus') }}
                                 </button>
                             </li>
                             <li class="me-2" role="presentation">
@@ -70,7 +70,7 @@
                                     aria-controls="weeklybonus-panel"
                                     aria-selected="false"
                                 >
-                                    Bônus Semanal
+                                    {{ $t('Weekly bonus') }}
                                 </button>
                             </li>
                             <li class="me-2" role="presentation">
@@ -82,7 +82,7 @@
                                     aria-controls="monthlybonus-panel"
                                     aria-selected="false"
                                 >
-                                    Bônus Mensal
+                                    {{ $t('Monthly bonus') }}
                                 </button>
                             </li>
                             <li class="me-2" role="presentation">
@@ -94,7 +94,7 @@
                                     aria-controls="annualbonus-panel"
                                     aria-selected="false"
                                 >
-                                    Bônus Anual
+                                    {{ $t('Yearly bonus') }}
                                 </button>
                             </li>
                         </ul>

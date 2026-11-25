@@ -2,18 +2,15 @@
 
 namespace Tests\Feature;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use Tests\Feature\Security\SecurityTestCase;
 
-class ExampleTest extends TestCase
+class ExampleTest extends SecurityTestCase
 {
-    /**
-     * A basic test example.
-     */
     public function test_the_application_returns_a_successful_response(): void
     {
-        $response = $this->get('/');
+        \Illuminate\Support\Facades\DB::table('custom_layouts')->insert(['custom_header' => '', 'custom_body' => '', 'created_at' => now(), 'updated_at' => now()]);
 
-        $response->assertStatus(200);
+        $this->withoutVite();
+        $this->get('/')->assertStatus(200);
     }
 }

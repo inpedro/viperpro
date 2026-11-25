@@ -281,7 +281,7 @@ trait PlayGamingTrait
                                 ];
 
                                 Game::create($data);
-                                echo "jogo salvo com sucesso \n";
+                                echo "game saved \n";
                             }
                         }
                     }

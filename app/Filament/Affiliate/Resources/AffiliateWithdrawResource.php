@@ -29,7 +29,7 @@ class AffiliateWithdrawResource extends Resource
      */
     public static function getNavigationLabel(): string
     {
-        return 'Meus Saques';
+        return __('My withdrawals');
     }
 
     /**
@@ -37,7 +37,7 @@ class AffiliateWithdrawResource extends Resource
      */
     public static function getModelLabel(): string
     {
-        return 'Meus Saques';
+        return __('My withdrawals');
     }
 
     public static function form(Form $form): Form
@@ -54,25 +54,25 @@ class AffiliateWithdrawResource extends Resource
             ->query(AffiliateWithdraw::query()->where('user_id', auth()->id()))
             ->columns([
                 Tables\Columns\TextColumn::make('amount')
-                    ->label('Valor')
+                    ->label(__('Amount'))
                     ->formatStateUsing(fn (AffiliateWithdraw $record): string => $record->symbol . ' ' . $record->amount)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('pix_type')
-                    ->label('Tipo')
+                    ->label(__('Type'))
                     ->formatStateUsing(fn (string $state): string => \Helper::formatPixType($state))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('pix_key')
-                    ->label('Chave Pix'),
+                    ->label(__('Pix key')),
                 Tables\Columns\TextColumn::make('bank_info')
-                    ->label('Informações Bancaria'),
+                    ->label(__('Bank details')),
                 Tables\Columns\TextColumn::make('proof')
-                    ->label('Comprovante')
+                    ->label(__('Receipt'))
                     ->html()
                     ->formatStateUsing(fn (string $state): string => '<a href="'.url('storage/'.$state).'" target="_blank">Baixar</a>'),
                 auth()->user()->hasRole('afiliado') ? Tables\Columns\IconColumn::make('status')
                     ->boolean() : Tables\Columns\ToggleColumn::make('status'),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Data')
+                    ->label(__('Date'))
                     ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')

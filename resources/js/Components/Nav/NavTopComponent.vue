@@ -29,7 +29,7 @@
                             Login
                         </button>
                         <button @click.prevent="registerToggle" class="ui-button-blue ml-3 mr-3 rounded">
-                            <i class="fa-solid fa-right-to-bracket mr-2"></i>  Registre-se
+                            <i class="fa-solid fa-right-to-bracket mr-2"></i>  {{ $t('Register') }}
                         </button>
                     </div>
 
@@ -229,7 +229,7 @@
                                 {{ $t('Log in') }}
                             </button>
                         </div>
-                        <p class="text-sm text-gray-500 dark:text-gray-300 mb-6">Novo por aqui? <a href="" @click.prevent="hideLoginShowRegisterToggle"><strong>Criar conta</strong></a></p>
+                        <p class="text-sm text-gray-500 dark:text-gray-300 mb-6">{{ $t('New here?') }} <a href="" @click.prevent="hideLoginShowRegisterToggle"><strong>{{ $t('Create an account') }}</strong></a></p>
                     </form>
 
                     <div class="login-wrap mt-5">
@@ -811,10 +811,10 @@ export default {
                     'Content-Type': 'multipart/form-data',
                 },
             }).then(response => {
-                console.log('Avatar atualizado com sucesso', response.data);
+                console.log('Avatar updated', response.data);
             })
                 .catch(error => {
-                    console.error('Erro ao atualizar avatar', error);
+                    console.error('Avatar update failed', error);
                 });
         },
         getProfile: async function() {

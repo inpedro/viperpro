@@ -45,10 +45,11 @@ trait SlotegratorTrait
 
             $url = $this->merchantUrl . '/games/init';
 
+            // Stable, signed player reference (ttl 0): Slotegrator uses player_id as the player's identity.
             $tokenPlayer = \Helper::MakeToken([
                 'player_id' => auth('api')->user()->id,
                 'platform' => 'main'
-            ]);
+            ], 0);
 
             $requestParams = [
                 'game_uuid'         => $gameuuid,
@@ -183,7 +184,7 @@ trait SlotegratorTrait
             ], 200);
 
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
+            report($e); return response()->json(['error' => 'Provider error'], 400);
         }
     }
 
@@ -663,13 +664,13 @@ trait SlotegratorTrait
             }else{
                 return response()->json([
                     'error_code' => "INTERNAL_ERROR",
-                    'error_description' => "Conexão não existe"
+                    'error_description' => "Connection does not exist"
                 ], ResponseAlias::HTTP_OK);
             }
         } catch (\Exception $e) {
             \Log::info('Message error:' .  $e->getMessage());
             \Log::info('Line error:' .  $e->getLine());
-            return response()->json(['error' => $e->getMessage(), 'line' => $e->getLine()], 400);
+            report($e); return response()->json(['error' => 'Provider error'], 400);
         }
     }
 
@@ -824,7 +825,7 @@ trait SlotegratorTrait
             ], 200);
 
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
+            report($e); return response()->json(['error' => 'Provider error'], 400);
         }
     }
 }

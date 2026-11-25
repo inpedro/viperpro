@@ -41,7 +41,8 @@ class EditUser extends EditRecord
 
         self::saveAffiliateHistory($record);
 
-        $record->update($data);
+        // Admin-only page: explicit whitelist instead of mass assignment of privileged fields.
+        $record->forceFill(\Illuminate\Support\Arr::only($data, \App\Models\User::ADMIN_EDITABLE))->save();
 
         return $record;
     }

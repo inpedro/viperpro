@@ -41,7 +41,7 @@ class LimitSetting extends Page implements HasForms
      */
     public function getTitle(): string | Htmlable
     {
-        return __('Limites');
+        return __('Limits');
     }
 
     public Setting $record;
@@ -67,8 +67,8 @@ class LimitSetting extends Page implements HasForms
         try {
             if(env('APP_DEMO')) {
                 Notification::make()
-                    ->title('Atenção')
-                    ->body('Você não pode realizar está alteração na versão demo')
+                    ->title(__('Attention'))
+                    ->body(__('You cannot make this change in the demo version'))
                     ->danger()
                     ->send();
                 return;
@@ -77,11 +77,11 @@ class LimitSetting extends Page implements HasForms
             $setting = Setting::find($this->record->id);
 
             if($setting->update($this->data)) {
-                Cache::put('setting', $setting);
+                Cache::put(\App\Core\Tenancy\Tenancy::key('setting'), $setting);
 
                 Notification::make()
-                    ->title('Dados alterados')
-                    ->body('Dados alterados com sucesso!')
+                    ->title(__('Data updated'))
+                    ->body(__('Data updated successfully.'))
                     ->success()
                     ->send();
 
@@ -102,19 +102,19 @@ class LimitSetting extends Page implements HasForms
     {
         return $form
             ->schema([
-                Section::make('Ajuste de Limites')
-                    ->description('Formulário ajustar os limites da plataforma')
+                Section::make(__('Limit settings'))
+                    ->description(__('Platform limits'))
                     ->schema([
                         TextInput::make('withdrawal_limit')
-                            ->label('Limite de Saque')
+                            ->label(__('Withdrawal limit'))
                             ->numeric(),
                         Select::make('withdrawal_period')
-                            ->label('Período')
+                            ->label(__('Period'))
                             ->options([
-                                'daily' => 'Diário',
-                                'weekly' => 'Semanal',
-                                'monthly' => 'Mensal',
-                                'yearly' => 'Anual',
+                                'daily' => __('Daily'),
+                                'weekly' => __('Weekly'),
+                                'monthly' => __('Monthly'),
+                                'yearly' => __('Yearly'),
                             ]),
                     ])->columns(2)
             ])

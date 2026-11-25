@@ -1,6 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 // eslint-disable-next-line no-undef
 module.exports = {
+    // The theme (or legacy layout) sets <html class="dark|light">; don't follow the OS setting.
+    darkMode: 'class',
     content: [
         "./resources/**/*.blade.php",
         "./resources/**/*.js",
@@ -12,7 +14,24 @@ module.exports = {
     ],
     theme: {
         extend: {
+            borderRadius: { vp: 'var(--vp-radius)', 'vp-sm': 'var(--vp-radius-sm)' },
+            fontFamily: { vp: 'var(--vp-font)', 'vp-heading': 'var(--vp-font-heading)' },
             colors: {
+                // Design tokens (resources/views/layouts/app.blade.php, config/themes.php)
+                vp: {
+                    'bg': 'rgb(var(--vp-bg-rgb) / <alpha-value>)',
+                    'surface': 'rgb(var(--vp-surface-rgb) / <alpha-value>)',
+                    'surface-2': 'rgb(var(--vp-surface-2-rgb) / <alpha-value>)',
+                    'border': 'rgb(var(--vp-border-rgb) / <alpha-value>)',
+                    'text': 'rgb(var(--vp-text-rgb) / <alpha-value>)',
+                    'muted': 'rgb(var(--vp-muted-rgb) / <alpha-value>)',
+                    'primary': 'rgb(var(--vp-primary-rgb) / <alpha-value>)',
+                    'primary-contrast': 'rgb(var(--vp-primary-contrast-rgb) / <alpha-value>)',
+                    'accent': 'rgb(var(--vp-accent-rgb) / <alpha-value>)',
+                    'success': 'rgb(var(--vp-success-rgb) / <alpha-value>)',
+                    'warning': 'rgb(var(--vp-warning-rgb) / <alpha-value>)',
+                    'danger': 'rgb(var(--vp-danger-rgb) / <alpha-value>)',
+                },
                 primary: {
                     100: '#F4F4F4',
                     200: '#E5E5E5',

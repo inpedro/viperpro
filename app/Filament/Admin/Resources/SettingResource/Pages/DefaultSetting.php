@@ -18,7 +18,6 @@ use Filament\Support\Exceptions\Halt;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
-use Jackiedo\DotenvEditor\Facades\DotenvEditor;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class DefaultSetting extends Page implements HasForms
@@ -44,7 +43,7 @@ class DefaultSetting extends Page implements HasForms
      */
     public function getTitle(): string | Htmlable
     {
-        return __('Padrão');
+        return __('General');
     }
 
     public Setting $record;
@@ -69,8 +68,8 @@ class DefaultSetting extends Page implements HasForms
         try {
             if(env('APP_DEMO')) {
                 Notification::make()
-                    ->title('Atenção')
-                    ->body('Você não pode realizar está alteração na versão demo')
+                    ->title(__('Attention'))
+                    ->body(__('You cannot make this change in the demo version'))
                     ->danger()
                     ->send();
                 return;
@@ -123,20 +122,14 @@ class DefaultSetting extends Page implements HasForms
                 }
             }
 
-            $envs = DotenvEditor::load(base_path('.env'));
 
-            $envs->setKeys([
-                'APP_NAME' => $this->data['software_name'],
-            ]);
-
-            $envs->save();
 
             if($setting->update($this->data)) {
-                Cache::put('setting', $setting);
+                Cache::put(\App\Core\Tenancy\Tenancy::key('setting'), $setting);
 
                 Notification::make()
-                    ->title('Dados alterados')
-                    ->body('Dados alterados com sucesso!')
+                    ->title(__('Data updated'))
+                    ->body(__('Data updated successfully.'))
                     ->success()
                     ->send();
 
@@ -157,39 +150,39 @@ class DefaultSetting extends Page implements HasForms
     {
         return $form
             ->schema([
-                Section::make('Ajuste Visual')
-                    ->description('Formulário ajustar o visual da plataforma')
+                Section::make(__('Appearance'))
+                    ->description(__('Platform appearance'))
                     ->schema([
                         Group::make()->schema([
                             TextInput::make('software_name')
-                                ->label('Nome')
-                                ->placeholder('Digite o nome do site')
+                                ->label(__('Name'))
+                                ->placeholder(__('Site name'))
                                 ->required()
                                 ->maxLength(191),
                             TextInput::make('software_description')
-                                ->placeholder('Digite a descrição do site')
-                                ->label('Descrição')
+                                ->placeholder(__('Site description'))
+                                ->label(__('Description'))
                                 ->maxLength(191),
                         ])->columns(2),
                         Group::make()->schema([
                             FileUpload::make('software_favicon')
-                                ->label('Favicon')
-                                ->placeholder('Carregue um favicon')
+                                ->label(__('Favicon'))
+                                ->placeholder(__('Upload a favicon'))
                                 ->image(),
                             Group::make()->schema([
                                 FileUpload::make('software_logo_white')
-                                    ->label('Logo Branca')
-                                    ->placeholder('Carregue uma logo branca')
+                                    ->label(__('White logo'))
+                                    ->placeholder(__('Upload a white logo'))
                                     ->image()
                                     ->columnSpanFull(),
                                 FileUpload::make('software_logo_black')
-                                    ->label('Logo Escura')
-                                    ->placeholder('Carregue uma logo escura')
+                                    ->label(__('Dark logo'))
+                                    ->placeholder(__('Upload a dark logo'))
                                     ->image()
                                     ->columnSpanFull(),
 //                                FileUpload::make('software_background')
-//                                    ->label('Background')
-//                                    ->placeholder('Carregue um background')
+//                                    ->label(__('Background'))
+//                                    ->placeholder(__('Upload a background'))
 //                                    ->image()
 //                                    ->columnSpanFull(),
                             ])

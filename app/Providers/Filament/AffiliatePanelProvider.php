@@ -2,7 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 use App\Filament\Affiliate\Pages\DashboardAffiliate;
 use App\Filament\Affiliate\Resources\AffiliateWithdrawResource;
 use App\Filament\Affiliate\Resources\SubAffiliateResource;
@@ -73,7 +72,7 @@ class AffiliatePanelProvider extends PanelProvider
 
                             NavigationItem::make('sub_affiliates')
                                 ->icon('heroicon-o-user-group')
-                                ->label(fn (): string => 'Sub Afiliados')
+                                ->label(fn (): string => __('Sub-affiliates'))
                                 ->url(fn (): string => SubAffiliateResource::getUrl())
                                 ->isActiveWhen(fn () => request()->routeIs('filament.admin.resources.sub-affiliates.index '))
                                 ->visible(fn(): bool => auth()->user()->hasRole('afiliado')),
@@ -100,6 +99,7 @@ class AffiliatePanelProvider extends PanelProvider
             })
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+                \App\Http\Middleware\AdminSessionGuard::class,
+            ], isPersistent: true);
     }
 }

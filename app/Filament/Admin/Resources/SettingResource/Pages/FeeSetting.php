@@ -42,7 +42,7 @@ class FeeSetting extends Page implements HasForms
      */
     public function getTitle(): string | Htmlable
     {
-        return __('Taxas');
+        return __('Fees');
     }
 
     public Setting $record;
@@ -68,8 +68,8 @@ class FeeSetting extends Page implements HasForms
         try {
             if(env('APP_DEMO')) {
                 Notification::make()
-                    ->title('Atenção')
-                    ->body('Você não pode realizar está alteração na versão demo')
+                    ->title(__('Attention'))
+                    ->body(__('You cannot make this change in the demo version'))
                     ->danger()
                     ->send();
                 return;
@@ -78,11 +78,11 @@ class FeeSetting extends Page implements HasForms
             $setting = Setting::find($this->record->id);
 
             if($setting->update($this->data)) {
-                Cache::put('setting', $setting);
+                Cache::put(\App\Core\Tenancy\Tenancy::key('setting'), $setting);
 
                 Notification::make()
-                    ->title('Dados alterados')
-                    ->body('Dados alterados com sucesso!')
+                    ->title(__('Data updated'))
+                    ->body(__('Data updated successfully.'))
                     ->success()
                     ->send();
 
@@ -103,28 +103,28 @@ class FeeSetting extends Page implements HasForms
     {
         return $form
             ->schema([
-                Section::make('Ajuste de Taxas')
-                    ->description('Formulário ajustar as taxas da plataforma')
+                Section::make(__('Fee settings'))
+                    ->description(__('Platform fees'))
                     ->schema([
                         Grid::make()->schema([
                             TextInput::make('revshare_percentage')
-                                ->label('RevShare (%)')
+                                ->label(__('Revenue share (%)'))
                                 ->numeric()
                                 ->suffix('%')
-                                ->helperText('Este é o revshare padrão para cada usuário que se candidata a ser afiliado.')
+                                ->helperText(__('Default revenue share for every user who becomes an affiliate.'))
                                 ->maxLength(191),
                             TextInput::make('cpa_baseline')
                                 ->label('CPA Baseline')
                                 ->numeric()
-                                ->suffix('R$ ')
+                                ->prefix(fn () => \App\Core\Localization\Formatter::tenantCurrencySymbol())
                                 ->maxLength(191),
                             TextInput::make('cpa_value')
-                                ->label('CPA Valor')
+                                ->label(__('CPA amount'))
                                 ->numeric()
-                                ->suffix('R$ ')
+                                ->prefix(fn () => \App\Core\Localization\Formatter::tenantCurrencySymbol())
                                 ->maxLength(191),
                             TextInput::make('ngr_percent')
-                                ->helperText('Esta taxa é deduzida dos ganhos do afiliado para plataforma.')
+                                ->helperText(__('This rate is deducted from the affiliate\'s earnings for the platform.'))
                                 ->label('NGR (%)')
                                 ->numeric()
                                 ->suffix('%')
@@ -132,8 +132,8 @@ class FeeSetting extends Page implements HasForms
                         ])->columns(2),
                         Toggle::make('revshare_reverse')
                             ->inline(true)
-                            ->label('Ativar RevShare Negativo')
-                            ->helperText('Esta opção possibilita que o afiliado acumule saldos negativos decorrentes das perdas geradas pelos seus indicados.')
+                            ->label(__('Enable negative revenue share'))
+                            ->helperText(__('When enabled, players\' winnings are deducted from their affiliate\'s commission and the balance can go negative.'))
                         ,
                     ])
             ])

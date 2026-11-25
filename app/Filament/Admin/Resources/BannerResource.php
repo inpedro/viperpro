@@ -41,20 +41,20 @@ class BannerResource extends Resource
                             Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\TextInput::make('link')
-                                    ->label('Link')
-                                    ->placeholder('Digite o link do banner')
+                                    ->label(__('Link'))
+                                    ->placeholder(__('Banner link'))
                                     ->maxLength(191),
                                 Forms\Components\Select::make('type')
-                                    ->label('Selecione o tipo')
+                                    ->label(__('Select the type'))
                                     ->options([
-                                        'carousel' => 'Banner na Carousel',
-                                        'home' => 'Banner na Home',
+                                        'carousel' => __('Carousel banner'),
+                                        'home' => __('Home page banner'),
                                     ])
                                     ->required(),
                             ])->columns(2)->columnSpanFull(),
 
                             Forms\Components\Textarea::make('description')
-                                ->placeholder('Digite uma descrição')
+                                ->placeholder(__('Description'))
                                 ->maxLength(65535)
                                 ->columnSpanFull(),
                         ])->columns(2),
@@ -74,12 +74,12 @@ class BannerResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
-                    ->label('Imagem'),
+                    ->label(__('Image')),
                 Tables\Columns\TextColumn::make('link')
-                    ->label('Link')
+                    ->label(__('Link'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('type')
-                    ->label('Tipo')
+                    ->label(__('Type'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

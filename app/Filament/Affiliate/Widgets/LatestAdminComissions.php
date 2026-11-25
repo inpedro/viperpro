@@ -26,34 +26,34 @@ class LatestAdminComissions extends BaseWidget
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('Usuário'),
+                    ->label(__('User')),
                 Tables\Columns\TextColumn::make('user.email')
-                    ->label('E-mail'),
+                    ->label(__('E-mail')),
 
                 Tables\Columns\TextColumn::make('commission_type')
-                    ->label('Tipo'),
+                    ->label(__('Type')),
 
                 Tables\Columns\TextColumn::make('deposited_amount')
-                    ->money('BRL')
+                    ->money(fn () => \App\Core\Localization\Formatter::tenantCurrency())
                     ->badge()
                     // ->color('danger')
-                    ->label('Depositos'),
+                    ->label(__('Deposits')),
 //
 //                Tables\Columns\TextColumn::make('losses_amount')
-//                    ->money('BRL')
+//                    ->money(fn () => \App\Core\Localization\Formatter::tenantCurrency())
 //                    ->badge()
 //                    ->color('danger')
-//                    ->label('Perdas'),
+//                    ->label(__('Losses')),
 //
 //                Tables\Columns\TextColumn::make('receita')
-//                    ->money('BRL')
+//                    ->money(fn () => \App\Core\Localization\Formatter::tenantCurrency())
 //                    ->badge()
 //                    // ->color('danger')
-//                    ->label('Receita'),
+//                    ->label(__('Revenue')),
 
                 Tables\Columns\TextColumn::make('commission_paid')
-                    ->money('BRL')
-                    ->label('Comissão'),
+                    ->money(fn () => \App\Core\Localization\Formatter::tenantCurrency())
+                    ->label(__('Commission')),
 
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
@@ -62,9 +62,9 @@ class LatestAdminComissions extends BaseWidget
                         'pago' => 'success',
                     }),
                 Tables\Columns\TextColumn::make('dateHumanReadable')
-                    ->label('Data'),
+                    ->label(__('Date')),
                 Tables\Columns\TextColumn::make('losses')
-                    ->label('Total de Perdas')
+                    ->label(__('Total losses'))
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()

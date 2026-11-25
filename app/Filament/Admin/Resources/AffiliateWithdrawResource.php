@@ -30,7 +30,7 @@ class AffiliateWithdrawResource extends Resource
      */
     public static function getNavigationLabel(): string
     {
-        return auth()->user()->hasRole('afiliado') ? 'Meus Saques' : 'Saques de Afiliados';
+        return auth()->user()->hasRole('afiliado') ? __('My withdrawals') : __('Affiliate withdrawals');
     }
 
     /**
@@ -38,7 +38,7 @@ class AffiliateWithdrawResource extends Resource
      */
     public static function getModelLabel(): string
     {
-        return auth()->user()->hasRole('afiliado') ? 'Meus Saques' : 'Saques de Afiliados';
+        return auth()->user()->hasRole('afiliado') ? __('My withdrawals') : __('Affiliate withdrawals');
     }
 
     public static function form(Form $form): Form
@@ -59,33 +59,33 @@ class AffiliateWithdrawResource extends Resource
             ->query(auth()->user()->hasRole('afiliado') ? AffiliateWithdraw::query()->where('user_id', auth()->id()) : AffiliateWithdraw::query())
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('Usuário')
+                    ->label(__('User'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('user.email')
-                    ->label('E-mail')
+                    ->label(__('E-mail'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->label('Valor')
+                    ->label(__('Amount'))
                     ->formatStateUsing(fn (AffiliateWithdraw $record): string => $record->symbol . ' ' . $record->amount)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('pix_type')
-                    ->label('Tipo')
+                    ->label(__('Type'))
                     ->formatStateUsing(fn (string $state): string => \Helper::formatPixType($state))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('pix_key')
-                    ->label('Chave Pix'),
+                    ->label(__('Pix key')),
                 Tables\Columns\TextColumn::make('bank_info')
-                    ->label('Informações Bancaria')
+                    ->label(__('Bank details'))
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('proof')
-                    ->label('Comprovante')
+                    ->label(__('Receipt'))
                     ->html()
                     ->formatStateUsing(fn (string $state): string => '<a href="'.url('storage/'.$state).'" target="_blank">Baixar</a>')
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\IconColumn::make('status')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Data')
+                    ->label(__('Date'))
                     ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
@@ -98,58 +98,24 @@ class AffiliateWithdrawResource extends Resource
             ])
             ->actions([
                 Action::make('deny_payment')
-                    ->label('Cancelar')
+                    ->label(__('Cancel'))
                     ->icon('heroicon-o-banknotes')
                     ->color('danger')
-                    ->visible(fn (AffiliateWithdraw $withdrawal): bool => !$withdrawal->status)
-                    ->action(function(AffiliateWithdraw $withdrawal) {
-                        \Filament\Notifications\Notification::make()
-                            ->title('Cancelar Saque')
-                            ->success()
-                            ->persistent()
-                            ->body('Você está cancelando saque de '. \Helper::amountFormatDecimal($withdrawal->amount))
-                            ->actions([
-                                \Filament\Notifications\Actions\Action::make('view')
-                                    ->label('Confirmar')
-                                    ->button()
-                                    ->url(route(\Helper::GetDefaultGateway().'.cancelwithdrawal', ['id' => $withdrawal->id, 'action' => 'affiliate']))
-                                    ->close(),
-                                \Filament\Notifications\Actions\Action::make('undo')
-                                    ->color('gray')
-                                    ->label('Cancelar')
-                                    ->action(function(AffiliateWithdraw $withdrawal) {
-
-                                    })
-                                    ->close(),
-                            ])
-                            ->send();
+                    ->visible(fn (AffiliateWithdraw $withdrawal): bool => (int) $withdrawal->status === \App\Core\Payments\WithdrawalService::PENDING)
+                    ->requiresConfirmation()
+                    ->modalDescription(fn (AffiliateWithdraw $withdrawal) => 'Cancel this withdrawal of '.\Helper::amountFormatDecimal($withdrawal->amount).' and return the funds to the player?')
+                    ->action(function (AffiliateWithdraw $withdrawal) {
+                        \App\Filament\Admin\Support\WithdrawalActions::cancel($withdrawal->id, 'affiliate');
                     }),
                 Action::make('approve_payment')
-                    ->label('Fazer pagamento')
+                    ->label(__('Pay out'))
                     ->icon('heroicon-o-banknotes')
                     ->color('success')
-                    ->visible(fn (AffiliateWithdraw $withdrawal): bool => !$withdrawal->status)
-                    ->action(function(AffiliateWithdraw $withdrawal) {
-                        \Filament\Notifications\Notification::make()
-                            ->title('Saque')
-                            ->success()
-                            ->persistent()
-                            ->body('Você está solicitando um saque de '. \Helper::amountFormatDecimal($withdrawal->amount))
-                            ->actions([
-                                \Filament\Notifications\Actions\Action::make('view')
-                                    ->label('Confirmar')
-                                    ->button()
-                                    ->url(route(\Helper::GetDefaultGateway().'.withdrawal', ['id' => $withdrawal->id, 'action' => 'affiliate']))
-                                    ->close(),
-                                \Filament\Notifications\Actions\Action::make('undo')
-                                    ->color('gray')
-                                    ->label('Cancelar')
-                                    ->action(function(AffiliateWithdraw $withdrawal) {
-
-                                    })
-                                    ->close(),
-                            ])
-                            ->send();
+                    ->visible(fn (AffiliateWithdraw $withdrawal): bool => (int) $withdrawal->status === \App\Core\Payments\WithdrawalService::PENDING)
+                    ->requiresConfirmation()
+                    ->modalDescription(fn (AffiliateWithdraw $withdrawal) => 'Send a payout of '.\Helper::amountFormatDecimal($withdrawal->amount).' through the default gateway?')
+                    ->action(function (AffiliateWithdraw $withdrawal) {
+                        \App\Filament\Admin\Support\WithdrawalActions::approve($withdrawal->id, 'affiliate');
                     }),
                 //Tables\Actions\EditAction::make(),
             ])
