@@ -1,243 +1,147 @@
 <template>
     <BaseLayout>
-        <div v-if="setting != null" class="md:w-4/6 2xl:w-4/6 mx-auto mt-20">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="col-span-1 hidden md:block">
+        <div class="mx-auto mt-20 w-full max-w-6xl px-4">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+                <aside class="hidden md:block">
                     <WalletSideMenu />
-                </div>
-                <div class="relative col-span-2">
-                    <div v-if="!isLoadingWallet" class="flex flex-col w-full bg-gray-200 hover:bg-gray-300/20 dark:bg-gray-800/50 p-4 rounded hover:dark:bg-gray-900">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                            <div class="flex w-full">
-                                <div class="rounded-full ring-2 ring-gray-200 px-4 py-2 text-center flex justify-center items-center">
-                                    <i class="fa-sharp fa-regular fa-dollar-sign text-2xl"></i>
-                                </div>
-                                <div class="leading-4 ml-3">
-                                    <span>{{ $t('Total Balance') }}</span>
-                                    <h1 class="text-lg font-bold text-yellow-400">{{ state.currencyFormat(parseFloat(wallet.balance), wallet.currency) }}</h1>
-                                </div>
-                            </div>
-                            <div class="flex w-full">
-                                <div class="rounded-full ring-2 ring-gray-200 px-4 py-2 text-center flex justify-center items-center">
-                                    <i class="fa-sharp fa-regular fa-dollar-sign text-2xl"></i>
-                                </div>
-                                <div class="leading-4 ml-3">
-                                    <span>{{ $t('Bonus balance') }}</span>
-                                    <h1 class="text-lg font-bold text-yellow-400">{{ state.currencyFormat(parseFloat(wallet.balance_bonus), wallet.currency) }}</h1>
-                                </div>
-                            </div>
-                            <div class="flex w-full">
-                                <div class="rounded-full ring-2 ring-gray-200 px-4 py-2 text-center flex justify-center items-center">
-                                    <i class="fa-sharp fa-regular fa-dollar-sign text-2xl"></i>
-                                </div>
-                                <div class="leading-4 ml-3">
-                                    <span>{{ $t('Withdrawal Balance') }}</span>
-                                    <h1 class="text-lg font-bold text-yellow-400">{{ state.currencyFormat(parseFloat(wallet.balance_withdrawal), wallet.currency) }}</h1>
-                                </div>
-                            </div>
-                            <div class="border-2 border-gray-600 col-span-2"></div>
-                            <div v-if="setting.disable_rollover === false || setting.rollover_deposit > 0" class="flex justify-between w-full col-span-2">
-                                <div class="flex w-1/2">
-                                    <div class="rounded-full ring-2 ring-gray-200 px-4 py-2 text-center flex justify-center items-center">
-                                        <i class="fa-sharp fa-regular fa-dollar-sign text-2xl"></i>
-                                    </div>
-                                    <div class="leading-4 ml-3">
-                                        <span>Rollover de Deposito</span>
-                                        <h1 class="text-lg font-bold text-yellow-400">{{ state.currencyFormat(parseFloat(wallet.balance_deposit_rollover), wallet.currency) }}</h1>
-                                    </div>
-                                </div>
-                                <div class="w-1/2">
-                                    <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700">
-                                        <div class="bg-green-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full truncate px-3" :style="{ width: rolloverPercentage(parseFloat(wallet.balance_deposit_rollover))   }">
-                                            {{ rolloverPercentage(parseFloat(wallet.balance_deposit_rollover)) }}%
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div v-if="setting.disable_rollover === false || setting.rollover > 0" class="flex justify-between w-full col-span-2">
-                               <div class="flex w-1/2">
-                                   <div class="rounded-full ring-2 ring-gray-200 px-4 py-2 text-center flex justify-center items-center">
-                                       <i class="fa-sharp fa-regular fa-dollar-sign text-2xl"></i>
-                                   </div>
-                                   <div class="leading-4 ml-3">
-                                       <span>{{ $t('Bonus rollover') }}</span>
-                                       <h1 class="text-lg font-bold text-yellow-400">{{ state.currencyFormat(parseFloat(wallet.balance_bonus_rollover), wallet.currency) }}</h1>
-                                   </div>
-                               </div>
-                                <div class="w-1/2">
-                                    <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700 mb-1">
-                                        <div class="flex bg-green-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full truncate px-3" :style="{ width: rolloverPercentage(parseFloat(wallet.balance_bonus_rollover))   }">
-                                            {{ rolloverPercentage(parseFloat(wallet.balance_bonus_rollover)) }}% - Barra de Rollover
-                                        </div>
-                                    </div>
-                                    <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700">
-                                        <div class="bg-blue-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full truncate px-3" :style="{ width: rolloverPercentage(parseFloat(setting.rollover_protection))   }">
-                                            {{ rolloverPercentage(parseFloat(setting.rollover_protection)) }} - Barra de Proteção
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                </aside>
 
-                        <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                            <a @click.prevent="$router.push('/profile/deposit')" href="" class="flex bg-white dark:bg-gray-900 p-4 border border-gray-300 dark:border-gray-600 rounded-lg">
-                                <div class="text-5xl mr-3">
-                                    <i class="fa-light fa-money-simple-from-bracket"></i>
-                                </div>
-                                <div class="flex flex-col">
-                                    <h1 class="text-lg">{{ $t('Deposit') }}</h1>
-                                    <p class="text-sm dark:text-gray-500">{{ $t('Click here to deposit') }}</p>
-                                </div>
-                            </a>
-                            <a @click.prevent="$router.push('/profile/withdraw')" href="" class="flex bg-white dark:bg-gray-900 p-4 border border-gray-300 dark:border-gray-600 rounded-lg">
-                                <div class="text-5xl mr-3">
-                                    <i class="fa-sharp fa-light fa-money-bill-transfer"></i>
-                                </div>
-                                <div class="flex flex-col">
-                                    <h1 class="text-lg">{{ $t('Withdraw') }}</h1>
-                                    <p class="text-sm dark:text-gray-500">{{ $t('Click here to withdraw') }}</p>
-                                </div>
-                            </a>
-                        </div>
+                <section class="md:col-span-2 space-y-6" :aria-busy="loading">
+                    <!-- Balances -->
+                    <div v-if="wallet" class="rounded-vp border border-vp-border bg-vp-surface p-5">
+                        <p class="text-sm text-vp-muted">{{ $t('Total balance') }}</p>
+                        <p class="mt-1 text-3xl font-bold tabular-nums text-vp-text">{{ money(wallet.total_balance) }}</p>
 
-                        <div class="mt-5 flex flex-col">
-                            <h1 class="mb-3 text-2xl">{{ $t('My Wallets') }}</h1>
-                            <div class="w-48 text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white w-full">
-                                <button v-for="(wallet, index) in mywallets" :key="index" @click.prevent="setWallet(wallet.id)" type="button" class="relative inline-flex justify-between items-center w-full px-4 py-2 text-sm font-medium border-b border-gray-200 rounded-t-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-500 dark:focus:text-white">
-                                   <div class="flex items-center">
-                                       <i class="fa-light fa-wallet text-3xl mr-2"></i>
-                                       <div class="flex flex-col items-start">
-                                           <p>{{ wallet.symbol }} {{ wallet.total_balance }}</p>
-                                           <p class="text-[12px] dark:text-gray-500">{{ wallet.symbol }} {{ wallet.balance_bonus }}</p>
-                                       </div>
-                                   </div>
-
-                                    <span v-if="wallet.active === 1" class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">{{ $t('Active') }}</span>
-                                </button>
+                        <dl class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                            <div v-for="item in balances" :key="item.key" class="rounded-vp bg-vp-surface-2 p-3">
+                                <dt class="text-xs text-vp-muted">{{ item.label }}</dt>
+                                <dd class="mt-1 text-lg font-semibold tabular-nums text-vp-text">{{ money(wallet[item.key]) }}</dd>
+                                <dd class="mt-1 text-xs text-vp-muted">{{ item.hint }}</dd>
                             </div>
+                        </dl>
+
+                        <div class="mt-5 flex flex-wrap gap-3">
+                            <VpButton to="/profile/deposit">
+                                <i class="fa-light fa-money-simple-from-bracket" aria-hidden="true"></i>{{ $t('Deposit') }}
+                            </VpButton>
+                            <VpButton to="/profile/withdraw" variant="outline">
+                                <i class="fa-sharp fa-light fa-money-bill-transfer" aria-hidden="true"></i>{{ $t('Withdraw') }}
+                            </VpButton>
                         </div>
                     </div>
-                    <div v-if="isLoadingWallet" role="status" class="absolute -translate-x-1/2 -translate-y-1/2 top-2/4 left-1/2">
-                        <svg aria-hidden="true" class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-green-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/></svg>
+
+                    <!-- Wagering requirements: shown as the amount still to wager, never as a made-up percentage. -->
+                    <div v-if="wallet && wagering.length" class="rounded-vp border border-vp-border bg-vp-surface p-5">
+                        <h2 class="text-base font-semibold text-vp-text">{{ $t('Wagering requirements') }}</h2>
+                        <p class="mt-1 text-sm text-vp-muted">{{ $t('Amount you still need to wager before the related funds can be withdrawn.') }}</p>
+                        <ul class="mt-4 space-y-3">
+                            <li v-for="item in wagering" :key="item.key" class="flex items-center justify-between rounded-vp bg-vp-surface-2 px-4 py-3">
+                                <span class="text-sm text-vp-text">{{ item.label }}</span>
+                                <span class="font-semibold tabular-nums" :class="Number(wallet[item.key]) > 0 ? 'text-vp-primary' : 'text-vp-muted'">
+                                    {{ Number(wallet[item.key]) > 0 ? money(wallet[item.key]) : $t('Completed') }}
+                                </span>
+                            </li>
+                        </ul>
+                        <p v-if="Number(setting?.rollover_protection) > 0" class="mt-3 text-xs text-vp-muted">
+                            {{ $t('Bonus rollover protection: at least :count bets are required to clear the bonus rollover.', { count: setting.rollover_protection }) }}
+                        </p>
+                        <RouterLink :to="{ name: 'legalPage', params: { slug: 'bonus' } }" class="mt-3 inline-block text-xs text-vp-primary hover:underline">
+                            {{ $t('Bonus terms') }}
+                        </RouterLink>
+                    </div>
+
+                    <!-- Wallets (one per currency) -->
+                    <div v-if="mywallets && mywallets.length > 1" class="rounded-vp border border-vp-border bg-vp-surface p-5">
+                        <h2 class="text-base font-semibold text-vp-text">{{ $t('My Wallets') }}</h2>
+                        <ul class="mt-4 divide-y divide-vp-border">
+                            <li v-for="item in mywallets" :key="item.id" class="flex items-center justify-between py-3">
+                                <div>
+                                    <p class="font-semibold tabular-nums text-vp-text">{{ money(item.total_balance, item.currency) }}</p>
+                                    <p class="text-xs text-vp-muted">{{ item.currency }} · {{ $t('Bonus') }} {{ money(item.balance_bonus, item.currency) }}</p>
+                                </div>
+                                <VpChip v-if="item.active === 1" :active="true">{{ $t('Active') }}</VpChip>
+                                <VpButton v-else size="sm" variant="subtle" :disabled="loading" @click="setWallet(item.id)">{{ $t('Use this wallet') }}</VpButton>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div v-if="loading && !wallet" class="h-48 animate-pulse rounded-vp bg-vp-surface" role="status">
                         <span class="sr-only">{{ $t('Loading') }}...</span>
                     </div>
-                </div>
+                </section>
             </div>
         </div>
     </BaseLayout>
 </template>
 
+<script setup>
+import { computed, getCurrentInstance, onMounted, ref } from 'vue';
+import { RouterLink } from 'vue-router';
+import { trans } from 'laravel-vue-i18n';
+import { useToast } from 'vue-toastification';
+import BaseLayout from '@/Layouts/BaseLayout.vue';
+import WalletSideMenu from '@/Pages/Profile/Components/WalletSideMenu.vue';
+import VpButton from '@/Components/DS/VpButton.vue';
+import VpChip from '@/Components/DS/VpChip.vue';
+import HttpApi from '@/Services/HttpApi.js';
+import { useSettingStore } from '@/Stores/SettingStore.js';
 
-<script>
+const toast = useToast();
+const appState = getCurrentInstance()?.appContext.config.globalProperties.state;
+const setting = computed(() => useSettingStore().setting);
+const wallet = ref(null);
+const mywallets = ref(null);
+const loading = ref(true);
 
-import { RouterLink } from "vue-router";
-import BaseLayout from "@/Layouts/BaseLayout.vue";
-import WalletSideMenu from "@/Pages/Profile/Components/WalletSideMenu.vue";
-import {useToast} from "vue-toastification";
-import {useAuthStore} from "@/Stores/Auth.js";
-import HttpApi from "@/Services/HttpApi.js";
-import {useSettingStore} from "@/Stores/SettingStore.js";
+const balances = computed(() => [
+    { key: 'balance', label: trans('Cash balance'), hint: trans('Available to play') },
+    { key: 'balance_withdrawal', label: trans('Withdrawable'), hint: trans('Can be withdrawn now') },
+    { key: 'balance_bonus', label: trans('Bonus balance'), hint: trans('Subject to wagering requirements') },
+]);
 
-export default {
-    props: [],
-    components: {WalletSideMenu, BaseLayout, RouterLink },
-    data() {
-        return {
-            isLoading: false,
-            isLoadingWallet: true,
-            wallet: null,
-            mywallets: null,
-            setting: null,
-        }
-    },
-    setup(props) {
+const wagering = computed(() => {
+    if (!setting.value || setting.value.disable_rollover) return [];
+    return [
+        { key: 'balance_deposit_rollover', label: trans('Deposit wagering') },
+        { key: 'balance_bonus_rollover', label: trans('Bonus wagering') },
+    ];
+});
 
+function money(value, currency) {
+    return appState.currencyFormat(parseFloat(value || 0), currency || wallet.value?.currency);
+}
 
-        return {};
-    },
-    computed: {
+function showErrors(error) {
+    try {
+        Object.values(JSON.parse(error.request.responseText)).forEach((v) => toast.error(`${v}`));
+    } catch {
+        toast.error(trans('Something went wrong'));
+    }
+}
 
-    },
-    mounted() {
+async function load() {
+    loading.value = true;
+    try {
+        const [w, list] = await Promise.all([HttpApi.get('profile/wallet'), HttpApi.get('profile/mywallet')]);
+        wallet.value = w.data.wallet;
+        mywallets.value = list.data.wallets;
+    } catch (e) {
+        showErrors(e);
+    } finally {
+        loading.value = false;
+    }
+}
 
-    },
-    methods: {
-        setWallet: function(id) {
-            const _this = this;
-            const _toast = useToast();
-            _this.isLoadingWallet = true;
+async function setWallet(id) {
+    loading.value = true;
+    try {
+        await HttpApi.post(`profile/mywallet/${id}`, {});
+        window.location.reload();
+    } catch (e) {
+        showErrors(e);
+        loading.value = false;
+    }
+}
 
-            HttpApi.post('profile/mywallet/'+ id, {})
-                .then(response => {
-                   _this.getMyWallet();
-                    _this.isLoadingWallet = false;
-                    window.location.reload();
-
-                })
-                .catch(error => {
-                    Object.entries(JSON.parse(error.request.responseText)).forEach(([key, value]) => {
-                        _toast.error(`${value}`);
-                    });
-                    _this.isLoadingWallet = false;
-                });
-        },
-        getWallet: function() {
-            const _this = this;
-            const _toast = useToast();
-            _this.isLoadingWallet = true;
-
-            HttpApi.get('profile/wallet')
-                .then(response => {
-                    _this.wallet = response.data.wallet;
-                    _this.isLoadingWallet = false;
-                })
-                .catch(error => {
-                    Object.entries(JSON.parse(error.request.responseText)).forEach(([key, value]) => {
-                        _toast.error(`${value}`);
-                    });
-                    _this.isLoadingWallet = false;
-                });
-        },
-        getMyWallet: function() {
-            const _this = this;
-            const _toast = useToast();
-
-            HttpApi.get('profile/mywallet')
-                .then(response => {
-                    _this.mywallets = response.data.wallets;
-                })
-                .catch(error => {
-                    Object.entries(JSON.parse(error.request.responseText)).forEach(([key, value]) => {
-                        _toast.error(`${value}`);
-                    });
-                });
-        },
-        getSetting: function() {
-            const _this = this;
-            const settingStore = useSettingStore();
-            const settingData = settingStore.setting;
-
-            if(settingData) {
-                _this.setting = settingData;
-            }
-
-            _this.isLoading = false;
-        },
-        rolloverPercentage(balance) {
-            return Math.max(0, ((balance / 100) * 100).toFixed(2));
-        },
-    },
-    created() {
-        this.getWallet();
-        this.getMyWallet();
-        this.getSetting();
-    },
-    watch: {
-
-    },
-};
+onMounted(load);
 </script>
-
-<style scoped>
-
-</style>

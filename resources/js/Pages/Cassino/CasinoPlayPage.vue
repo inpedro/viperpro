@@ -167,7 +167,7 @@
             <!-- End Tabs -->
         </div>
         <div v-if="undermaintenance" class="flex flex-col items-center justify-center text-center py-24">
-            <h1 class="text-2xl mb-4">JOGO EM MANUTENÇÃO</h1>
+            <h1 class="text-2xl mb-4">{{ $t('Game under maintenance') }}</h1>
             <img :src="`/assets/images/work-in-progress.gif`" alt="" width="400">
         </div>
     </GameLayout>

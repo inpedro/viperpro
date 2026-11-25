@@ -200,7 +200,8 @@ No new migrations. Full detail in `docs/INTEGRATIONS.md`.
 | Reconciliation dashboard (admin + platform; stored runs, mismatch details, rate-limited Run now) | done |
 | CRM / player segmentation / marketing suppression | **open** |
 | Admin panels localized (en/sq/es/pt_BR, ~470 strings); hardcoded BRL/`R$` in admin tables replaced with the casino currency | done |
-| Wallet/profile/VIP/promotions/auth modals on the design system | **open** (carried from Phase 6) |
+| Wallet page rebuilt on the design system (honest wagering display; `docs/screenshots/wallet-*.png`); remaining Portuguese UI strings (VIP, maintenance) translated | done |
+| Profile/VIP/promotions/auth modals on the design system | **open** |
 
 **Breaking changes**
 * Admins and super-admins must enrol TOTP on their next panel visit (`MFA_ENFORCE=false` disables this; not recommended).

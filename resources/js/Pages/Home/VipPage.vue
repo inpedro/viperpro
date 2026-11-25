@@ -58,7 +58,7 @@
                                     aria-controls="vipdefault-panel"
                                     aria-selected="false"
                                 >
-                                    Bônus de aumento de nível
+                                    {{ $t('Level-up bonus') }}
                                 </button>
                             </li>
                             <li class="me-2" role="presentation">
@@ -70,7 +70,7 @@
                                     aria-controls="weeklybonus-panel"
                                     aria-selected="false"
                                 >
-                                    Bônus Semanal
+                                    {{ $t('Weekly bonus') }}
                                 </button>
                             </li>
                             <li class="me-2" role="presentation">
@@ -82,7 +82,7 @@
                                     aria-controls="monthlybonus-panel"
                                     aria-selected="false"
                                 >
-                                    Bônus Mensal
+                                    {{ $t('Monthly bonus') }}
                                 </button>
                             </li>
                             <li class="me-2" role="presentation">
@@ -94,7 +94,7 @@
                                     aria-controls="annualbonus-panel"
                                     aria-selected="false"
                                 >
-                                    Bônus Anual
+                                    {{ $t('Yearly bonus') }}
                                 </button>
                             </li>
                         </ul>

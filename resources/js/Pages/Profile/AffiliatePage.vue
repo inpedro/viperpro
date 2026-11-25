@@ -275,7 +275,7 @@
                             <div class="dark:text-gray-400 mb-3">
                                 <label for="">{{ $t('Withdrawal amount') }}</label>
                                 <input v-model="withdrawalForm.amount" type="number" class="input" :placeholder="$t('Withdrawal amount')" required>
-                                <span v-if="wallet" class="text-sm italic">Saldo: {{ state.currencyFormat(parseFloat(wallet?.refer_rewards), wallet?.currency) }}</span>
+                                <span v-if="wallet" class="text-sm italic">{{ $t('Balance') }}: {{ state.currencyFormat(parseFloat(wallet?.refer_rewards), wallet?.currency) }}</span>
                             </div>
 
                             <div class="dark:text-gray-400 mb-3">
