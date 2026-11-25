@@ -197,7 +197,7 @@ No new migrations. Full detail in `docs/INTEGRATIONS.md`.
 | Operator-managed, sanitized, localized legal pages (old template text removed) | done |
 | Ledger-based analytics per casino and platform-wide; found and fixed a query bug (`pluck(DB::raw)`) via tests | done |
 | Demo-agent accounts labelled "Demo account (play money)" | done |
-| Reconciliation dashboard (UI on top of `wallet:reconcile`) | **open** (CLI exists) |
+| Reconciliation dashboard (admin + platform; stored runs, mismatch details, rate-limited Run now) | done |
 | CRM / player segmentation / marketing suppression | **open** |
 | Admin panels localized (en/sq/es/pt_BR, ~470 strings); hardcoded BRL/`R$` in admin tables replaced with the casino currency | done |
 | Wallet/profile/VIP/promotions/auth modals on the design system | **open** (carried from Phase 6) |

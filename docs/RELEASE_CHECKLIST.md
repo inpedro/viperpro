@@ -38,7 +38,7 @@ _Phase 9. "Verified here" means it was checked in this repository's test suite o
 
 ## Known functional gaps
 * The wallet, profile, VIP, promotions and auth modals are not yet rebuilt on the design system.
-* No reconciliation dashboard (CLI only), no CRM or segmentation.
+* No CRM or segmentation.
 * Domain events and unification of `role_id` with Spatie roles.
 
 **Sign-off is not given by this document.** It lists what a security lead, the operator's compliance officer and legal counsel must each approve.

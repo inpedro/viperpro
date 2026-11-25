@@ -2,83 +2,40 @@
 
 namespace App\Console\Commands;
 
-use App\Core\Ledger\LedgerService;
-use App\Core\Ledger\Models\LedgerAccount;
-use App\Core\Money\Amount;
-use App\Core\Wallet\WalletService;
-use App\Models\Wallet;
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
+use App\Core\Ledger\Reconciliation;
 use App\Core\Tenancy\Models\Tenant;
 use App\Core\Tenancy\Tenancy;
+use Illuminate\Console\Command;
 
 /**
  * Compares every wallet bucket (the projection) with the sum of its ledger entries, and
- * checks that every journal balances to zero per currency.
+ * checks that every journal balances to zero per currency. Each casino's result is stored
+ * (reconciliation_runs) and shown in Admin → Reconciliation.
  *
  *   php artisan wallet:reconcile           report only (exit 1 on any mismatch)
  *   php artisan wallet:reconcile --open    first post opening balances for never-touched buckets
  */
 class ReconcileWallets extends Command
 {
-    protected $signature = 'wallet:reconcile {--open : Post opening balances for buckets that have no ledger entries yet}';
+    protected $signature = 'wallet:reconcile {--open : Post opening balances for buckets that have no ledger entries yet} {--trigger=cli : recorded with the run (cli|schedule)}';
 
     protected $description = 'Reconcile wallet balances against the ledger';
 
     public function handle(): int
     {
-        $mismatches = 0;
-        $checked = 0;
+        $checked = $mismatches = $unbalanced = $observed = 0;
+        $trigger = in_array($this->option('trigger'), ['cli', 'schedule'], true) ? $this->option('trigger') : 'cli';
 
         foreach (Tenant::orderBy('id')->get() as $tenant) {
-            Tenancy::runAs($tenant, function () use (&$mismatches, &$checked) {
-                $this->reconcileCurrentTenant($mismatches, $checked);
-            });
+            $run = Tenancy::runAs($tenant, fn () => Reconciliation::run($trigger, (bool) $this->option('open'), function (array $row) use ($tenant) {
+                $this->error(sprintf('[tenant %d] wallet %d %-18s projection %s  ledger %s  diff %s',
+                    $tenant->id, $row['wallet_id'], $row['bucket'], $row['projection'], $row['ledger'], $row['difference']));
+            }));
+            $checked += $run->buckets_checked;
+            $mismatches += $run->mismatches;
+            $unbalanced += $run->unbalanced_journals;
+            $observed += $run->observed_journals;
         }
-
-        return $this->summary($mismatches, $checked);
-    }
-
-    private function reconcileCurrentTenant(int &$mismatches, int &$checked): void
-    {
-        Wallet::query()->orderBy('id')->chunkById(500, function ($wallets) use (&$mismatches, &$checked) {
-            foreach ($wallets as $wallet) {
-                foreach (LedgerService::WALLET_BUCKETS as $bucket) {
-                    $projection = WalletService::bucketMinor($wallet, $bucket);
-
-                    if ($this->option('open')) {
-                        DB::transaction(function () use ($wallet, $bucket) {
-                            $locked = Wallet::whereKey($wallet->id)->lockForUpdate()->first();
-                            WalletService::ensureOpened($locked, $bucket, WalletService::bucketMinor($locked, $bucket));
-                        });
-                    }
-
-                    $account = LedgerAccount::where('code', "wallet:{$wallet->id}:{$bucket}")->first();
-                    $ledger  = $account ? LedgerService::accountBalanceMinor($account) : 0;
-                    $checked++;
-
-                    if ($ledger !== $projection) {
-                        $mismatches++;
-                        $this->error(sprintf(
-                            '[tenant '.\App\Core\Tenancy\Tenancy::id().'] wallet %d %-18s projection %s  ledger %s  diff %s',
-                            $wallet->id, $bucket, Amount::fromMinor($projection), Amount::fromMinor($ledger), Amount::fromMinor($projection - $ledger)
-                        ));
-                    }
-                }
-            }
-        });
-
-    }
-
-    private function summary(int $mismatches, int $checked): int
-    {
-        $unbalanced = DB::table('ledger_entries')
-            ->select('journal_id', 'currency', DB::raw('SUM(amount_minor) AS total'))
-            ->groupBy('journal_id', 'currency')
-            ->havingRaw('SUM(amount_minor) <> 0')
-            ->count();
-
-        $observed = DB::table('ledger_journals')->where('source', 'observed')->count();
 
         $this->line("Checked {$checked} wallet buckets: {$mismatches} mismatches, {$unbalanced} unbalanced journals.");
         $this->line("Journals recorded by the legacy observer (call sites still to migrate): {$observed}.");

@@ -138,6 +138,12 @@ class AdminPanelProvider extends PanelProvider
                                     ->url(fn (): string => \App\Filament\Admin\Pages\AnalyticsPage::getUrl())
                                     ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.analytics'))
                                     ->visible(fn (): bool => auth()->user()->hasRole('admin')),
+                                NavigationItem::make('reconciliation')
+                                    ->icon('heroicon-o-scale')
+                                    ->label(fn (): string => __('Reconciliation'))
+                                    ->url(fn (): string => \App\Filament\Admin\Pages\ReconciliationPage::getUrl())
+                                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.reconciliation'))
+                                    ->visible(fn (): bool => auth()->user()->hasRole('admin')),
                                 ...\App\Filament\Admin\Resources\LegalPageResource::getNavigationItems(),
                                 NavigationItem::make('staff-sessions')
                                     ->icon('heroicon-o-computer-desktop')

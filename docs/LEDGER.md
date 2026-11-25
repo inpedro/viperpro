@@ -78,6 +78,14 @@ php artisan wallet:reconcile            # schedule hourly; exit 1 on any mismatc
 
 `ensureOpened()` also opens a bucket automatically the first time it is touched, so the invariant holds even before the `--open` run.
 
+**Dashboard.** Every run is stored per casino (`reconciliation_runs`):
+* Admin → Reconciliation shows the latest result, the first 200 mismatches (wallet, balance, wallet vs ledger, difference) and the history. **Run now** is rate-limited to once a minute and audited.
+* Platform → Reconciliation shows every casino's latest result.
+* A failed run logs `wallet.reconciliation_failed`.
+* Runs are read-only: nothing is corrected automatically, and the ledger remains the source of truth.
+
+Migration `2026_12_01_000001_create_reconciliation_runs_table` is reversible.
+
 ## Limits (documented, not hidden)
 
 * **Precision is 2 decimals**, because every wallet column is `decimal(20,2)`. Currencies with other precisions (JPY 0, USDT 6) need those columns widened first, plus per-currency precision in `Money`.
