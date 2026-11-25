@@ -39,7 +39,9 @@ class SettingController extends Controller
 
     public function index()
     {
-        return response()->json(['setting' => \Helper::getSetting()], 200);
+        $setting = \Helper::getSetting();
+
+        return response()->json(['setting' => $setting ? $setting->only(\App\Models\Setting::PUBLIC_FIELDS) : null], 200);
     }
 
     /**

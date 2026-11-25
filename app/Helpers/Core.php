@@ -737,8 +737,9 @@ class Core
 
 
                     if(!empty($affHistoryRevshare)) {
-                        /// verificar qual revshare pagar, o fake ou o padrão
-                        $revshare = $affiliate->affiliate_revenue_share_fake ?? $affiliate->affiliate_revenue_share;
+                        // The affiliate's real rate. A separate "fake" rate used to be shown to the
+                        // affiliate and applied here when players won (deceptive; removed).
+                        $revshare = $affiliate->affiliate_revenue_share;
 
                         $commissionSub = self::porcentagem_xn($revshare, $amount); /// calcula a porcentagem da perda, com o valor ganhado na variavel $amount
 
@@ -907,36 +908,11 @@ class Core
      */
     public static function getSetting()
     {
-        $setting = null;
-        if(Cache::has(\App\Core\Tenancy\Tenancy::key('setting'))) {
-            $setting = Cache::get(\App\Core\Tenancy\Tenancy::key('setting'));
-        }else{
-            $setting = Setting::select(
-                'software_name',
-                'software_description',
-                'software_logo_white',
-                'software_logo_black',
-                'currency_code',
-                'decimal_format',
-                'currency_position',
-                'prefix',
-                'storage',
-                'min_deposit',
-                'max_deposit',
-                'min_withdrawal',
-                'max_withdrawal',
-                'initial_bonus',
-                'suitpay_is_enable',
-                'stripe_is_enable',
-                'sharkpay_is_enable',
-                'disable_spin',
-                'disable_rollover',
-            )->first();
-
-            Cache::put(\App\Core\Tenancy\Tenancy::key('setting'), $setting);
-        }
-
-        return $setting;
+        // Always the full row. This used to select a column subset while the admin pages cached
+        // the full row under the same key, so affiliate commission inputs (revshare_reverse,
+        // ngr_percent, perc_sub_lv*) were null or set depending on cache state. Public output
+        // goes through Setting::PUBLIC_FIELDS instead.
+        return Cache::remember(\App\Core\Tenancy\Tenancy::key('setting'), 3600, fn () => Setting::query()->first());
     }
 
     /**

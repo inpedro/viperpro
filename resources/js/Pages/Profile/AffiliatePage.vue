@@ -118,7 +118,7 @@
                             </div>
 
                             <div class="body flex flex-col justify-center items-center py-8">
-                                <h1 class="text-yellow-400 font-bold text-4xl">{{ userData.affiliate_revenue_share_fake ? userData.affiliate_revenue_share_fake : userData.affiliate_revenue_share }}%</h1>
+                                <h1 class="text-yellow-400 font-bold text-4xl">{{ userData.affiliate_revenue_share }}%</h1>
                             </div>
                         </div>
                         <div class="p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 w-full mb-3">

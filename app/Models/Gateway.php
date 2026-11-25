@@ -37,10 +37,6 @@ class Gateway extends Model
         'stripe_secret_key',
         'stripe_webhook_key',
 
-        'bspay_uri',
-        'bspay_cliente_id',
-        'bspay_cliente_secret',
-
         // Sharkpay
         'public_key',
         'private_key',

@@ -96,4 +96,13 @@ class Setting extends Model
     ];
 
     protected $hidden = array('updated_at');
+
+    /** The only settings exposed to visitors (GET /api/settings/data). */
+    public const PUBLIC_FIELDS = [
+        'software_name', 'software_description', 'software_logo_white', 'software_logo_black', 'software_favicon',
+        'currency_code', 'decimal_format', 'currency_position', 'prefix', 'storage',
+        'min_deposit', 'max_deposit', 'min_withdrawal', 'max_withdrawal', 'initial_bonus',
+        'suitpay_is_enable', 'stripe_is_enable', 'sharkpay_is_enable', 'digitopay_is_enable', 'mercadopago_is_enable',
+        'disable_spin', 'disable_rollover', 'rollover', 'rollover_deposit', 'rollover_protection', 'turn_on_football',
+    ];
 }

@@ -120,7 +120,7 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
     /** Fields the admin user form may write (UserResource pages). */
     public const ADMIN_EDITABLE = [
         'name', 'last_name', 'email', 'cpf', 'phone', 'password', 'email_verified_at', 'inviter',
-        'affiliate_revenue_share', 'affiliate_revenue_share_fake', 'affiliate_cpa', 'affiliate_baseline',
+        'affiliate_revenue_share', 'affiliate_cpa', 'affiliate_baseline',
         'banned', 'is_demo_agent', 'status',
     ];
 

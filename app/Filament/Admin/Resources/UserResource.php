@@ -150,9 +150,6 @@ class UserResource extends Resource
                             ->required()
                             ->default(2)
                             ->numeric(),
-                        Forms\Components\TextInput::make('affiliate_revenue_share_fake')
-                            ->label('Revenue Share Fake (%)')
-                            ->numeric(),
                         Forms\Components\TextInput::make('affiliate_cpa')
                             ->label('CPA')
                             ->default(10)

@@ -222,6 +222,7 @@ No new migrations. Full detail in `docs/INTEGRATIONS.md`.
 | Laravel 12 upgrade (Laravel 12.74, Carbon 3, PHPUnit 11, Sanctum 4, jwt-auth 2.3): **0 advisories** | done |
 | Removed unused/incompatible packages: `nwidart/laravel-modules` (no modules), `jackiedo/dotenv-editor`, `althinect/filament-spatie-roles-permissions` (the app already had its own copies of the resources) | done |
 | Admin pages no longer write the shared `.env` (cross-tenant + injection); casino name and SMTP applied per tenant at runtime; SMTP password encrypted | done |
+| Fake affiliate revenue share removed; consistent settings for commission maths; public settings allow-list; schema reconciled with models (#41–#44) | done |
 | Panel smoke test: every parameterless admin and platform page must render | done; fixed 3 pages that crashed for casinos without a layout/spin row |
 | `DEPLOYMENT.md`, `RELEASE_CHECKLIST.md`, `CHANGELOG.md` | done |
 | MySQL staging run, load test, penetration test, legal sign-off | **open** (needs staging and people) |
@@ -234,7 +235,7 @@ No new migrations. Full detail in `docs/INTEGRATIONS.md`.
 * Settings pages no longer write `.env`. `APP_NAME` and `MAIL_*` in `.env` are now only the defaults for casinos that haven't configured their own.
 * The roles/permissions plugin is gone. Its two resources (already app-owned) are unchanged, and its labels come from `lang/vendor/filament-spatie-roles-permissions`.
 
-**Migration:** `2026_11_30_000001_encrypt_tenant_smtp_passwords` (reversible: decrypts on rollback). The fixed `down()` methods only affect rollbacks.
+**Migrations:** `2026_11_30_000001_encrypt_tenant_smtp_passwords` (reversible: decrypts on rollback); `2026_11_30_000002_reconcile_schema_with_models` (adds only what is missing; on rollback drops `ggr_games` only if it's empty). The fixed `down()` methods only affect rollbacks.
 
 ## Working assumptions
 * Tests run on SQLite in memory (`phpunit.xml`). Engine-specific behaviour (InnoDB locks) must also be verified on staging MySQL.

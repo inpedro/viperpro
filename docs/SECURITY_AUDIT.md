@@ -79,12 +79,22 @@ Severity: **C** = exploitable anonymously for money or full account takeover; **
 | 39 | L | The permissions filter used `eval()` on a config value. | Replaced with a plain `LIKE`. |
 | 40 | M | Laravel 10 is end-of-life. Its remaining advisories had no fix (CRLF in `email` rule, signed-URL path confusion, TokenGuard bypass < 10.50.4). | Upgraded to Laravel 12; `composer audit` clean. |
 
+### Found and fixed after the release pass
+
+| # | Sev | Finding | Resolution |
+|---|---|---|---|
+| 41 | H | **Fake affiliate revenue share.** The admin could set `affiliate_revenue_share_fake`. The affiliate page displayed it, the affiliate earned at the real rate, and when their players won they were charged at the (usually higher) fake rate. | The fake rate is no longer displayed, applied or editable. Only the real rate is used, covered by `AffiliateRevshareTest`. The column's data is kept on dump installs; nothing was deleted. |
+| 42 | M | `Helper::getSetting()` selected a column subset, while the admin pages cached the full row under the same key. NGR deduction, sub-affiliate shares and the win reversal therefore changed with cache state. | It always returns the full row. |
+| 43 | M | `GET /api/settings/data` returned whatever was cached, including every internal setting (affiliate rates, NGR, …) after any admin save. | Explicit `Setting::PUBLIC_FIELDS` allow-list, covered by `PublicSettingsTest`. |
+| 44 | M | Schema drift: columns used by the admin forms (`settings.revshare_reverse`, `turn_on_football`, `software_background`, `sharkpay/mercadopago_is_enable`, `providers.distribution`) and the `ggr_games` table existed only in the SQL dump, so those forms failed on migration-based installs. | Reconciliation migration plus `FillableColumnsExistTest`. The demo-rigging fields `missions.influencer_*` were removed from the model instead of being added. |
+
 ## 3. Deceptive or non-compliant features
 
 | Finding | Action |
 |---|---|
 | "Demo agent" accounts received a 90% win rate plus scripted wins, a mechanism for staging fake big-win streams. | Removed: every account gets identical odds. Phase 8 relabelled the flag "Demo account (play money)"; those wins never reach public feeds. Disclosure while streaming is an operator obligation. |
 | `/api/spin/winners` returned 200 Faker-generated names and a hardcoded "total bonus". | Now returns only real redemptions (names masked). |
+| Affiliates were shown a "fake" revenue-share rate that was also used to charge them when players won (#41). | Removed. |
 | The sports bets feed showed hardcoded rows with invented players and stakes. | Removed; honest empty state until a real feed exists. |
 | The affiliate page listed invented programme "rules" (another brand's wallet, checks the code doesn't perform). | Replaced with statements that match the platform, plus a link to the operator's referral terms. |
 | The in-house slot outcomes are picked from pre-set win/lose lists weighted by `games.rtp` (a hit frequency, not an RTP). Not a certified RNG. | The final pick now uses `random_int`. **These games must not be offered for real money** without independent RNG/game certification in the target jurisdiction. |
